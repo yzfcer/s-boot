@@ -29,7 +29,7 @@ static void init_reg_name(boot_param_s *bp)
     int32_t cnt = (sizeof(boot_param_s)/sizeof(region_s));
     for(i = 0;i < cnt;i ++)
     {
-        mp[i].regname = (char*)sys_mem_name[i];
+        mp[i].regname = region_name(i);
     }
 }
 

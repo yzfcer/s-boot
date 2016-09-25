@@ -38,7 +38,7 @@ mem_map_s g_memmap =
     }
 };
 
-const char *sys_mem_name[] = 
+char *g_reg_name[] = 
 {
     "boot_rom",
     "boot_param1",
@@ -55,7 +55,7 @@ const char *sys_mem_name[] =
 };
 //mem_map_s *g_default_map = (mem_map_s *)NULL;
 
-const char *sys_memtype[] = 
+char *g_memtype_name[] = 
 {
     "RAM",
     "ROM",
@@ -63,14 +63,17 @@ const char *sys_memtype[] =
 
 uint32_t get_share_addr (void)
 {
-	uint32_t base,lenth;
     mem_map_s *map = get_memory_map();
 	return map->ram.share_region.addr;
 }
 
 char *memtype_name(uint32_t type)
 {
-    return sys_memtype[type];
+    return g_memtype_name[type];
+}
+char *region_name(uint32_t regidx)
+{
+    return g_reg_name[regidx];
 }
 
 mem_map_s *get_memory_map(void)
@@ -117,8 +120,6 @@ static uint32_t alloc_region(region_s * reg,uint32_t *base,uint32_t size)
 int32_t mem_region_init(void)
 {
     int i;
-	uint32_t base;
-	uint32_t len;
     uint32_t rambase[RAM_COUNT];
     uint32_t rombase[ROM_COUNT];
 	mem_map_s *map = &g_memmap;
@@ -239,7 +240,6 @@ int32_t check_probuf_and_running(region_s *probuf,region_s *run)
 }
 int32_t check_map_valid(void)
 {
-    int32_t i;
     mem_map_s *map;
     boot_notice("begin to check momery map params...");
     map = &g_memmap;

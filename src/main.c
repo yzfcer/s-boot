@@ -510,10 +510,7 @@ void go_to_next_step(void)
     s_boot_status ++;
 }
 
-
-
-
-int32_t main(void)
+void boot_loop(void)
 {
     int32_t i,ret;
     device_init();
@@ -539,9 +536,13 @@ int32_t main(void)
             set_boot_status(BOOT_ERROR);
         }
     }
-#if defined(MAIN_RETURN_VALUE)
+}
+
+
+int32_t main(void)
+{
+    boot_loop();
     return 0;
-#endif        
 }
 
 #ifdef __cplusplus

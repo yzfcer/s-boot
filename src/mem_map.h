@@ -76,7 +76,6 @@ typedef struct __mem_map_s
     run_map_s run;
 }mem_map_s;
 
-extern const char *sys_mem_name[];
 int32_t mem_region_init(void);
 int32_t check_map_valid(void);
 
@@ -85,6 +84,7 @@ void print_program_space(mem_map_s *map);
 
 uint32_t get_share_addr(void);
 char *memtype_name(uint32_t type);
+char *region_name(uint32_t regidx);
 mem_map_s *get_memory_map(void);
 int32_t set_default_map(int32_t index);
 void choose_default_map(void);

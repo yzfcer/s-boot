@@ -86,7 +86,8 @@ static void download_img_to_sflash(void)
     }
     download_img_file(DOWN_SFLASH);
 }
-static void download_img_to_IRAM(void)
+
+static void download_img_to_iram(void)
 {
     int32_t ret;
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
@@ -104,7 +105,7 @@ static void download_img_to_IRAM(void)
     exit_menu();
 }
 
-static void download_img_to_XRAM(void)
+static void download_img_to_xram(void)
 {
     int32_t ret;
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
@@ -256,27 +257,6 @@ static void set_default_boot_img(void)
     }
 }
 
-/*
-static void unlock_mcu(void)
-{
-    char *cmd = "unlock";
-    
-    boot_printf("input the unlock commnad:");
-    read_str_withblockig(commbuffer,7);
-    boot_printf("\r\n");
-    
-    if(is_string_equal(cmd,commbuffer,6))
-    {
-        if(make_sure_input("Are you sure to unlock MCU"))
-        {
-            do_clear_flash_data(1);
-            boot_notice("MCU has been unlocked now.\r\n");
-        }
-    }
-    else
-        boot_warn("command error.");
-}
-*/
 
 static void exit_and_save(void)
 {
@@ -293,10 +273,10 @@ static void exit_and_save(void)
 
 static menu_handle_TB g_menu_handleTB[] = 
 {
-    {'1',0,0,"download img file to MEM_TYPE_ROM",download_img_to_iflash},
-    {'2',0,0,"download img file to MEM_TYPE_ROM",download_img_to_sflash},
-    {'3',0,0,"download img file to MEM_TYPE_RAM",download_img_to_IRAM},
-    {'4',0,0,"download img file to XRAM",download_img_to_XRAM},
+    {'1',0,0,"download img file to irom",download_img_to_iflash},
+    {'2',0,0,"download img file to xrom",download_img_to_sflash},
+    {'3',0,0,"download img file to iram",download_img_to_iram},
+    {'4',0,0,"download img file to xram",download_img_to_xram},
     
     {'b',2,2,"set debug mode",set_debug_mode},
     {'d',0,0,"show current memory map",show_current_memmap},
