@@ -131,12 +131,16 @@ int32_t read_param(void)
 {
     uint32_t err = 0;
     int32_t i,j,len,ret;
-    uint32_t base[2] = {PROGRAM_LENTH,PROGRAM_LENTH+PARAM_LENTH};
+    region_s *reg[2];
+    mem_map_s *map = get_memory_map();
+    reg[0] = &map->rom.param1_region;
+    reg[1] = &map->rom.param2_region;
+    
     for(i = 0;i < 2;i ++)
     {
         for(j = 0;j < 3;j ++)
         {
-            len = read_block(MEM_TYPE_ROM,base[i],g_bootparam,sizeof(g_bootparam) / BLOCK_SIZE);
+            len = read_block(MEM_TYPE_ROM,reg[i]->index,reg[i]->addr,g_bootparam,sizeof(g_bootparam) / BLOCK_SIZE);
             if(len >= sizeof(g_bootparam) / BLOCK_SIZE)
             {
                 break;
@@ -166,8 +170,12 @@ int32_t read_param(void)
 int32_t write_param(void)
 {
     int32_t i,j,len,err = 0;
-    uint32_t base[2] = {PROGRAM_LENTH,PROGRAM_LENTH+PARAM_LENTH};
+    region_s *reg[2];
     boot_param_s *bp = (boot_param_s *)g_bootparam;
+    mem_map_s *map = get_memory_map();
+    reg[0] = &map->rom.param1_region;
+    reg[1] = &map->rom.param2_region;
+    
     bp->flush_num ++;
     bp->mem_map.rom.param1_region.lenth = sizeof(boot_param_s);
     bp->mem_map.rom.param2_region.lenth = sizeof(boot_param_s);    
@@ -176,7 +184,7 @@ int32_t write_param(void)
     {
         for(j = 0;j < 3;j ++)
         {
-            len = write_block(MEM_TYPE_ROM,base[i],(char*)g_bootparam,sizeof(g_bootparam) / BLOCK_SIZE);
+            len = write_block(MEM_TYPE_ROM,reg[i]->index,reg[i]->addr,(char*)g_bootparam,sizeof(g_bootparam) / BLOCK_SIZE);
             if(len >=  sizeof(g_bootparam) / BLOCK_SIZE)
             {
                 break;

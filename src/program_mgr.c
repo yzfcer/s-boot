@@ -104,8 +104,8 @@ int32_t check_and_decrypt_img(region_s *img,region_s *bin)
     boot_notice("img file decrypt");
         //while(1);
     
-    boot_debug("DecrypUpDData base:0x%x,lenth:%d",real_addr,img->lenth - 4);
-    ret = DecrypUpDData(real_addr,img->lenth - 4,0);
+    boot_debug("decrypt_data base:0x%x,lenth:%d",real_addr,img->lenth - 4);
+    ret = decrypt_data(real_addr,img->lenth - 4,0);
     if(0 != ret)
     {
         boot_warn("img file Decrypt ERROR.");
@@ -154,8 +154,8 @@ int32_t encrypt_code(region_s *code_reg)
     //对数据重新加密，将加密后的数据烧录到SFLASH空间
     //head = (img_head_s*)(real_addr+10);
     
-    boot_debug("DecrypUpDData base:0x%x,lenth:%d",real_addr,code_reg->lenth - 4);
-    ret = DecrypUpDData(real_addr,code_reg->lenth -4,1);
+    boot_debug("decrypt_data base:0x%x,lenth:%d",real_addr,code_reg->lenth - 4);
+    ret = decrypt_data(real_addr,code_reg->lenth -4,1);
     if(0 != ret)
     {
         boot_warn("img file encrypt ERROR.");
@@ -178,7 +178,7 @@ int32_t encrypt_code(region_s *code_reg)
 int32_t copy_data_on_memory(region_s *src,region_s *dest)
 {
     int32_t i,j,len,blocks,times;
-    uint32_t base;
+    uint32_t addr;
 
     if(0 >= src->lenth)
         return 0;
@@ -189,7 +189,7 @@ int32_t copy_data_on_memory(region_s *src,region_s *dest)
     }
     boot_notice("copy data from %s to %s lenth %d.",
                 src->regname,dest->regname,src->lenth);
-    boot_debug("source type %s,base 0x%x,lenth %d dest type,%s,base 0x%x,lenth %d.",
+    boot_debug("source type %s,addr 0x%x,lenth %d dest type,%s,addr 0x%x,lenth %d.",
                 memtype_name(src->type),src->addr,src->lenth,
                 memtype_name(dest->type),dest->addr,dest->maxlen);
     
@@ -200,33 +200,33 @@ int32_t copy_data_on_memory(region_s *src,region_s *dest)
     {    
         for(times = 0;times < 3;times ++)
         {
-            base = src->addr + i * sizeof(commbuffer);
+            addr = src->addr + i * sizeof(commbuffer);
             if(i >= blocks - 1)
             {
                 for(j = 0;j < sizeof(commbuffer);j ++)
                     commbuffer[j] = 0;
             }
-            len = read_block(src->type,base,commbuffer,sizeof(commbuffer)/BLOCK_SIZE);
+            len = read_block(src->type,src->index,addr,commbuffer,sizeof(commbuffer)/BLOCK_SIZE);
             if(len > 0)
                 break;
         }
         if(times >= 3)
         {
-            boot_warn("read block 0x%x,lenth %d failed.",base,sizeof(commbuffer));
+            boot_warn("read block 0x%x,lenth %d failed.",addr,sizeof(commbuffer));
             dest->status = MEM_ERROR;
             return -1;
         }
 
         for(times = 0;times < 3;times ++)
         {
-            base = dest->addr + i * sizeof(commbuffer);
-            len = write_block(dest->type,base,commbuffer,sizeof(commbuffer)/BLOCK_SIZE);
+            addr = dest->addr + i * sizeof(commbuffer);
+            len = write_block(dest->type,dest->index,addr,commbuffer,sizeof(commbuffer)/BLOCK_SIZE);
             if(len > 0)
                 break;
         }
         if(times >= 3)
         {
-            boot_warn("read block 0x%x,lenth %d failed.",base,sizeof(commbuffer));
+            boot_warn("read block 0x%x,lenth %d failed.",addr,sizeof(commbuffer));
             dest->status = MEM_ERROR;
             return -1;
         }
@@ -454,7 +454,7 @@ void clean_program(void)
     {   
         boot_notice("erase base 0x%x,lenth %d.",code[i]->addr,code[i]->lenth);
         blocknum = (code[i]->lenth + BLOCK_SIZE - 1) / BLOCK_SIZE;
-        erase_block(code[i]->type,code[i]->addr,blocknum);
+        erase_block(code[i]->type,code[i]->index,code[i]->addr,blocknum);
     }
     boot_printf("clear program OK.\r\n");
 }
@@ -586,7 +586,7 @@ int32_t check_rom_program(region_s *code)
         for(i = 0;i < blocks;i ++)
         {
             base = prog.addr + i * sizeof(commbuffer);
-            len = read_block(prog.type,base,commbuffer,sizeof(commbuffer)/BLOCK_SIZE);
+            len = read_block(prog.type,prog.index,base,commbuffer,sizeof(commbuffer)/BLOCK_SIZE);
             if(len <= 0)
             {
                 boot_warn("read %s block base 0x%x,lenth %d failed.",

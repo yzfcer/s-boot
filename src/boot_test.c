@@ -62,7 +62,7 @@ void destroy_code_space(region_s *code)
     {
         commbuffer[i] = 0xff;
     }
-    write_block(code->type,code->addr,commbuffer,sizeof(commbuffer) / BLOCK_SIZE);
+    write_block(code->type,code->index,code->addr,commbuffer,sizeof(commbuffer) / BLOCK_SIZE);
 }
 
 void test_pro1_error(void)

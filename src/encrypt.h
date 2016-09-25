@@ -62,7 +62,7 @@ extern uint8_t ECRYPT_filter(ECRYPT_ctx* ctx);
 //extern uint8_t  cKEY[];
 //extern uint8_t  cIV[];
 
-int32_t DecrypUpDData(uint32_t base,int32_t filelen,int32_t encrypt);
+int32_t decrypt_data(uint32_t addr,int32_t filelen,int32_t encrypt);
 
 #ifdef __cplusplus
 }

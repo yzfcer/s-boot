@@ -13,14 +13,14 @@ void boot_delay(uint32_t ms)
     while(boot_get_sys_ms() - tick < ms);
 }
 
-int32_t wait_for_key_input(int32_t timeout_sec,char *ch,int32_t print_flag)
+int32_t wait_for_key_input(int32_t to_sec,char *ch,int32_t print_flag)
 {
     int32_t second;
     uint32_t tick;
     int32_t ret = -1;
-    if(timeout_sec <= 0)
+    if(to_sec <= 0)
         return -1;
-    second = timeout_sec > 99?99:timeout_sec;
+    second = to_sec > 99?99:to_sec;
     tick = boot_get_sys_ms();
     if(print_flag)
         boot_printf("\r\nwaiting:%ds",second);
@@ -208,24 +208,17 @@ int32_t boot_receive_img(uint32_t addr,uint32_t maxlen)
 }
 #endif
 
-
-int32_t init_block(void)
-{
-    return 0;
-}
-
-int32_t write_block(uint8_t memtype,uint32_t addr,uint8_t *buf,int32_t blkcount)
+int32_t read_block(uint8_t memtype,uint32_t memidx,uint32_t addr,uint8_t *buf,int32_t blkcount)
 {
     return blkcount;
 }
 
-
-int32_t read_block(uint8_t memtype,uint32_t addr,uint8_t *buf,int32_t blkcount)
+int32_t write_block(uint8_t memtype,uint32_t memidx,uint32_t addr,uint8_t *buf,int32_t blkcount)
 {
     return blkcount;
 }
 
-int32_t erase_block(uint8_t memtype,uint32_t addr,int32_t blkcount)
+int32_t erase_block(uint8_t memtype,uint32_t memidx,uint32_t addr,int32_t blkcount)
 {
 	return blkcount;
 }

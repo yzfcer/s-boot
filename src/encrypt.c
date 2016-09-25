@@ -35,10 +35,12 @@ uint8_t  cFilter[] =
     0x4E,0x25,0xD4,0x3D,0x90,0xD5,0x46,0xAF,0x8A,0xDC,
     0x23,0x86,0xC5,0x9F,0x61,0x26,0xFF,0x5D,0x98,0xAE
 };
+
 uint8_t  cKEY[] = 
 {
     0x00,0x88,0x63,0x9d,0x6b,0xf8,0x47,0xed,0x59,0xc6    
 };
+
 uint8_t  cIV[] = 
 {
     0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99
@@ -195,11 +197,11 @@ uint8_t chIV[10];                 //加密解密使用的IV值
 ECRYPT_ctx  ctx;                    //用于解密的结构体
 uint8_t chKeys[ENCRYP_KEYLEN];        //密钥流
 
-int32_t DecrypUpDData(uint32_t base,int32_t filelen,int32_t encrypt)
+int32_t decrypt_data(uint32_t addr,int32_t filelen,int32_t encrypt)
 {
     int32_t i,j;
     uint8_t tempdat, len; 
-    uint8_t *pUpdateBuf = (uint8_t*)base;
+    uint8_t *pUpdateBuf = (uint8_t*)addr;
     char *identify = "MHIMG_M4";
     for(i = 0; i < 10; i++) 
     {
