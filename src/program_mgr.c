@@ -173,7 +173,7 @@ int32_t encrypt_code(region_s *code_reg)
 
 
 
-int32_t copy_data_on_memory(region_s *src,region_s *dest)
+int32_t copy_region_data(region_s *src,region_s *dest)
 {
     int32_t i,j,len,blocks,times;
     uint32_t addr;
@@ -267,7 +267,7 @@ int32_t write_derect_space(region_s *code_reg,region_s *dest)
     bin_reg.crc = head->file_crc;
     bin_reg.lenth = head->file_len;
     
-    ret = copy_data_on_memory(&bin_reg,dest);
+    ret = copy_region_data(&bin_reg,dest);
     return ret;    
 }
 
@@ -276,7 +276,7 @@ int32_t flush_code_to_ram(region_s *code_region)
 {
     int32_t ret;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
-    ret = copy_data_on_memory(code_region,&bp->mem_map.run.flash);
+    ret = copy_region_data(code_region,&bp->mem_map.run.flash);
     if(0 != ret)
     {
         boot_warn("copy img to running space failed.");
@@ -292,11 +292,11 @@ int32_t flush_code_to_iflash(region_s *bin)
     int32_t ret;
     region_s *src;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
-
     boot_notice("begin to flush code to MEM_TYPE_ROM space...");
+    
     //先将原来的程序拷贝到备份空间    
     src = &bp->mem_map.rom.program1_region;
-    ret = copy_data_on_memory(src,&bp->mem_map.rom.program2_region);
+    ret = copy_region_data(src,&bp->mem_map.rom.program2_region);
     if(0 != ret)
     {
         boot_warn("backup old program failed.");
@@ -304,7 +304,7 @@ int32_t flush_code_to_iflash(region_s *bin)
     }
 
     //将新程序烧到运行空间
-    ret = copy_data_on_memory(bin,&bp->mem_map.rom.program1_region);
+    ret = copy_region_data(bin,&bp->mem_map.rom.program1_region);
     if(0 != ret)
     {
         boot_error("write new program failed.");
@@ -328,7 +328,7 @@ int32_t flush_code_to_sflash(region_s *img,region_s *bin)
     boot_notice("begin to flush code to MEM_TYPE_ROM space...");
     //先将原来的SFLASH程序数据备份
     old_code = &bp->mem_map.rom.program1_region;
-    ret = copy_data_on_memory(old_code,&bp->mem_map.rom.program2_region);
+    ret = copy_region_data(old_code,&bp->mem_map.rom.program2_region);
     if(0 != ret)
     {
         boot_warn("backup old program failed.");
@@ -338,7 +338,7 @@ int32_t flush_code_to_sflash(region_s *img,region_s *bin)
     //如果是在IFLASH运行，在加密前先烧录运行程序空间
     if(MEM_TYPE_ROM == bp->mem_map.run.flash.type)
     {
-        ret = copy_data_on_memory(bin,&bp->mem_map.run.flash);
+        ret = copy_region_data(bin,&bp->mem_map.run.flash);
         if(0 != ret)
         {
             boot_error("write new program to running space failed.");
@@ -354,7 +354,7 @@ int32_t flush_code_to_sflash(region_s *img,region_s *bin)
         return -1;
     }
     
-    ret = copy_data_on_memory(img,&bp->mem_map.rom.program1_region);
+    ret = copy_region_data(img,&bp->mem_map.rom.program1_region);
     if(0 != ret)
     {
         boot_error("write new program failed.");
@@ -463,7 +463,7 @@ int32_t write_encrypt_code_to_run(region_s *src,region_s *run)
     region_s img,bin;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
 
-    ret = copy_data_on_memory(src,&bp->mem_map.ram.probuf_region);
+    ret = copy_region_data(src,&bp->mem_map.ram.probuf_region);
     if(0 != ret)
     {
         boot_warn("copy data error.");
@@ -480,7 +480,7 @@ int32_t write_encrypt_code_to_run(region_s *src,region_s *run)
         return -1;
     }
     
-    ret = copy_data_on_memory(&bin,run);
+    ret = copy_region_data(&bin,run);
     if(0 != ret)
     {
         boot_warn("flush data to running space error.");
@@ -522,7 +522,7 @@ int32_t change_boot_app(int32_t index)
     
     if(MEM_TYPE_ROM == src.type)
     {
-        ret = copy_data_on_memory(&src,&bp->mem_map.run.flash);
+        ret = copy_region_data(&src,&bp->mem_map.run.flash);
         if(MEM_TYPE_ROM == bp->mem_map.rom.program1_region.type)
         {
             if(0 == ret)

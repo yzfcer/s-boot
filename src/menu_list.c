@@ -163,7 +163,7 @@ static void show_memmap(void)
     print_map_info(&bp->mem_map);
 }
 
-static void lock_MCU(void)
+static void lock_mcu(void)
 {
     boot_param_s *bp = (boot_param_s *)get_boot_params();
     if(is_chip_lock())
@@ -172,6 +172,18 @@ static void lock_MCU(void)
         return;
     }
     set_chip_lock(1);
+    exit_menu();
+}
+
+static void unlock_mcu(void)
+{
+    boot_param_s *bp = (boot_param_s *)get_boot_params();
+    if(!is_chip_lock())
+    {
+        boot_notice("MCU has NOT been locked before.");
+        return;
+    }
+    set_chip_lock(0);
     exit_menu();
 }
 
@@ -277,14 +289,14 @@ static menu_handle_TB g_menu_handleTB[] =
     
     {'b',2,2,"set debug mode",set_debug_mode},
     {'d',0,0,"show memory map",show_memmap},
-    {'k',0,0,"lock MCU chip",lock_MCU},
+    {'k',0,0,"lock MCU chip",lock_mcu},
     {'p',0,0,"show program status",show_program_status},
     {'r',2,2,"clear boot params",clear_boot_param},
 #if BOOT_TEST_ENABLE
     {'t',0,0,"set bootloader test",set_bootloader_error_test},
 #endif
     {'s',1,1,"set default boot img",set_default_boot_img},
-    //{'u',2,2,"unlock MCU chip",unlock_mcu},
+    {'u',2,2,"unlock MCU chip",unlock_mcu},
     
     {'x',1,1,"exit menu and save",exit_and_save},
     {'q',0,0,"exit menu",exit_menu}
@@ -339,7 +351,6 @@ int32_t open_super_prio(void)
     
     for(i = 0;i < sizeof(g_menu_handleTB)/sizeof(menu_handle_TB);i ++)
     {
-        //g_menu_handleTB[i].prio_bak = g_menu_handleTB[i].prio;
         if(g_menu_handleTB[i].prio <= prio)
             g_menu_handleTB[i].prio = 0;
     }

@@ -298,7 +298,7 @@ void print_map_info(mem_map_s *map)
     region_s *reg;
     reg = (region_s*)map;
     boot_printf("memory map as following:\r\n");
-    boot_printf("%-15s%-14s%-14s%-12s\r\n","area","base","maxlen","type");
+    boot_printf("%-15s%-14s%-14s%-12s\r\n","region","base","maxlen","type");
     for(i = 0;i < sizeof(mem_map_s)/sizeof(region_s);i ++)
     {
         boot_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
@@ -318,7 +318,7 @@ void print_program_space(mem_map_s *map)
 
 void copy_region_info(region_s *src,region_s *dest)
 {
-    dest->regname = src->regname;
+    //dest->regname = src->regname;
     dest->type = src->type;
     dest->index = src->index;
     dest->addr = src->addr;
