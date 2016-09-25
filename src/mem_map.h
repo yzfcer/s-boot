@@ -76,6 +76,7 @@ typedef struct __mem_map_s
     run_map_s run;
 }mem_map_s;
 
+void init_map_info(mem_map_s *map);
 int32_t mem_region_init(void);
 int32_t check_map_valid(void);
 

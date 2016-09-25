@@ -40,11 +40,9 @@ typedef struct
     uint32_t crc;//CRCÐ£Ñé
 }boot_param_s;
 
-void *sys_boot_params(void);
-void init_map_info(mem_map_s *map);
-
+void *get_boot_params(void);
 void *get_boot_params_from_ROM(void);
-void upate_bootparam_crc(boot_param_s *btprm);
+
 void init_boot_param(const mem_map_s *mmap);
 int32_t check_boot_param(boot_param_s *btprm);
 int32_t check_app_debug_mode(void);

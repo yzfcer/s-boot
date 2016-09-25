@@ -1,6 +1,8 @@
 #include "port.h"
 #include "boot_debug.h"
 #include "boot_hw_if.h"
+#include <stdarg.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -25,7 +27,7 @@ int32_t wait_for_key_input(int32_t timeout_sec,char *ch,int32_t print_flag)
     while(1)
     {
         feed_watchdog();
-        ret = read_char_noblocking(ch);
+        ret = boot_getchar_noblocking(ch);
         if(ret == 0)
         {
             ret = 0;
@@ -50,7 +52,21 @@ int32_t wait_for_key_input(int32_t timeout_sec,char *ch,int32_t print_flag)
     return ret;
 }
 
-#ifdef MCU_DEVICE
+
+int boot_printf(const char *fmt,...)
+{
+    int cnt;
+    va_list argptr;
+    static char outbuf[256];
+    
+    va_start(argptr, fmt);
+    cnt = vsprintf(outbuf, fmt, argptr);
+    va_end(argptr);
+    boot_output(outbuf,cnt);
+    return cnt;
+}
+
+
 int32_t read_char_blocking(char *ch)
 {
     if(0 == wait_for_key_input(60,ch,0))
@@ -61,14 +77,36 @@ int32_t read_char_blocking(char *ch)
     return -1;
 }
 
+int32_t read_line_blockig(char *buff,int32_t len)
+{
+    int idx = 0;
+    char ch;
+	while(1)
+    {
+        if(0 == boot_getchar_noblocking(&ch))
+        {
+            if((ch == '\r') || 
+                (ch == '\n') ||
+                ((idx >= len - 1)))
+            {
+                buff[idx++] = 0;
+                return idx;
+            }
+            else 
+            {
+                buff[idx++] = ch;
+            }
+        }
+    }   
+}
 
+#if 0
 typedef enum
 {
     RECV_START,
     RECV_HANDLE,
     RECV_END
 }recv_e;
-
 
 typedef struct
 {
@@ -94,7 +132,7 @@ static void wait_file_send_compete(void)
         //ret = wait_for_key_input(3,&ch,0);
     	feed_watchdog();
     	boot_delay(100);
-    	ret = read_char_noblocking(&ch);
+    	ret = boot_getchar_noblocking(&ch);
     	if(0 == ret)
         {
         	g_recvstat.stat = boot_get_sys_ms();
@@ -104,7 +142,7 @@ static void wait_file_send_compete(void)
     }
 }
 
-int32_t receive_img_data(uint32_t addr,uint32_t maxlen)
+int32_t boot_receive_img(uint32_t addr,uint32_t maxlen)
 {
     int32_t ret;
     int32_t i,end;
@@ -130,7 +168,7 @@ int32_t receive_img_data(uint32_t addr,uint32_t maxlen)
                 }
                 break;
             case RECV_HANDLE:
-                ret = read_char_noblocking(&buf[g_recvstat.idx]);
+                ret = boot_getchar_noblocking(&buf[g_recvstat.idx]);
                 if(0 == ret)
                 {
                     g_recvstat.idx ++;
@@ -191,7 +229,6 @@ int32_t erase_block(uint8_t memtype,uint32_t addr,int32_t blkcount)
 {
 	return blkcount;
 }
-
 
 #ifdef __cplusplus
 }

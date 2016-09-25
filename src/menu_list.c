@@ -26,8 +26,7 @@ extern "C" {
 #endif
 
 
-//通用缓存器，一般在拷贝数据时做缓存，或者接收命令字符
-extern char commbuffer[BLOCK_SIZE];
+
 //退出菜单标记，如果只为有效，回到菜单时将退出菜单
 static uint8_t exit_menu_flag = 0;
 //高级权限标志，拥有高级权限可以使用更多功能
@@ -68,7 +67,7 @@ static int32_t is_string_equal(char *str1,char *str2,int32_t len)
 }
 static void download_img_to_iflash(void)
 {
-    boot_param_s *bp = (boot_param_s*)sys_boot_params();
+    boot_param_s *bp = (boot_param_s*)get_boot_params();
     if(MEM_TYPE_ROM!= bp->mem_map.rom.program1_region.type)
     {
         boot_warn("img can not download to MEM_TYPE_ROM,device NOT support.");
@@ -78,7 +77,7 @@ static void download_img_to_iflash(void)
 }
 static void download_img_to_sflash(void)
 {
-    boot_param_s *bp = (boot_param_s*)sys_boot_params();
+    boot_param_s *bp = (boot_param_s*)get_boot_params();
     if(MEM_TYPE_ROM!= bp->mem_map.rom.program1_region.type)
     {
         boot_warn("img can not download to MEM_TYPE_ROM,device NOT support.");
@@ -90,7 +89,7 @@ static void download_img_to_sflash(void)
 static void download_img_to_iram(void)
 {
     int32_t ret;
-    boot_param_s *bp = (boot_param_s*)sys_boot_params();
+    boot_param_s *bp = (boot_param_s*)get_boot_params();
     if(MEM_TYPE_RAM != bp->mem_map.run.flash.type)
     {
         boot_warn("img can not download to MEM_TYPE_RAM,device NOT support.");
@@ -108,7 +107,7 @@ static void download_img_to_iram(void)
 static void download_img_to_xram(void)
 {
     int32_t ret;
-    boot_param_s *bp = (boot_param_s*)sys_boot_params();
+    boot_param_s *bp = (boot_param_s*)get_boot_params();
     if(MEM_TYPE_RAM != bp->mem_map.run.flash.type)
     {
         boot_warn("img can not download to XRAM,device NOT support.");
@@ -133,7 +132,7 @@ static void set_debug_mode(void)
         "Normal",
         "Debug",
     };
-    boot_param_s *bp = (boot_param_s*)sys_boot_params();
+    boot_param_s *bp = (boot_param_s*)get_boot_params();
     while(1)
     {
         boot_printf("set debug mode options:\r\n");
@@ -159,16 +158,16 @@ static void set_debug_mode(void)
 }
 
 
-static void show_current_memmap(void)
+static void show_memmap(void)
 {
-    boot_param_s *bp = (boot_param_s *)sys_boot_params();
+    boot_param_s *bp = (boot_param_s *)get_boot_params();
     boot_printf("current memory map info:\r\n");
     print_map_info(&bp->mem_map);
 }
 
 static void lock_MCU(void)
 {
-    boot_param_s *bp = (boot_param_s *)sys_boot_params();
+    boot_param_s *bp = (boot_param_s *)get_boot_params();
     if(is_chip_lock())
     {
         boot_notice("MCU has been locked before.");
@@ -180,7 +179,7 @@ static void lock_MCU(void)
 
 static void show_program_status(void)
 {
-    boot_param_s *bp = (boot_param_s *)sys_boot_params();
+    boot_param_s *bp = (boot_param_s *)get_boot_params();
     print_program_space(&bp->mem_map);
 }
 
@@ -196,7 +195,7 @@ static void set_bootloader_error_test(void)
 
 static void do_clear_flash_data(uint8_t unlock)
 {
-    boot_param_s *bp = (boot_param_s*)sys_boot_params();
+    boot_param_s *bp = (boot_param_s*)get_boot_params();
     clean_program();
     
     init_boot_param(&bp->mem_map);
@@ -224,7 +223,7 @@ static void set_default_boot_img(void)
         "program2",
         "cancel"
     };
-    boot_param_s *bp = (boot_param_s *)sys_boot_params();
+    boot_param_s *bp = (boot_param_s *)get_boot_params();
     while(1)
     {
         boot_printf("choose the following program:\r\n");
@@ -279,7 +278,7 @@ static menu_handle_TB g_menu_handleTB[] =
     {'4',0,0,"download img file to xram",download_img_to_xram},
     
     {'b',2,2,"set debug mode",set_debug_mode},
-    {'d',0,0,"show current memory map",show_current_memmap},
+    {'d',0,0,"show memory map",show_memmap},
     {'k',0,0,"lock MCU chip",lock_MCU},
     {'p',0,0,"show program status",show_program_status},
     {'r',2,2,"clear boot params",clear_boot_param},
@@ -322,16 +321,16 @@ void print32_t_menu_list(void)
 int32_t open_super_prio(void)
 {
     int32_t i;
-    //char buf[6];
+    char cmdbuf[6];
     int32_t prio = 0;
     char *prio1 = "test";
     char *prio2 = "sudo";
-    read_str_withblockig(commbuffer,5);
-    if(is_string_equal(commbuffer,prio1,4))
+    read_line_blockig(cmdbuf,10);
+    if(is_string_equal(cmdbuf,prio1,4))
     {
         prio = 1;
     }
-    else if(is_string_equal(commbuffer,prio2,4))
+    else if(is_string_equal(cmdbuf,prio2,4))
     {
         prio = 2;
     }
@@ -384,8 +383,8 @@ void menu_entry(void)
                     boot_printf("You have got some advanced priority. ^_^\r\n");
                 }
             }
-            else
-                boot_warn("no such an option to handle:%c.",ch);
+            //else
+            //    boot_warn("no such an option to handle:%c.",ch);
         }
     }
 }    

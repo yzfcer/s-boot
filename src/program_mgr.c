@@ -253,7 +253,7 @@ int32_t write_derect_space(region_s *code_reg,region_s *dest)
     region_s bin_reg;
     img_head_s *head;
     uint32_t real_addr;
-    boot_param_s *bp = (boot_param_s*)sys_boot_params();
+    boot_param_s *bp = (boot_param_s*)get_boot_params();
     
     real_addr = get_ram_addr(code_reg->addr,bp->mem_map.ram.probuf_region.type);
     if(INVALID_REAL_ADDR == real_addr)
@@ -277,7 +277,7 @@ int32_t write_derect_space(region_s *code_reg,region_s *dest)
 int32_t flush_code_to_ram(region_s *code_region)
 {
     int32_t ret;
-    boot_param_s *bp = (boot_param_s*)sys_boot_params();
+    boot_param_s *bp = (boot_param_s*)get_boot_params();
     ret = copy_data_on_memory(code_region,&bp->mem_map.run.flash);
     if(0 != ret)
     {
@@ -293,7 +293,7 @@ int32_t flush_code_to_iflash(region_s *bin)
 {
     int32_t ret;
     region_s *src;
-    boot_param_s *bp = (boot_param_s*)sys_boot_params();
+    boot_param_s *bp = (boot_param_s*)get_boot_params();
 
     boot_notice("begin to flush code to MEM_TYPE_ROM space...");
     //先将原来的程序拷贝到备份空间    
@@ -324,7 +324,7 @@ int32_t flush_code_to_iflash(region_s *bin)
 int32_t flush_code_to_sflash(region_s *img,region_s *bin)
 {
     int32_t ret;
-    boot_param_s *bp = (boot_param_s*)sys_boot_params();
+    boot_param_s *bp = (boot_param_s*)get_boot_params();
     region_s *old_code;
 
     boot_notice("begin to flush code to MEM_TYPE_ROM space...");
@@ -403,7 +403,7 @@ int32_t download_img_file(downtype_e type)
 {
     int32_t ret,len;
     region_s *img,bin;
-    boot_param_s *bp = (boot_param_s*)sys_boot_params();
+    boot_param_s *bp = (boot_param_s*)get_boot_params();
 
     if(bp->debug_mode)
     {
@@ -412,7 +412,7 @@ int32_t download_img_file(downtype_e type)
     }
     img = &bp->mem_map.ram.probuf_region;
     boot_printf("begin to receive file data,please wait.\r\n");
-    len = receive_img_data(img->addr,img->maxlen);
+    len = boot_receive_img(img->addr,img->maxlen);
     if(len <= 0)
     {
         boot_error("receive img data failed.");
@@ -442,7 +442,7 @@ void clean_program(void)
     int idx = 0;
     uint32_t i,blocknum;
     region_s *code[6];
-    boot_param_s *bp = (boot_param_s*)sys_boot_params();
+    boot_param_s *bp = (boot_param_s*)get_boot_params();
     boot_printf("clearing program ...\r\n");
     code[idx++] = &bp->mem_map.rom.program1_region;
     code[idx++] = &bp->mem_map.rom.program2_region;
@@ -463,7 +463,7 @@ int32_t write_encrypt_code_to_run(region_s *src,region_s *run)
 {
     int32_t ret;
     region_s img,bin;
-    boot_param_s *bp = (boot_param_s*)sys_boot_params();
+    boot_param_s *bp = (boot_param_s*)get_boot_params();
 
     ret = copy_data_on_memory(src,&bp->mem_map.ram.probuf_region);
     if(0 != ret)
@@ -495,7 +495,7 @@ int32_t change_boot_app(int32_t index)
 {
     int32_t ret;
     region_s src;
-    boot_param_s *bp = (boot_param_s *)sys_boot_params();
+    boot_param_s *bp = (boot_param_s *)get_boot_params();
     boot_notice("begin to change boot App:%d.",index);
     switch(index)
     {
@@ -623,7 +623,7 @@ int32_t check_programs(void)
     int32_t ret = 0;
     region_s *code[3];
     int32_t save_flag = 0,i;
-    boot_param_s *bp = (boot_param_s *)sys_boot_params();
+    boot_param_s *bp = (boot_param_s *)get_boot_params();
     
     code[idx++] = &bp->mem_map.rom.program1_region;
     code[idx++] = &bp->mem_map.rom.program2_region;

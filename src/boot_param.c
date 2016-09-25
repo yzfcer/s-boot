@@ -33,7 +33,7 @@ static void init_reg_name(boot_param_s *bp)
     }
 }
 
-void *sys_boot_params(void)
+void *get_boot_params(void)
 {
     if(NULL == g_pbp)
         g_pbp = (boot_param_s*)get_boot_params_from_ROM();
@@ -124,17 +124,8 @@ void clear_boot_param_buffer(void)
     }
     g_pbp = NULL;
 }
-void init_map_info(mem_map_s *map)
-{
-    int32_t i;
-    region_s *rg = (region_s*)map;
-    for(i = 0;i < sizeof(mem_map_s)/sizeof(region_s);i ++)
-    {
-        rg[i].crc = 0xffffff;
-        rg[i].lenth = 0;
-        rg[i].status = MEM_NULL;
-    }
-}
+
+
 
 int32_t read_param(void)
 {
@@ -210,7 +201,7 @@ int32_t write_param(void)
 
 int32_t check_app_debug_mode(void)
 {
-    boot_param_s *bp = (boot_param_s*)sys_boot_params();
+    boot_param_s *bp = (boot_param_s*)get_boot_params();
     if(NULL == bp)
     {
         return 0;
