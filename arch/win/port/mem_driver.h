@@ -1,3 +1,11 @@
+/***************************************************************************************
+** 文件名：
+** 文件信息：
+** 创建时间：2016.09.25
+** 创建人：清风海岸
+**文件版本 1.0
+** 修改记录：
+***************************************************************************************/
 #ifndef MEM_DRIVER_H__
 #define MEM_DRIVER_H__
 #include "boot_type.h"
@@ -32,5 +40,6 @@ uint32_t get_ram_base(int32_t idx);
 uint32_t get_rom_base(int32_t idx);
 uint32_t get_ram_lenth(int32_t idx);
 uint32_t get_rom_lenth(int32_t idx);
+
 
 #endif
