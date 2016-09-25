@@ -27,35 +27,19 @@ mem_status_s g_memstatus;
 upgrade_region_s g_upgrade_status;
 reserve_region_s g_reserve_reg;
 
-void print32_t_app_type(app_type_e type)
-{
-    printk_rt("boot app type:");
-    switch(type)
-    {
-        case APP_NOEMAL:
-            printk_rt("normal application program.\r\n");
-            break;
-        case APP_PRODUCT:
-            printk_rt(" producting program.\r\n");
-            break;
-        default:
-            printk_rt("undefined.\r\n");
-            break;
-    }
-}
 
 static int32_t boot_init(void)
 {
-    printk_rt("\r\n");
-    printk_rt("----------------------------------------------------------\r\n");
-    printk_rt("       s-boot %d.%d,built @ %s %s.\r\n",
+    boot_printf("\r\n");
+    boot_printf("----------------------------------------------------------\r\n");
+    boot_printf("       s-boot %d.%d,built @ %s %s.\r\n",
             (uint8_t)(BOOT_VERSION >> 8),
             (uint8_t)(BOOT_VERSION),__DATE__,__TIME__);
-    printk_rt("       boot(C)ICL 2015-2018,all rights reserved.\r\n");
-    printk_rt("----------------------------------------------------------\r\n");
+    boot_printf("       boot(C)ICL 2015-2018,all rights reserved.\r\n");
+    boot_printf("----------------------------------------------------------\r\n");
 	mem_region_init();
     clear_boot_param_buffer();
-    go_to_next_step();//
+    go_to_next_step();
     boot_notice("bootloader init OK.");
     return 0;
 }
@@ -65,13 +49,13 @@ static int32_t boot_app_debug_check(void)
     int32_t dbg_mode = check_app_debug_mode();
     if(dbg_mode)
     {
-        boot_warn("bootloader running mode:***DEBUG***");
+        boot_warn("bootloader mode:DEBUG");
         set_boot_status(BOOT_WAIT_KEY_PRESS);
     }
     else
     {
         
-        boot_notice("bootloader running mode:***NORMAL***");
+        boot_notice("bootloader mode:NORMAL");
         go_to_next_step();
     }
     return 0;
@@ -162,22 +146,12 @@ int32_t repair_running_space(boot_param_s *bp)
     region_s *src,*dest;
     
     dest = &bp->mem_map.run.iflash;
-    if(APP_NOEMAL == bp->app_type)
-    {
-        if(MEM_NORMAL == bp->mem_map.rom.program1_region.status)
-            src = &bp->mem_map.rom.program1_region;
-        else if(MEM_NORMAL == bp->mem_map.rom.programbak_region.status)
-            src = &bp->mem_map.rom.programbak_region;
-        else
-            src = NULL;
-    }
+    if(MEM_NORMAL == bp->mem_map.rom.program1_region.status)
+        src = &bp->mem_map.rom.program1_region;
+    else if(MEM_NORMAL == bp->mem_map.rom.programbak_region.status)
+        src = &bp->mem_map.rom.programbak_region;
     else
-    {
-        if(MEM_NORMAL == bp->mem_map.rom.product_region.status)
-            src = &bp->mem_map.rom.product_region;
-        else
-            src = NULL;
-    }
+        src = NULL;
     
     if(NULL == src)
     {
@@ -212,11 +186,6 @@ static int32_t repair_program(boot_param_s *bp)
     if(MEM_ERROR == bp->mem_map.rom.programbak_region.status)
     {
         if(0 != repair_rom_space(&bp->mem_map.rom.program1_region,&bp->mem_map.rom.programbak_region))
-            ret = -1;
-    }
-    if(MEM_ERROR == bp->mem_map.rom.product_region.status)
-    {
-        if(0 != repair_rom_space(&bp->mem_map.run.iflash,&bp->mem_map.rom.product_region))
             ret = -1;
     }
     (void)write_param();
@@ -351,20 +320,7 @@ static int32_t  boot_rollback_check(void)
         return 0;
     }
     sp_set_app_rollback(0);
-    if(APP_PRODUCT == bp->app_type)
-    {
-        ret = change_boot_app(APP_IDX_PRODUCT);
-    }
-    else if(APP_NOEMAL == bp->app_type)
-    {
-        ret = change_boot_app(APP_IDX_PROBAK);
-    }
-    else
-    {
-        boot_warn("undefined app type:%d",bp->app_type);
-        ret = -1;
-    }
-    
+    ret = change_boot_app(APP_IDX_PROBAK);
     if(0 != ret)
     {
         boot_error("app roll back failed.");
@@ -378,54 +334,19 @@ static int32_t  boot_rollback_check(void)
     return ret;
 }
 
-static int32_t boot_change_app_type(void)
-{
-    int32_t ret = 0;
-    uint32_t type;
-    boot_param_s *bp = (boot_param_s*)sys_boot_params();
-    type = check_app_type_switch();
-    if(type != bp->app_type)
-    {
-        boot_notice("app type is NOT matched,change to type %d.",type);
-        if(type == APP_NOEMAL)
-        {
-            if(bp->mem_map.rom.param1_region.type == IFLASH
-                && bp->mem_map.run.iflash.type == IFLASH)
-                ret = change_boot_app(APP_IDX_PROBAK);
-            else
-                ret = change_boot_app(APP_IDX_PRO1);
-        }
-        else if(type == APP_PRODUCT)
-        {
-            ret = change_boot_app(APP_IDX_PRODUCT);
-        }
-        
-        if(0 != ret)
-        {
-            boot_warn("change App type failed.");
-        }    
-    }
-    else
-    {
-        boot_notice("device app type is matched,type %d.",type);
-    }
-    go_to_next_step();
-    return 0;    
-    
-}
 
 static int32_t boot_wait_key_press(void)
 {
     char ch = 0;
-    printk_rt("press any key to enter menu list:");
+    boot_printf("press any key to enter menu list:");
     if(0 == wait_for_key_input(3,&ch,1))
     {
         go_to_next_step();
-        printk_rt("\r\n");
+        boot_printf("\r\n");
         return 0;
     }
     set_boot_status(BOOT_LOAD_APP);
-    printk_rt("\r\n");
+    boot_printf("\r\n");
     return 0;
 }
 
@@ -489,8 +410,6 @@ static int32_t boot_load_app(void)
         return -1;
     }
 
-    print32_t_app_type((app_type_e)bp->app_type);
-
     if(IFLASH == regi->type)
     {
         boot_notice("need not load App to a NORFlash ROM.");
@@ -521,17 +440,17 @@ static int32_t boot_set_app_param(void)
     g_upgrade_status.mem_type = bp->mem_map.ram.probuf_region.type;
     sp_set_upgrade_param(&g_upgrade_status);
     sp_get_upgrade_param(&g_upgrade_status);
-    printk_rt("set upgrade params:\r\n");
-    printk_rt("addr:0x%x\r\n",g_upgrade_status.addr);
-    printk_rt("lenth:0x%x\r\n",g_upgrade_status.lenth);
+    boot_printf("set upgrade params:\r\n");
+    boot_printf("addr:0x%x\r\n",g_upgrade_status.addr);
+    boot_printf("lenth:0x%x\r\n",g_upgrade_status.lenth);
 
     
     g_reserve_reg.addr = bp->mem_map.rom.reserve_region.base;
     g_reserve_reg.lenth = bp->mem_map.rom.reserve_region.maxlen;
     g_reserve_reg.mem_type = bp->mem_map.rom.reserve_region.type;
-    printk_rt("set reserve region params:\r\n");
-    printk_rt("addr:0x%x\r\n",g_reserve_reg.addr);
-    printk_rt("lenth:0x%x\r\n",g_reserve_reg.lenth);
+    boot_printf("set reserve region params:\r\n");
+    boot_printf("addr:0x%x\r\n",g_reserve_reg.addr);
+    boot_printf("lenth:0x%x\r\n",g_reserve_reg.lenth);
     sp_set_reserve_param(&g_reserve_reg);
     
     sp_set_mem_status(&g_memstatus);
@@ -554,7 +473,7 @@ static int32_t boot_error_handle(void)
 static int32_t boot_jump_tp_system(void)
 {
 	boot_notice("begin to jump to App space...");
-	printk_rt("(^_^)\r\n\r\n\r\n");
+	boot_printf("(^_^)\r\n\r\n\r\n");
 	boot_run_system();
 	return 0;
 }
@@ -569,7 +488,6 @@ boot_handle_TB g_status_handTB[] =
     {BOOT_SELF_CHECK,"self_check",boot_self_check},
     {BOOT_UPGRADE_CHECK,"upgrade_check",boot_upgrade_check},
     {BOOT_ROLLBACK_CHECK,"rollback_check",boot_rollback_check},
-    {BOOT_CHANGE_APP_TYPE,"change_app_type",boot_change_app_type},
     
     {BOOT_WAIT_KEY_PRESS,"wait_key_press",boot_wait_key_press},
     {BOOT_MENU_LIST,"menu_list",boot_menu_list},
@@ -612,7 +530,7 @@ int32_t main(void)
                 ret = g_status_handTB[i].handle();
                 if(0 != ret)
                 {
-                    printk_rt("step %d: {%s} captures some errors.\r\n",i + 1,g_status_handTB[i].stepname);
+                    boot_printf("step %d: {%s} captures some errors.\r\n",i + 1,g_status_handTB[i].stepname);
                 }
                 break;
             }

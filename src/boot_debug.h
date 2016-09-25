@@ -20,17 +20,17 @@ extern "C" {
 
 #define BOOT_DEBUG_EN 0
 #if BOOT_DEBUG_EN
-#define boot_todo(fmt,...) printk_rt("%s"fmt" [%s,%d]\r\n","TODO:***--------  ",##__VA_ARGS__,__FUNCTION__,__LINE__)
-#define boot_debug(fmt,...) printk_rt("%s"fmt"  [%s,%d]\r\n","DEBUG: ",##__VA_ARGS__,__FUNCTION__,__LINE__)
-#define boot_notice(fmt,...) printk_rt("%s"fmt"\r\n","NOTICE: ",##__VA_ARGS__)
-#define boot_warn(fmt,...) printk_rt("\r\n%s"fmt" [%s,%d]\r\n\r\n","------WARNING------\r\n",##__VA_ARGS__,__FUNCTION__,__LINE__)
-#define boot_error(fmt,...) printk_rt("\r\n%s"fmt" [%s,%d]\r\n\r\n","------ERROR------\r\n",##__VA_ARGS__,__FUNCTION__,__LINE__)
+#define boot_todo(fmt,...) boot_printf("%s"fmt" [%s,%d]\r\n","TODO:***--------  ",##__VA_ARGS__,__FUNCTION__,__LINE__)
+#define boot_debug(fmt,...) boot_printf("%s"fmt"  [%s,%d]\r\n","DEBUG: ",##__VA_ARGS__,__FUNCTION__,__LINE__)
+#define boot_notice(fmt,...) boot_printf("%s"fmt"\r\n","NOTICE: ",##__VA_ARGS__)
+#define boot_warn(fmt,...) boot_printf("\r\n%s"fmt" [%s,%d]\r\n\r\n","------WARNING------\r\n",##__VA_ARGS__,__FUNCTION__,__LINE__)
+#define boot_error(fmt,...) boot_printf("\r\n%s"fmt" [%s,%d]\r\n\r\n","------ERROR------\r\n",##__VA_ARGS__,__FUNCTION__,__LINE__)
 #else
-#define boot_todo(fmt,...) //printk_rt("%s"fmt" [%s,%d]\r\n","TODO:***--------  ",__VA_ARGS__,__FUNCTION__,__LINE__)
-#define boot_debug(fmt,...) //printk_rt("%s"fmt"\r\n","DEBUG:",__VA_ARGS__)
-#define boot_notice(fmt,...) printk_rt("%s"fmt"\r\n","NOTICE: ",##__VA_ARGS__)
-#define boot_warn(fmt,...) printk_rt("\r\n%s"fmt" \r\n\r\n","------WARNING------\r\n",##__VA_ARGS__)
-#define boot_error(fmt,...) printk_rt("\r\n%s"fmt" \r\n\r\n","------ERROR------\r\n",##__VA_ARGS__)
+#define boot_todo(fmt,...) //boot_printf("%s"fmt" [%s,%d]\r\n","TODO:***--------  ",__VA_ARGS__,__FUNCTION__,__LINE__)
+#define boot_debug(fmt,...) //boot_printf("%s"fmt"\r\n","DEBUG:",__VA_ARGS__)
+#define boot_notice(fmt,...) boot_printf("%s"fmt"\r\n","NOTICE: ",##__VA_ARGS__)
+#define boot_warn(fmt,...) boot_printf("\r\n%s"fmt" \r\n\r\n","------WARNING------\r\n",##__VA_ARGS__)
+#define boot_error(fmt,...) boot_printf("\r\n%s"fmt" \r\n\r\n","------ERROR------\r\n",##__VA_ARGS__)
 #endif
 #ifndef NULL 
 #define NULL (void*)0

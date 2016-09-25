@@ -31,7 +31,7 @@ int32_t wait_for_key_input(int32_t timeout_sec,char *ch,int32_t print_flag)
     second = timeout_sec > 99?99:timeout_sec;
     tick = boot_get_sys_ms();
     if(print_flag)
-        printk_rt("\r\nwaiting:%ds",second);
+        boot_printf("\r\nwaiting:%ds",second);
     while(1)
     {
         feed_watchdog();
@@ -51,12 +51,12 @@ int32_t wait_for_key_input(int32_t timeout_sec,char *ch,int32_t print_flag)
             }
             if(print_flag)
             {
-                printk_rt("%c%c%c",8,8,8);
-                printk_rt("%2ds",second);
+                boot_printf("%c%c%c",8,8,8);
+                boot_printf("%2ds",second);
             }
         }
     }
-    printk_rt("\r\n");
+    boot_printf("\r\n");
     return ret;
 }
 
@@ -65,7 +65,7 @@ int32_t read_char_blocking(char *ch)
 {
     if(0 == wait_for_key_input(60,ch,0))
         return 0;
-    printk_rt("you have NOT input any key in a 60 seconds,boot exit the menu list.\r\n");
+    boot_printf("you have NOT input any key in a 60 seconds,boot exit the menu list.\r\n");
     if(0 == wait_for_key_input(30,ch,1))
         return 0;
     return -1;
@@ -153,11 +153,11 @@ int32_t receive_img_data(uint32_t addr,uint32_t maxlen)
                     g_recvstat.mstick = boot_get_sys_ms();
                     if((g_recvstat.idx & 0x1ff) == 0)
                     {
-                        printk_rt("#");
+                        boot_printf("#");
                     }
                     if((g_recvstat.idx & 0x7fff) == 0)
                     {
-                        printk_rt("\r\n");
+                        boot_printf("\r\n");
                     }
                 }
                 else
@@ -170,7 +170,7 @@ int32_t receive_img_data(uint32_t addr,uint32_t maxlen)
                 feed_watchdog();
                 break;
             case RECV_END:
-                printk_rt("\r\n");
+                boot_printf("\r\n");
                 end = (g_recvstat.idx + BLOCK_SIZE - 1)/BLOCK_SIZE*BLOCK_SIZE;
                 for(i = g_recvstat.idx;i < end; i ++)
                     buf[i] = 0;

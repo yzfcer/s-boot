@@ -40,7 +40,7 @@ static int32_t make_sure_input(char *info)
     char ch;
     while(1)
     {
-        printk_rt("%s?[y/n]\r\n",info);
+        boot_printf("%s?[y/n]\r\n",info);
         if(0 != read_char_blocking(&ch))
         {
             exit_menu();
@@ -122,10 +122,6 @@ static void download_img_to_XRAM(void)
     exit_menu();
 }
 
-static void download_product_to_device(void)
-{
-    download_img_file(DOWN_PRODUCT);
-}
 
 static void set_debug_mode(void)
 {
@@ -139,10 +135,10 @@ static void set_debug_mode(void)
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
     while(1)
     {
-        printk_rt("set debug mode options:\r\n");
+        boot_printf("set debug mode options:\r\n");
         for(i = 0;i < sizeof(mode)/sizeof(char*);i ++)
         {
-            printk_rt("[%d] %s\r\n",i+1,mode[i]);
+            boot_printf("[%d] %s\r\n",i+1,mode[i]);
         }
         if(0 != read_char_blocking(&ch))
         {
@@ -167,7 +163,7 @@ static void choose_default_memmap(void)
     int32_t ret;
     while(1)
     {
-        printk_rt("please choose map:\r\n");
+        boot_printf("please choose map:\r\n");
         print32_t_map_list();
         if(0 != read_char_blocking(&ch))
         {
@@ -186,7 +182,7 @@ static void choose_default_memmap(void)
 static void show_current_memmap(void)
 {
     boot_param_s *bp = (boot_param_s *)sys_boot_params();
-    printk_rt("current memory map info:\r\n");
+    boot_printf("current memory map info:\r\n");
     print32_t_map_info(&bp->mem_map);
 }
 
@@ -236,7 +232,7 @@ static void clear_boot_param(void)
 {
     if(make_sure_input("Are you sure to unlock MCU"))
         do_clear_flash_data(0);
-    printk_rt("clear boot param complete.\r\n");
+    boot_printf("clear boot param complete.\r\n");
 }
 
 static void set_default_boot_img(void)
@@ -247,16 +243,15 @@ static void set_default_boot_img(void)
     {
         "program1",
         "program2",
-        "product program",
         "cancel"
     };
     boot_param_s *bp = (boot_param_s *)sys_boot_params();
     while(1)
     {
-        printk_rt("choose the following program:\r\n");
+        boot_printf("choose the following program:\r\n");
         for(i = 0;i < sizeof(pro)/sizeof(char*);i ++)
         {
-            printk_rt("[%d] %s\r\n",i+1,pro[i]);
+            boot_printf("[%d] %s\r\n",i+1,pro[i]);
         }
         if(0 != read_char_blocking(&ch))
         {
@@ -288,9 +283,9 @@ static void unlock_mcu(void)
 {
     char *cmd = "unlock";
     
-    printk_rt("input the unlock commnad:");
+    boot_printf("input the unlock commnad:");
     read_str_withblockig(commbuffer,7);
-    printk_rt("\r\n");
+    boot_printf("\r\n");
     
     if(is_string_equal(cmd,commbuffer,6))
     {
@@ -312,7 +307,7 @@ static void exit_and_save(void)
     ret = write_param();
     if(ret != 0)
     {
-        printk_rt("write param fialed.\r\n");
+        boot_printf("write param fialed.\r\n");
     }    //这里是否还需要对参数做进一步的验证
     exit_menu();
 }
@@ -324,7 +319,6 @@ static menu_handle_TB g_menu_handleTB[] =
     {'2',0,0,"download img file to XFLASH",download_img_to_sflash},
     {'3',0,0,"download img file to IRAM",download_img_to_IRAM},
     {'4',0,0,"download img file to XRAM",download_img_to_XRAM},
-    {'5',0,0,"download producting img file to device",download_product_to_device},
     
     {'b',2,2,"set debug mode",set_debug_mode},
     {'c',1,1,"choose default memory map",choose_default_memmap},
@@ -357,12 +351,12 @@ static void exit_menu(void)
 void print32_t_menu_list(void)
 {
     int32_t i;
-    printk_rt("\r\n\r\npress key to choose the following functions:\r\n");
+    boot_printf("\r\n\r\npress key to choose the following functions:\r\n");
     for(i = 0;i < sizeof(g_menu_handleTB)/sizeof(menu_handle_TB);i ++)
     {
         if(!g_menu_handleTB[i].prio)
         {
-            printk_rt("[%c] %s\r\n",g_menu_handleTB[i].key,g_menu_handleTB[i].menu_item);
+            boot_printf("[%c] %s\r\n",g_menu_handleTB[i].key,g_menu_handleTB[i].menu_item);
         }
     }
 }
@@ -426,11 +420,11 @@ void menu_entry(void)
         {
             if(ch == '0')
             {
-                printk_rt("\r\n");
+                boot_printf("\r\n");
                 ret = open_super_prio();
                 if(0 == ret)
                 {
-                    printk_rt("You have got some advanced priority. ^_^\r\n");
+                    boot_printf("You have got some advanced priority. ^_^\r\n");
                 }
             }
             else

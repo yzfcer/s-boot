@@ -17,14 +17,6 @@ extern "C" {
 #define BOOT_VERSION 1
 #define BLOCK_SIZE 4096
 
-
-typedef enum 
-{
-    APP_NOEMAL,
-    APP_PRODUCT,
-    APP_UNDEFINE = 0xff
-}app_type_e;
-
 typedef struct 
 {
     uint32_t lenth;
@@ -39,7 +31,6 @@ typedef struct
     uint32_t lenth;//本参数结构体的长度
     
     uint8_t version;//bootloader的版本号
-    uint8_t app_type;
     uint8_t debug_mode;
     uint8_t pad1[1];
 

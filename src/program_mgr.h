@@ -34,7 +34,6 @@ typedef enum
 {
     APP_IDX_PRO1,
     APP_IDX_PROBAK,
-    APP_IDX_PRODUCT,
 }app_idx_e;
 
 int32_t download_img_file(downtype_e type);

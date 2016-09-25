@@ -72,7 +72,6 @@ void init_boot_param(const mem_map_s *mmap)
     bp->lenth = sizeof(boot_param_s);
     
     bp->version = BOOT_VERSION;
-    bp->app_type = APP_UNDEFINE;
     bp->debug_mode = 0;
     bp->pad1[0] = 0xaa;
 

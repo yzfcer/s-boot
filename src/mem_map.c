@@ -27,7 +27,6 @@ mem_map_s g_memmap[] =
             {"boot_param2",0,0,IFLASH,0,0,0},
             {"app_program1",0,0,IFLASH,0,0,0},
             {"app_program2",0,0,IFLASH,0,0,0},
-            {"app_product",0,0,IFLASH,0,0,0},
             {"reserved",0,0,IFLASH,0,0,0}
         },
         {
@@ -49,7 +48,6 @@ mem_map_s g_memmap[] =
             {"boot_param2",0,0,IFLASH,0,0,0},
             {"app_program1",0,0,XFLASH,0,0},
             {"app_program2",0,0,XFLASH,0,0},
-            {"app_product",0,0,XFLASH,0,0},
             {"reserved",0,0,IFLASH,0,0,0}
         },
         {
@@ -72,7 +70,6 @@ const char *sys_mem_name[] =
     "boot_param2",
     "app_program1",
     "app_program2",
-    "app_product",
     "reserved",
     "boot_ram",
     "code_buffer",
@@ -120,7 +117,7 @@ void choose_default_map(void)
     int32_t index;
     while(1)
     {
-        printk_rt("please choose map:\r\n");
+        boot_printf("please choose map:\r\n");
         print32_t_map_list();
         if(XFLASH_EXIST)
         {
@@ -185,7 +182,6 @@ int32_t mem_region_init(void)
 	len /= 2;
 	base += alloc_region(&map->rom.program1_region,base,len);
 	base += alloc_region(&map->rom.programbak_region,base,len);
-	base += alloc_region(&map->rom.product_region,base,BOOT_PRODUCT_LENTH);
 	base += alloc_region(&map->rom.reserve_region,base,BOOT_RESERVED_LENTH);    
 	base = get_iram_base();
 	len = (IRAM_LENTH - BOOT_PROGRAMBUF_LENTH - BOOT_SHARE_PARAM_LENTH);
@@ -208,7 +204,6 @@ int32_t mem_region_init(void)
     base = 0;
     base += alloc_region(&map->rom.program1_region,base,BOOT2_PROGRAM1_LENTH);
     base += alloc_region(&map->rom.programbak_region,base,BOOT2_PROGRAMBAK_LENTH);
-    base += alloc_region(&map->rom.product_region,base,BOOT2_PRODUCT_LENTH);
 
     base = get_iram_base();
 	base += alloc_region(&map->ram.app_region,base,len);
@@ -365,10 +360,10 @@ void print32_t_map_info(mem_map_s *map)
     int32_t i;
     region_s *reg;
     reg = (region_s*)map;
-    printk_rt("%-15s%-14s%-14s%-12s\r\n","area","base","maxlen","type");
+    boot_printf("%-15s%-14s%-14s%-12s\r\n","area","base","maxlen","type");
     for(i = 0;i < sizeof(mem_map_s)/sizeof(region_s);i ++)
     {
-        printk_rt(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
+        boot_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
     }
 }
 
@@ -377,11 +372,10 @@ void print32_t_program_space(mem_map_s *map)
 #define REGION_FORMAT1 "%-15s0x%-10x0x%-9x0x%-9x%-9s%4d%%\r\n" 
 #define REGION_PARAM1(reg) (reg)->regname,(reg)->base,(reg)->maxlen,\
                         (reg)->lenth,sys_memtype[(reg)->type],((reg)->lenth*100)/(reg)->maxlen
-        printk_rt("%-15s%-12s%-11s%-11s%-9s%-8s\r\n","area","base","maxlen","lenth","type","usage");
-        printk_rt(REGION_FORMAT1,REGION_PARAM1(&map->rom.program1_region));
-        printk_rt(REGION_FORMAT1,REGION_PARAM1(&map->rom.programbak_region));
-        printk_rt(REGION_FORMAT1,REGION_PARAM1(&map->rom.product_region));
-        printk_rt(REGION_FORMAT1,REGION_PARAM1(&map->run.iflash));
+        boot_printf("%-15s%-12s%-11s%-11s%-9s%-8s\r\n","area","base","maxlen","lenth","type","usage");
+        boot_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.program1_region));
+        boot_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.programbak_region));
+        boot_printf(REGION_FORMAT1,REGION_PARAM1(&map->run.iflash));
 }
 
 
@@ -391,7 +385,7 @@ void print32_t_map_list(void)
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
     for(i = 0;i < sizeof(g_memmap)/sizeof(mem_map_s);i ++)
     {
-        printk_rt("\r\n[%d] memory map:\r\n",i+1);
+        boot_printf("\r\n[%d] memory map:\r\n",i+1);
         print32_t_map_info(&g_memmap[i]);
     }
 }

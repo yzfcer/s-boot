@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <winbase.h>
 #include "boot_param.h"
+#include <conio.h>
 void feed_watchdog(void)
 {
 }
@@ -27,8 +28,14 @@ void boot_run_system(void)
 
 int32_t read_char_noblocking(char *ch)
 {
-	scanf("%c",ch);
-	return 0;
+    char c;
+    c = _kbhit();
+    if(c)
+    {
+        *ch = c;
+        return 0;
+    }
+	return -1;
 }
 
 int32_t boot_get_sys_ms(void)
@@ -38,7 +45,7 @@ int32_t boot_get_sys_ms(void)
 
 int32_t read_char_blocking(char *ch)
 {
-	scanf("%c",ch);
+	scanf_s("%c",ch,2);
 	return 0;
 }
 

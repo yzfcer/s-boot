@@ -16,7 +16,11 @@ typedef char int8_t;
 
 typedef float fp32_t;
 typedef double fp64_t;
-
+typedef enum 
+{
+    FALSE,
+    TRUE,
+}bool_t;
 #ifdef __cplusplus
 }
 #endif

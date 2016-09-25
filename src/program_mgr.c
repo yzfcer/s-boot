@@ -32,8 +32,8 @@ char commbuffer[BLOCK_SIZE];
 static void print32_t_copy_percents(int32_t numerator, int32_t denominator,int32_t del)
 {
     if(del)
-        printk_rt("%c%c%c%c",8,8,8,8);
-    printk_rt("%3d%%",numerator*100/denominator);
+        boot_printf("%c%c%c%c",8,8,8,8);
+    boot_printf("%3d%%",numerator*100/denominator);
         feed_watchdog();
 }
 
@@ -124,9 +124,9 @@ int32_t check_and_decrypt_img(region_s *img,region_s *bin)
     boot_notice("img file decrypt OK.");
 
     imginfo = (img_head_s*)(real_addr+10);
-    printk_rt("decrypt img file: \r\n");
-    printk_rt("file name:%s\r\n",imginfo->file_name);
-    printk_rt("lenth:%d\r\n",imginfo->file_len);
+    boot_printf("decrypt img file: \r\n");
+    boot_printf("file name:%s\r\n",imginfo->file_name);
+    boot_printf("lenth:%d\r\n",imginfo->file_len);
 
     //内层校验
     cal_crc = calc_crc32((char*)(real_addr+imginfo->head_len),imginfo->file_len,0);
@@ -203,7 +203,7 @@ int32_t copy_data_on_memory(region_s *src,region_s *dest)
                 sys_memtype[dest->type],dest->base,dest->maxlen);
     
     blocks = (src->lenth + BLOCK_SIZE - 1) / BLOCK_SIZE;
-    printk_rt("complete:");
+    boot_printf("complete:");
     print32_t_copy_percents(0,1,0);
     for(i = 0;i < blocks;i ++)
     {    
@@ -243,7 +243,7 @@ int32_t copy_data_on_memory(region_s *src,region_s *dest)
         feed_watchdog();
     }
     print32_t_copy_percents(i,blocks,1);
-    printk_rt("\r\n");
+    boot_printf("\r\n");
 
     dest->lenth = src->lenth;
     dest->crc = src->crc;
@@ -305,16 +305,13 @@ int32_t flush_code_to_iflash(region_s *bin)
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
 
     boot_notice("begin to flush code to IFLASH space...");
-    if(APP_NOEMAL == bp->app_type)
+    //先将原来的程序拷贝到备份空间    
+    src = &bp->mem_map.rom.program1_region;
+    ret = copy_data_on_memory(src,&bp->mem_map.rom.programbak_region);
+    if(0 != ret)
     {
-        //先将原来的程序拷贝到备份空间    
-        src = &bp->mem_map.rom.program1_region;
-        ret = copy_data_on_memory(src,&bp->mem_map.rom.programbak_region);
-        if(0 != ret)
-        {
-            boot_warn("backup old program failed.");
-            return -1;
-        }
+        boot_warn("backup old program failed.");
+        return -1;
     }
 
     //将新程序烧到运行空间
@@ -327,9 +324,7 @@ int32_t flush_code_to_iflash(region_s *bin)
     bp->mem_map.run.iflash.status = MEM_NORMAL;
     
     bp->mem_map.run.iflash.crc = bin->crc;
-    bp->mem_map.run.iflash.lenth= bin->lenth;
-    bp->app_type = APP_NOEMAL;
-    
+    bp->mem_map.run.iflash.lenth= bin->lenth;    
     return 0;
 }
 
@@ -342,16 +337,13 @@ int32_t flush_code_to_sflash(region_s *img,region_s *bin)
     region_s *old_code;
 
     boot_notice("begin to flush code to XFLASH space...");
-    if(APP_NOEMAL == bp->app_type)
+    //先将原来的SFLASH程序数据备份
+    old_code = &bp->mem_map.rom.program1_region;
+    ret = copy_data_on_memory(old_code,&bp->mem_map.rom.programbak_region);
+    if(0 != ret)
     {
-        //先将原来的SFLASH程序数据备份
-        old_code = &bp->mem_map.rom.program1_region;
-        ret = copy_data_on_memory(old_code,&bp->mem_map.rom.programbak_region);
-        if(0 != ret)
-        {
-            boot_warn("backup old program failed.");
-            return -1;
-        }
+        boot_warn("backup old program failed.");
+        return -1;
     }
 
     //如果是在IFLASH运行，在加密前先烧录运行程序空间
@@ -364,7 +356,6 @@ int32_t flush_code_to_sflash(region_s *img,region_s *bin)
             return -1;
         }
     }
-    bp->app_type = APP_NOEMAL;
     
     //将数据重新加密
     ret = encrypt_code(img);
@@ -384,56 +375,7 @@ int32_t flush_code_to_sflash(region_s *img,region_s *bin)
 }
 
 
-int32_t flush_code_to_product(region_s *img,region_s *bin)
-{
-    int32_t ret;
-    region_s *src;
-    boot_param_s *bp = (boot_param_s*)sys_boot_params();
 
-    boot_notice("begin to flush code to producting space...");
-    //如果是在IFLASH运行，先烧录运行程序
-    if(IFLASH == bp->mem_map.run.iflash.type)
-    {
-        ret = copy_data_on_memory(bin,&bp->mem_map.run.iflash);
-        if(0 != ret)
-        {
-            boot_error("write new program to running space failed.");
-            return -1;
-        }
-        if(IFLASH == bp->mem_map.rom.program1_region.type)
-        {
-            bp->mem_map.rom.program1_region.lenth = bin->lenth;
-            bp->mem_map.rom.program1_region.crc = bin->crc;
-        }
-    }
-    bp->app_type = APP_PRODUCT;
-
-
-    if(XFLASH == bp->mem_map.rom.product_region.type)
-    {
-        //将数据重新加密
-        ret = encrypt_code(img);
-        if(0 != ret)
-        {
-            boot_error("encrypt code error");
-            return -1;
-        }
-        src = img;
-    }
-    else
-    {
-        src = bin;
-    }
-    
-    ret = copy_data_on_memory(src,&bp->mem_map.rom.product_region);
-    if(0 != ret)
-    {
-        boot_error("write product program failed.");
-        return -1;
-    }
-    
-    return 0;
-}
 
 int32_t flush_code_data(downtype_e type,region_s *img,region_s *bin)
 {
@@ -449,9 +391,6 @@ int32_t flush_code_data(downtype_e type,region_s *img,region_s *bin)
             break;
         case DOWN_SFLASH:
             ret = flush_code_to_sflash(img,bin);
-            break;
-        case DOWN_PRODUCT:
-            ret = flush_code_to_product(img,bin);
             break;
         default:
             boot_error("unknown memory type:%d",type);
@@ -481,7 +420,7 @@ int32_t download_img_file(downtype_e type)
         return -1;
     }
     img = &bp->mem_map.ram.probuf_region;
-    printk_rt("begin to receive file data,please wait.\r\n");
+    boot_printf("begin to receive file data,please wait.\r\n");
     len = receive_img_data(img->base,img->maxlen);
     if(len <= 0)
     {
@@ -509,17 +448,16 @@ int32_t download_img_file(downtype_e type)
 
 void clean_program(void)
 {
-    
+    int idx = 0;
     uint32_t i,blocknum;
     region_s *code[6];
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
-    printk_rt("clearing program ...\r\n");
-    code[0] = &bp->mem_map.rom.program1_region;
-    code[1] = &bp->mem_map.rom.programbak_region;
-    code[2] = &bp->mem_map.rom.product_region;
-    code[3] = &bp->mem_map.run.iflash;
-    code[4] = &bp->mem_map.rom.param1_region;
-    code[5] = &bp->mem_map.rom.param2_region;
+    boot_printf("clearing program ...\r\n");
+    code[idx++] = &bp->mem_map.rom.program1_region;
+    code[idx++] = &bp->mem_map.rom.programbak_region;
+    code[idx++] = &bp->mem_map.run.iflash;
+    code[idx++] = &bp->mem_map.rom.param1_region;
+    code[idx++] = &bp->mem_map.rom.param2_region;
     
     for(i = 0;i < 6;i ++)
     {   
@@ -527,7 +465,7 @@ void clean_program(void)
         blocknum = (code[i]->lenth + BLOCK_SIZE - 1) / BLOCK_SIZE;
         erase_block(code[i]->type,code[i]->base,blocknum);
     }
-    printk_rt("clear program OK.\r\n");
+    boot_printf("clear program OK.\r\n");
 }
 
 int32_t write_encrypt_code_to_run(region_s *src,region_s *run)
@@ -572,15 +510,9 @@ int32_t change_boot_app(int32_t index)
     {
         case APP_IDX_PRO1:
             copy_region_info(&bp->mem_map.rom.programbak_region,&src);
-            bp->app_type = APP_NOEMAL;
             break;
         case APP_IDX_PROBAK:
             copy_region_info(&bp->mem_map.rom.programbak_region,&src);
-            bp->app_type = APP_NOEMAL;
-            break;
-        case APP_IDX_PRODUCT:
-            copy_region_info(&bp->mem_map.rom.product_region,&src);
-            bp->app_type = APP_PRODUCT;
             break;
         default:
             boot_warn("undefined index:%d.",index);
@@ -696,15 +628,15 @@ int32_t check_rom_program(region_s *code)
 
 int32_t check_programs(void)
 {
+	int idx = 0;
     int32_t ret = 0;
-    region_s *code[4];
+    region_s *code[3];
     int32_t save_flag = 0,i;
     boot_param_s *bp = (boot_param_s *)sys_boot_params();
     
-    code[0] = &bp->mem_map.rom.program1_region;
-    code[1] = &bp->mem_map.rom.programbak_region;
-    code[2] = &bp->mem_map.rom.product_region;
-    code[3] = &bp->mem_map.run.iflash;
+    code[idx++] = &bp->mem_map.rom.program1_region;
+    code[idx++] = &bp->mem_map.rom.programbak_region;
+    code[idx++] = &bp->mem_map.run.iflash;
     boot_notice("begin to check programs...");
     for(i = 0;i < sizeof(code)/sizeof(region_s*);i ++)
     {

@@ -2,7 +2,7 @@
 #define PORT_H__
 #include "boot_type.h"
 #include <stdio.h>
-#define printk_rt(fmt,...) printf(fmt,##__VA_ARGS__)
+#define boot_printf(fmt,...) printf(fmt,##__VA_ARGS__)
 void feed_watchdog(void);
 uint8_t is_chip_lock();
 void set_chip_lock(uint8_t lock_en);

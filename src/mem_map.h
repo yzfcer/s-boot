@@ -16,36 +16,7 @@ extern "C" {
 
 #define INVALID_REAL_ADDR 0xffffffff
 
-#if 0
 
-//--------------------------------------------------
-//采用内部Flash时程序空间的划分
-#define BOOT_IPROGRAM1_BASE (BOOT_PARAM2_BASE+BOOT_PARAM_LENTH)
-#define BOOT_IPROGRAM_LENTH 0x64000
-#define BOOT_IPROGRAM2_BASE (BOOT_IPROGRAM1_BASE + BOOT_IPROGRAM_LENTH)
-#define BOOT_IPRODUCT_BASE (BOOT_IPROGRAM2_BASE + BOOT_IPROGRAM_LENTH)
-#define BOOT_IPRODUCT_LENTH 0x24000
-#define BOOT_RESERVED_LENTH 0x4000
-#define BOOT_RESERVED_BASE (IFLASH_BASE + IFLASH_LENTH - BOOT_RESERVED_LENTH)
-
-#define BOOT_IPROBUFFER_LENTH 0x19000
-#define BOOT_IPROBUFFER_BASE (BOOT_SHARE_DATA_BASE - BOOT_IPROBUFFER_LENTH)
-#define BOOT_IRUN_BASE BOOT_IPROGRAM1_BASE
-#define BOOT_IRUN_LENTH BOOT_IPROGRAM_LENTH
-
-//采用外部Flash时程序空间的划分
-#define BOOT_XPROGRAM1_BASE 0x0
-#define BOOT_XPROGRAM_LENTH 0xC8000
-#define BOOT_XPROGRAM2_BASE (BOOT_XPROGRAM1_BASE + BOOT_XPROGRAM_LENTH)
-#define BOOT_XPRODUCT_BASE (BOOT_XPROGRAM2_BASE + BOOT_XPROGRAM_LENTH)
-#define BOOT_SFLASH_RESERVED 0x8000
-#define BOOT_XPRODUCT_LENTH (0x64000 - BOOT_SFLASH_RESERVED)
-
-#define BOOT_XPROBUFFER_LENTH 0xC8000
-#define BOOT_XPROBUFFER_BASE (XRAM_BASE + XRAM_LENTH - BOOT_XPROBUFFER_LENTH)
-#define BOOT_XRUN_BASE BOOT_IPROGRAM1_BASE
-#define BOOT_XRUN_LENTH (BOOT_IPROGRAM_LENTH*2)
-#endif
 //-----------------------------------------------------------------------
 
 //#define DEFAULT_MAP_INDEX 1
@@ -82,7 +53,6 @@ typedef struct __ROM_map_s
     region_s param2_region;//第二份参数代码区
     region_s program1_region;//第一份程序代码区
     region_s programbak_region;//第二份程序代码区
-    region_s product_region;//生产测试程序代码区
     region_s reserve_region;//保留区
 }rom_map_s;
 

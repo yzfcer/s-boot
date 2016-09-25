@@ -76,11 +76,7 @@ void test_probak_error(void)
     destroy_code_space(&bp->mem_map.rom.programbak_region);
 }
 
-void test_product_error(void)
-{
-    boot_param_s *bp = (boot_param_s*)sys_boot_params();
-    destroy_code_space(&bp->mem_map.rom.product_region);
-}
+
 void test_run_error(void)
 {
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
@@ -101,7 +97,7 @@ void test_upgrade(void)
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
     extern mem_status_s g_memstatus;
     img = &bp->mem_map.ram.probuf_region;
-    printk_rt("begin to receive file data,please wait.\r\n");
+    boot_printf("begin to receive file data,please wait.\r\n");
     img->lenth = receive_img_data(img->base,img->maxlen);
     if(img->lenth <= 0)
     {
@@ -131,20 +127,19 @@ boot_test_s g_boottest[] =
     {'2',"test XFLASH error",test_sflash_error},
     {'3',"test program1 error",test_pro1_error},
     {'4',"test program bak error",test_probak_error},
-    {'5',"test product program error",test_product_error},
-    {'6',"test running program error",test_run_error},
-    {'7',"test upgrade program",test_upgrade},
-    {'8',"test rollback program",test_rollback},
-    {'9',"test app type NOT match",test_app_type_not_match},
+    {'5',"test running program error",test_run_error},
+    {'6',"test upgrade program",test_upgrade},
+    {'6',"test rollback program",test_rollback},
+    {'7',"test app type NOT match",test_app_type_not_match},
 };
 
 void print32_t_boottest(void)
 {
     int32_t i;
-    printk_rt("choose test items:\r\n");
+    boot_printf("choose test items:\r\n");
     for(i = 0;i < sizeof(g_boottest)/sizeof(boot_test_s);i ++)
     {
-        printk_rt("[%c] %s\r\n",g_boottest[i].key,g_boottest[i].item_desc);
+        boot_printf("[%c] %s\r\n",g_boottest[i].key,g_boottest[i].item_desc);
     }
 }
 
