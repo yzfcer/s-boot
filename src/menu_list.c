@@ -69,9 +69,9 @@ static int32_t is_string_equal(char *str1,char *str2,int32_t len)
 static void download_img_to_iflash(void)
 {
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
-    if(IFLASH!= bp->mem_map.rom.program1_region.type)
+    if(MEM_TYPE_ROM!= bp->mem_map.rom.program1_region.type)
     {
-        boot_warn("img can not download to IFLASH,device NOT support.");
+        boot_warn("img can not download to MEM_TYPE_ROM,device NOT support.");
         return;
     }
     download_img_file(DOWN_IFLASH);
@@ -79,9 +79,9 @@ static void download_img_to_iflash(void)
 static void download_img_to_sflash(void)
 {
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
-    if(XFLASH!= bp->mem_map.rom.program1_region.type)
+    if(MEM_TYPE_ROM!= bp->mem_map.rom.program1_region.type)
     {
-        boot_warn("img can not download to XFLASH,device NOT support.");
+        boot_warn("img can not download to MEM_TYPE_ROM,device NOT support.");
         return;
     }
     download_img_file(DOWN_SFLASH);
@@ -90,9 +90,9 @@ static void download_img_to_IRAM(void)
 {
     int32_t ret;
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
-    if(IRAM != bp->mem_map.run.iflash.type)
+    if(MEM_TYPE_RAM != bp->mem_map.run.flash.type)
     {
-        boot_warn("img can not download to IRAM,device NOT support.");
+        boot_warn("img can not download to MEM_TYPE_RAM,device NOT support.");
         return;
     }
     ret = download_img_file(DOWN_IRAM);
@@ -108,7 +108,7 @@ static void download_img_to_XRAM(void)
 {
     int32_t ret;
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
-    if(XRAM != bp->mem_map.run.iflash.type)
+    if(MEM_TYPE_RAM != bp->mem_map.run.flash.type)
     {
         boot_warn("img can not download to XRAM,device NOT support.");
         return;
@@ -157,33 +157,12 @@ static void set_debug_mode(void)
     
 }
 
-static void choose_default_memmap(void)
-{
-    char ch;
-    int32_t ret;
-    while(1)
-    {
-        boot_printf("please choose map:\r\n");
-        print32_t_map_list();
-        if(0 != read_char_blocking(&ch))
-        {
-            exit_menu();
-            return;
-        }
-        if(ch >= '1' && ch <= '9')
-        {
-            ch -= '1';
-            ret = set_default_map(ch);
-            if(0 == ret)
-                break;
-        }
-    }
-}
+
 static void show_current_memmap(void)
 {
     boot_param_s *bp = (boot_param_s *)sys_boot_params();
     boot_printf("current memory map info:\r\n");
-    print32_t_map_info(&bp->mem_map);
+    print_map_info(&bp->mem_map);
 }
 
 static void lock_MCU(void)
@@ -201,7 +180,7 @@ static void lock_MCU(void)
 static void show_program_status(void)
 {
     boot_param_s *bp = (boot_param_s *)sys_boot_params();
-    print32_t_program_space(&bp->mem_map);
+    print_program_space(&bp->mem_map);
 }
 
 #if BOOT_TEST_ENABLE
@@ -223,7 +202,6 @@ static void do_clear_flash_data(uint8_t unlock)
     (void)write_param();
     
     clear_boot_param_buffer();
-    set_default_map(0xffff);
     if(unlock)
         set_chip_lock(0);
 }
@@ -315,13 +293,12 @@ static void exit_and_save(void)
 
 static menu_handle_TB g_menu_handleTB[] = 
 {
-    {'1',0,0,"download img file to IFLASH",download_img_to_iflash},
-    {'2',0,0,"download img file to XFLASH",download_img_to_sflash},
-    {'3',0,0,"download img file to IRAM",download_img_to_IRAM},
+    {'1',0,0,"download img file to MEM_TYPE_ROM",download_img_to_iflash},
+    {'2',0,0,"download img file to MEM_TYPE_ROM",download_img_to_sflash},
+    {'3',0,0,"download img file to MEM_TYPE_RAM",download_img_to_IRAM},
     {'4',0,0,"download img file to XRAM",download_img_to_XRAM},
     
     {'b',2,2,"set debug mode",set_debug_mode},
-    {'c',1,1,"choose default memory map",choose_default_memmap},
     {'d',0,0,"show current memory map",show_current_memmap},
     {'k',0,0,"lock MCU chip",lock_MCU},
     {'p',0,0,"show program status",show_program_status},

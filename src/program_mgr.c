@@ -37,23 +37,14 @@ static void print32_t_copy_percents(int32_t numerator, int32_t denominator,int32
         feed_watchdog();
 }
 
-uint32_t get_ram_addr(uint32_t addr,memtype_e type)
+uint32_t get_ram_addr(uint32_t memidx,uint32_t addr)
+
 {
 	uint32_t base;
-    if(IRAM == type)
-       {
-       	base = get_iram_base();
-    	return base + addr;
-       }
-    else if(XRAM == type)
-       {
-       	base = get_xram_base();
-    	return base + addr;
-       }
-    else
-    {
-        return INVALID_REAL_ADDR;
-    }
+    base = get_ram_base(memidx);
+    if(MEM_BASE_INVALID == base)
+        return MEM_BASE_INVALID;
+    return base + addr;
 }
 
 uint32_t GET_INT_BY_STR(uint8_t *str,int32_t index)
@@ -82,7 +73,7 @@ int32_t check_and_decrypt_img(region_s *img,region_s *bin)
     uint32_t real_addr,cal_crc,crc;
     img_head_s *imginfo;
     
-    real_addr = get_ram_addr(img->base,img->type);
+    real_addr = get_ram_addr(img->index,img->addr);
     if(INVALID_REAL_ADDR == real_addr)
     {
         boot_error("memory map error.");
@@ -90,7 +81,7 @@ int32_t check_and_decrypt_img(region_s *img,region_s *bin)
     }
     
     //对接受的数据做CRC校验
-    real_addr = get_ram_addr(img->base,img->type);
+    real_addr = get_ram_addr(img->index,img->addr);
     if(INVALID_REAL_ADDR == real_addr)
     {
         boot_error("memory map error.");
@@ -138,7 +129,7 @@ int32_t check_and_decrypt_img(region_s *img,region_s *bin)
     feed_watchdog();
     boot_notice("bin file verify OK.");
     bin->regname = img->regname;
-    bin->base = img->base + imginfo->head_len;
+    bin->addr = img->addr + imginfo->head_len;
     bin->lenth = imginfo->file_len;
     bin->type = img->type;
     bin->crc = imginfo->file_crc;
@@ -153,7 +144,7 @@ int32_t encrypt_code(region_s *code_reg)
     int32_t ret;
     //img_head_s *head;
     //获取实际地址
-    real_addr = get_ram_addr(code_reg->base,code_reg->type);
+    real_addr = get_ram_addr(code_reg->addr,code_reg->type);
     if(INVALID_REAL_ADDR == real_addr)
     {
         boot_error("memory map error.");
@@ -199,8 +190,8 @@ int32_t copy_data_on_memory(region_s *src,region_s *dest)
     boot_notice("copy data from %s to %s lenth %d.",
                 src->regname,dest->regname,src->lenth);
     boot_debug("source type %s,base 0x%x,lenth %d dest type,%s,base 0x%x,lenth %d.",
-                sys_memtype[src->type],src->base,src->lenth,
-                sys_memtype[dest->type],dest->base,dest->maxlen);
+                memtype_name(src->type),src->addr,src->lenth,
+                memtype_name(dest->type),dest->addr,dest->maxlen);
     
     blocks = (src->lenth + BLOCK_SIZE - 1) / BLOCK_SIZE;
     boot_printf("complete:");
@@ -209,7 +200,7 @@ int32_t copy_data_on_memory(region_s *src,region_s *dest)
     {    
         for(times = 0;times < 3;times ++)
         {
-            base = src->base + i * sizeof(commbuffer);
+            base = src->addr + i * sizeof(commbuffer);
             if(i >= blocks - 1)
             {
                 for(j = 0;j < sizeof(commbuffer);j ++)
@@ -228,7 +219,7 @@ int32_t copy_data_on_memory(region_s *src,region_s *dest)
 
         for(times = 0;times < 3;times ++)
         {
-            base = dest->base + i * sizeof(commbuffer);
+            base = dest->addr + i * sizeof(commbuffer);
             len = write_block(dest->type,base,commbuffer,sizeof(commbuffer)/BLOCK_SIZE);
             if(len > 0)
                 break;
@@ -264,7 +255,7 @@ int32_t write_derect_space(region_s *code_reg,region_s *dest)
     uint32_t real_addr;
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
     
-    real_addr = get_ram_addr(code_reg->base,bp->mem_map.ram.probuf_region.type);
+    real_addr = get_ram_addr(code_reg->addr,bp->mem_map.ram.probuf_region.type);
     if(INVALID_REAL_ADDR == real_addr)
     {
         boot_error("memory map error.");
@@ -272,7 +263,7 @@ int32_t write_derect_space(region_s *code_reg,region_s *dest)
     }
 
     head = (img_head_s*)(real_addr+10);
-    bin_reg.base = code_reg->base + head->head_len;
+    bin_reg.addr = code_reg->addr + head->head_len;
     bin_reg.lenth = code_reg->lenth - head->head_len - 4;
     bin_reg.type = code_reg->type;
     bin_reg.crc = head->file_crc;
@@ -287,7 +278,7 @@ int32_t flush_code_to_ram(region_s *code_region)
 {
     int32_t ret;
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
-    ret = copy_data_on_memory(code_region,&bp->mem_map.run.iflash);
+    ret = copy_data_on_memory(code_region,&bp->mem_map.run.flash);
     if(0 != ret)
     {
         boot_warn("copy img to running space failed.");
@@ -304,10 +295,10 @@ int32_t flush_code_to_iflash(region_s *bin)
     region_s *src;
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
 
-    boot_notice("begin to flush code to IFLASH space...");
+    boot_notice("begin to flush code to MEM_TYPE_ROM space...");
     //先将原来的程序拷贝到备份空间    
     src = &bp->mem_map.rom.program1_region;
-    ret = copy_data_on_memory(src,&bp->mem_map.rom.programbak_region);
+    ret = copy_data_on_memory(src,&bp->mem_map.rom.program2_region);
     if(0 != ret)
     {
         boot_warn("backup old program failed.");
@@ -321,10 +312,10 @@ int32_t flush_code_to_iflash(region_s *bin)
         boot_error("write new program failed.");
         return -1;
     }
-    bp->mem_map.run.iflash.status = MEM_NORMAL;
+    bp->mem_map.run.flash.status = MEM_NORMAL;
     
-    bp->mem_map.run.iflash.crc = bin->crc;
-    bp->mem_map.run.iflash.lenth= bin->lenth;    
+    bp->mem_map.run.flash.crc = bin->crc;
+    bp->mem_map.run.flash.lenth= bin->lenth;    
     return 0;
 }
 
@@ -336,10 +327,10 @@ int32_t flush_code_to_sflash(region_s *img,region_s *bin)
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
     region_s *old_code;
 
-    boot_notice("begin to flush code to XFLASH space...");
+    boot_notice("begin to flush code to MEM_TYPE_ROM space...");
     //先将原来的SFLASH程序数据备份
     old_code = &bp->mem_map.rom.program1_region;
-    ret = copy_data_on_memory(old_code,&bp->mem_map.rom.programbak_region);
+    ret = copy_data_on_memory(old_code,&bp->mem_map.rom.program2_region);
     if(0 != ret)
     {
         boot_warn("backup old program failed.");
@@ -347,9 +338,9 @@ int32_t flush_code_to_sflash(region_s *img,region_s *bin)
     }
 
     //如果是在IFLASH运行，在加密前先烧录运行程序空间
-    if(IFLASH == bp->mem_map.run.iflash.type)
+    if(MEM_TYPE_ROM == bp->mem_map.run.flash.type)
     {
-        ret = copy_data_on_memory(bin,&bp->mem_map.run.iflash);
+        ret = copy_data_on_memory(bin,&bp->mem_map.run.flash);
         if(0 != ret)
         {
             boot_error("write new program to running space failed.");
@@ -421,7 +412,7 @@ int32_t download_img_file(downtype_e type)
     }
     img = &bp->mem_map.ram.probuf_region;
     boot_printf("begin to receive file data,please wait.\r\n");
-    len = receive_img_data(img->base,img->maxlen);
+    len = receive_img_data(img->addr,img->maxlen);
     if(len <= 0)
     {
         boot_error("receive img data failed.");
@@ -439,7 +430,7 @@ int32_t download_img_file(downtype_e type)
     ret = flush_code_data(type,img,&bin);
     if(0 != ret)
     {
-        boot_warn("flush data to %s failed.",sys_memtype[type]);
+        boot_warn("flush data to %s failed.",memtype_name(type));
         return -1;
     }
     boot_notice("img flush OK.");
@@ -454,16 +445,16 @@ void clean_program(void)
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
     boot_printf("clearing program ...\r\n");
     code[idx++] = &bp->mem_map.rom.program1_region;
-    code[idx++] = &bp->mem_map.rom.programbak_region;
-    code[idx++] = &bp->mem_map.run.iflash;
+    code[idx++] = &bp->mem_map.rom.program2_region;
+    code[idx++] = &bp->mem_map.run.flash;
     code[idx++] = &bp->mem_map.rom.param1_region;
     code[idx++] = &bp->mem_map.rom.param2_region;
     
     for(i = 0;i < 6;i ++)
     {   
-        boot_notice("erase base 0x%x,lenth %d.",code[i]->base,code[i]->lenth);
+        boot_notice("erase base 0x%x,lenth %d.",code[i]->addr,code[i]->lenth);
         blocknum = (code[i]->lenth + BLOCK_SIZE - 1) / BLOCK_SIZE;
-        erase_block(code[i]->type,code[i]->base,blocknum);
+        erase_block(code[i]->type,code[i]->addr,blocknum);
     }
     boot_printf("clear program OK.\r\n");
 }
@@ -509,17 +500,17 @@ int32_t change_boot_app(int32_t index)
     switch(index)
     {
         case APP_IDX_PRO1:
-            copy_region_info(&bp->mem_map.rom.programbak_region,&src);
+            copy_region_info(&bp->mem_map.rom.program2_region,&src);
             break;
         case APP_IDX_PROBAK:
-            copy_region_info(&bp->mem_map.rom.programbak_region,&src);
+            copy_region_info(&bp->mem_map.rom.program2_region,&src);
             break;
         default:
             boot_warn("undefined index:%d.",index);
             return -1;
     }
     
-    if(src.base == bp->mem_map.run.iflash.base)
+    if(src.addr == bp->mem_map.run.flash.addr)
     {
         boot_notice("need NOT to write program.");
         return 0;        
@@ -531,10 +522,10 @@ int32_t change_boot_app(int32_t index)
         return -1;
     }
     
-    if(IFLASH == src.type)
+    if(MEM_TYPE_ROM == src.type)
     {
-        ret = copy_data_on_memory(&src,&bp->mem_map.run.iflash);
-        if(IFLASH == bp->mem_map.rom.program1_region.type)
+        ret = copy_data_on_memory(&src,&bp->mem_map.run.flash);
+        if(MEM_TYPE_ROM == bp->mem_map.rom.program1_region.type)
         {
             if(0 == ret)
             {
@@ -548,9 +539,9 @@ int32_t change_boot_app(int32_t index)
             }
         }
     }
-    else if(XFLASH == src.type)
+    else if(MEM_TYPE_ROM == src.type)
     {
-        ret = write_encrypt_code_to_run(&src,&bp->mem_map.run.iflash);
+        ret = write_encrypt_code_to_run(&src,&bp->mem_map.run.flash);
     }
     else
     {
@@ -581,25 +572,25 @@ int32_t check_rom_program(region_s *code)
     if(prog.status == MEM_NULL)
     {
         boot_notice("  ***  space %s type %s base 0x%x lenth %d is empty.",
-                    prog.regname,sys_memtype[prog.type],prog.base,prog.lenth);
+                    prog.regname,memtype_name(prog.type),prog.addr,prog.lenth);
         return 0;
     }
     if(prog.status != MEM_ERROR)
     {
-        if(XFLASH == prog.type)
+        if(MEM_TYPE_ROM == prog.type)
         {
             prog.lenth -= 4;
         }
-        boot_debug("check program base 0x%x,lenth %d",prog.base,prog.lenth);
+        boot_debug("check program base 0x%x,lenth %d",prog.addr,prog.lenth);
         blocks = (prog.lenth + BLOCK_SIZE - 1) / BLOCK_SIZE;
         for(i = 0;i < blocks;i ++)
         {
-            base = prog.base + i * sizeof(commbuffer);
+            base = prog.addr + i * sizeof(commbuffer);
             len = read_block(prog.type,base,commbuffer,sizeof(commbuffer)/BLOCK_SIZE);
             if(len <= 0)
             {
                 boot_warn("read %s block base 0x%x,lenth %d failed.",
-                            sys_memtype[prog.type],base,sizeof(commbuffer));
+                            memtype_name(prog.type),base,sizeof(commbuffer));
                 return -1;
             }
             
@@ -618,7 +609,7 @@ int32_t check_rom_program(region_s *code)
     if(MEM_ERROR == prog.status || cal_crc != prog.crc)
     {
         boot_warn("check program CRC in %s base 0x%x,lenth %d failed.",
-                    sys_memtype[prog.type],prog.base,prog.lenth);
+                    memtype_name(prog.type),prog.addr,prog.lenth);
         boot_debug("cal_crc:0x%x,crc:0x%x",cal_crc,prog.crc);
         code->status = MEM_ERROR;
         return -1;
@@ -635,8 +626,8 @@ int32_t check_programs(void)
     boot_param_s *bp = (boot_param_s *)sys_boot_params();
     
     code[idx++] = &bp->mem_map.rom.program1_region;
-    code[idx++] = &bp->mem_map.rom.programbak_region;
-    code[idx++] = &bp->mem_map.run.iflash;
+    code[idx++] = &bp->mem_map.rom.program2_region;
+    code[idx++] = &bp->mem_map.run.flash;
     boot_notice("begin to check programs...");
     for(i = 0;i < sizeof(code)/sizeof(region_s*);i ++)
     {
@@ -651,7 +642,7 @@ int32_t check_programs(void)
         {
             
             boot_warn("check program CRC in %s base 0x%x,lenth %d failed.",
-                        sys_memtype[code[i]->type],code[i]->base,code[i]->lenth);
+                        memtype_name(code[i]->type),code[i]->addr,code[i]->lenth);
             ret= 1;
         }
     }

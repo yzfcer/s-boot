@@ -21,7 +21,7 @@ extern "C" {
 #endif
 #if BOOT_TEST_ENABLE
 extern upgrade_region_s g_upgrade_status;
-extern uint32_t get_ram_addr(uint32_t addr,memtype_e type);
+extern uint32_t get_ram_addr(uint32_t memidx,uint32_t addr);
 extern uint32_t GET_INT_BY_STR(uint8_t *str,int32_t index);
 boot_stub_s boot_stub = {0,0,0};
 void clear_errors(void)
@@ -62,7 +62,7 @@ void destroy_code_space(region_s *code)
     {
         commbuffer[i] = 0xff;
     }
-    write_block(code->type,code->base,commbuffer,sizeof(commbuffer) / BLOCK_SIZE);
+    write_block(code->type,code->addr,commbuffer,sizeof(commbuffer) / BLOCK_SIZE);
 }
 
 void test_pro1_error(void)
@@ -73,14 +73,14 @@ void test_pro1_error(void)
 void test_probak_error(void)
 {
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
-    destroy_code_space(&bp->mem_map.rom.programbak_region);
+    destroy_code_space(&bp->mem_map.rom.program2_region);
 }
 
 
 void test_run_error(void)
 {
     boot_param_s *bp = (boot_param_s*)sys_boot_params();
-    destroy_code_space(&bp->mem_map.run.iflash);
+    destroy_code_space(&bp->mem_map.run.flash);
 }
 void test_app_type_not_match(void)
 {
@@ -98,14 +98,14 @@ void test_upgrade(void)
     extern mem_status_s g_memstatus;
     img = &bp->mem_map.ram.probuf_region;
     boot_printf("begin to receive file data,please wait.\r\n");
-    img->lenth = receive_img_data(img->base,img->maxlen);
+    img->lenth = receive_img_data(img->addr,img->maxlen);
     if(img->lenth <= 0)
     {
         boot_error("receive img data failed.");
         return;
     }
 
-    real_addr = get_ram_addr(img->base,img->type);
+    real_addr = get_ram_addr(img->index,img->addr);
     sp_init_share_param();
 
     g_upgrade_status.addr = real_addr;
@@ -124,7 +124,7 @@ void test_rollback(void)
 boot_test_s g_boottest[] = 
 {
     {'1',"test XRAM error",test_xram_error},
-    {'2',"test XFLASH error",test_sflash_error},
+    {'2',"test MEM_TYPE_ROM error",test_sflash_error},
     {'3',"test program1 error",test_pro1_error},
     {'4',"test program bak error",test_probak_error},
     {'5',"test running program error",test_run_error},

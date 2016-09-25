@@ -191,7 +191,7 @@ int32_t write_block(uint8_t memtype,uint32_t addr,uint8_t *buf,int32_t blkcount)
     uint8_t *base;
     switch(memtype)
     {
-        case IRAM:
+        case MEM_TYPE_RAM:
             base = get_iram_base();
             memory_copy((uint8_t*)(base+addr*BLOCK_SIZE),buf,blkcount);
             break;
@@ -199,7 +199,7 @@ int32_t write_block(uint8_t memtype,uint32_t addr,uint8_t *buf,int32_t blkcount)
             base = get_xram_base();
             memory_copy((uint8_t*)(base+addr*BLOCK_SIZE),buf,blkcount);
             break;
-        case IFLASH:
+        case MEM_TYPE_ROM:
             break;
         case XFLASH:
             break;
@@ -216,7 +216,7 @@ int32_t read_block(uint8_t memtype,uint32_t addr,uint8_t *buf,int32_t blkcount)
     uint8_t *base;
     switch(memtype)
     {
-        case IRAM:
+        case MEM_TYPE_RAM:
             base = get_iram_base();
             memory_copy(buf,(uint8_t*)(base+addr*BLOCK_SIZE),blkcount);
             break;
@@ -224,7 +224,7 @@ int32_t read_block(uint8_t memtype,uint32_t addr,uint8_t *buf,int32_t blkcount)
             base = get_xram_base();
             memory_copy(buf,(uint8_t*)(base+addr*BLOCK_SIZE),blkcount);
             break;
-        case IFLASH:
+        case MEM_TYPE_ROM:
             break;
         case XFLASH:
             break;
@@ -241,7 +241,7 @@ int32_t erase_block(uint8_t memtype,uint32_t addr,int32_t blkcount)
     uint32_t base;
     switch(memtype)
     {
-        case IRAM:
+        case MEM_TYPE_RAM:
             base = get_iram_base();
             memory_set((uint8_t*)(base+addr*BLOCK_SIZE),0,blkcount);
             break;
@@ -249,7 +249,7 @@ int32_t erase_block(uint8_t memtype,uint32_t addr,int32_t blkcount)
             base = get_iram_base();
             memory_set((uint8_t*)(base+addr*BLOCK_SIZE),0,blkcount);
             break;
-        case IFLASH:
+        case MEM_TYPE_ROM:
             break;
         case XFLASH:
             break;

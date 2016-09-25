@@ -1,43 +1,68 @@
 #include "boot_config.h"
 #include "mem_driver.h"
 
-uint8_t g_iram[IRAM_LENTH];
-uint8_t g_xram[XRAM_LENTH];
+//存储系统总体空间定义
+#define RAM1_LENTH 0x40000
+#define RAM2_LENTH 0x100000
+#define ROM1_LENTH 0x100000
+#define ROM2_LENTH 0x400000
 
-uint32_t get_iram_base(void)
+uint8_t g_ram1[RAM1_LENTH];
+uint8_t g_ram2[RAM2_LENTH];
+uint8_t g_rom1[ROM1_LENTH];
+uint8_t g_rom2[ROM2_LENTH];
+
+uint32_t get_ram_base(int32_t idx)
 {
-    return (uint32_t)g_iram;
+    switch(idx)
+    {
+        case 0:
+            return (uint32_t)&g_ram1;
+        case 1:
+            return (uint32_t)&g_ram2;
+        default:
+            return MEM_BASE_INVALID;
+    }
 }
 
-uint32_t get_xram_base(void)
+uint32_t get_rom_base(int32_t idx)
 {
-    return (uint32_t)g_xram;
+    switch(idx)
+    {
+        case 0:
+            return (uint32_t)&g_rom1;
+        case 1:
+            return (uint32_t)&g_rom2;
+        default:
+            return MEM_BASE_INVALID;
+    }
 }
 
-uint32_t get_iflash_base(void)
+uint32_t get_ram_lenth(int32_t idx)
 {
-    return 0;
-}
-uint32_t get_xflash_base(void)
-{
-    return 0;
+    switch(idx)
+    {
+        case 0:
+            return RAM1_LENTH;
+        case 1:
+            return RAM2_LENTH;
+        default:
+            return 0;
+    }
 }
 
-uint32_t get_iram_lenth(void)
+uint32_t get_rom_lenth(int32_t idx)
 {
-    return IRAM_LENTH;
+    switch(idx)
+    {
+        case 0:
+            return ROM1_LENTH;
+        case 1:
+            return ROM2_LENTH;
+        default:
+            return 0;
+    }
 }
-uint32_t get_xram_lenth(void)
-{
-    return XRAM_LENTH;
-}
-uint32_t get_iflash_lenth(void)
-{
-    return IFLASH_LENTH;
-}
-uint32_t get_xflash_lenth(void)
-{
-    return XFLASH_LENTH;
-}
+
 
 

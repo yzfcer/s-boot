@@ -27,7 +27,6 @@ typedef enum
     DOWN_SFLASH,
     DOWN_IRAM,
     DOWN_XRAM,
-    DOWN_PRODUCT
 }downtype_e;
 
 typedef enum

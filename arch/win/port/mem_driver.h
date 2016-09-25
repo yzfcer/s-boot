@@ -3,16 +3,34 @@
 #include "boot_type.h"
 #include "mem_map.h"
 
-uint32_t get_iram_base(void);
-uint32_t get_xram_base(void);
-uint32_t get_iflash_base(void);
-uint32_t get_xflash_base(void);
+#define RAM_COUNT 2
+#define ROM_COUNT 2
 
-uint32_t get_iram_lenth(void);
-uint32_t get_xram_lenth(void);
-uint32_t get_iflash_lenth(void);
-uint32_t get_xflash_lenth(void);
+#define MEM_BASE_INVALID 0xffffffff
 
 
+#define BOOTLOADER_IDX 0
+#define PARAM1_IDX 0
+#define PARAM2_IDX 0
+#define PROGRAM1_IDX 0
+#define PROGRAM2_IDX 0
+#define RESERVED_IDX 0
+
+//在只使用内部FLASH时，FLASH的地址划分从低地址开始依次如下:
+//【bootloader】【bootloader参数】【bootloader参数备份】【系统程序】【系统程序备份】【保留区(存储系统程序参数)】
+//其中两份bootloader参数是完全一样的，两份系统程序可能不一样，其中第一份是运行程序，第二份用于在第一份出错时修复使用
+#define BOOTLOADER_LENTH 0xE000
+#define PARAM_LENTH 0x1000
+#define PROGRAM_LENTH 0x40000
+#define RESERVED_LENTH 0x1000
+
+#define BOOTRAM_LENTH 0x10000
+#define PROGRAMBUF_LENTH 0x18000
+#define SHARE_PARAM_LENTH 0x1000
+
+uint32_t get_ram_base(int32_t idx);
+uint32_t get_rom_base(int32_t idx);
+uint32_t get_ram_lenth(int32_t idx);
+uint32_t get_rom_lenth(int32_t idx);
 
 #endif

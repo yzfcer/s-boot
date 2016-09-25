@@ -22,10 +22,8 @@ extern "C" {
 //#define DEFAULT_MAP_INDEX 1
 typedef enum 
 {
-    IRAM,
-    XRAM,
-    IFLASH,
-    XFLASH
+    MEM_TYPE_RAM,
+    MEM_TYPE_ROM,
 }memtype_e;
 
 typedef enum
@@ -38,9 +36,10 @@ typedef enum
 typedef struct __region
 {
     char *regname;
-    uint32_t base;
+    memtype_e type; 
+    uint32_t index;
+    uint32_t addr;
     uint32_t maxlen;
-    memtype_e type;   
     uint32_t lenth;
     uint32_t crc;
     uint32_t status; 
@@ -52,7 +51,7 @@ typedef struct __ROM_map_s
     region_s param1_region;//第一份参数代码区
     region_s param2_region;//第二份参数代码区
     region_s program1_region;//第一份程序代码区
-    region_s programbak_region;//第二份程序代码区
+    region_s program2_region;//第二份程序代码区
     region_s reserve_region;//保留区
 }rom_map_s;
 
@@ -65,9 +64,8 @@ typedef struct __RAM_map_s
 
 typedef struct __RUN_map_s
 {
-    region_s iflash;//bootloader运行使用的内存区
-    region_s iram;//程序下载的内存区
-    region_s xram;//bootloader与应用程序的交换区
+    region_s flash;//bootloader运行使用的内存区
+    region_s ram;//程序下载的内存区
 }run_map_s;
 
 
@@ -78,18 +76,16 @@ typedef struct __mem_map_s
     run_map_s run;
 }mem_map_s;
 
-extern const char *sys_memtype[];
 extern const char *sys_mem_name[];
 int32_t mem_region_init(void);
 int32_t check_map_valid(void);
 
-void print32_t_map_info(mem_map_s *map);
-void print32_t_map_list(void);
-void print32_t_program_space(mem_map_s *map);
+void print_map_info(mem_map_s *map);
+void print_program_space(mem_map_s *map);
 
 uint32_t get_share_addr(void);
-mem_map_s *get_map_by_index(int32_t id);
-mem_map_s *get_default_map(void);
+char *memtype_name(uint32_t type);
+mem_map_s *get_memory_map(void);
 int32_t set_default_map(int32_t index);
 void choose_default_map(void);
 

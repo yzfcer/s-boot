@@ -78,9 +78,8 @@ static int32_t boot_first_check(void)
         return 0;
     }
     boot_notice("NO valid boot params found.");
-    choose_default_map();
-    map = get_default_map();
-    
+    map = get_memory_map();
+    print_map_info(map);
     init_boot_param(map);
     ret = write_param();
     if(0 != ret)
@@ -122,7 +121,7 @@ int32_t repair_rom_space(region_s *src,region_s *dest)
     boot_notice("repair program from %s to %s",src->regname,dest->regname);
     if(dest->type == src->type)
         ret = copy_data_on_memory(src,dest);
-    else if(XFLASH == src->type || IFLASH == dest->type)
+    else if(MEM_TYPE_ROM == src->type || MEM_TYPE_ROM == dest->type)
         ret = write_encrypt_code_to_run(src,dest);
     else
     {
@@ -133,7 +132,7 @@ int32_t repair_rom_space(region_s *src,region_s *dest)
     if(0 != ret)
     {
         boot_error("repir space %s base 0x%x,lenth %d failed.",
-                    sys_memtype[dest->type],dest->base,dest->maxlen);
+                    memtype_name(dest->type),dest->addr,dest->maxlen);
         return -1;
     }
     return 0;
@@ -145,11 +144,11 @@ int32_t repair_running_space(boot_param_s *bp)
     int32_t ret;
     region_s *src,*dest;
     
-    dest = &bp->mem_map.run.iflash;
+    dest = &bp->mem_map.run.flash;
     if(MEM_NORMAL == bp->mem_map.rom.program1_region.status)
         src = &bp->mem_map.rom.program1_region;
-    else if(MEM_NORMAL == bp->mem_map.rom.programbak_region.status)
-        src = &bp->mem_map.rom.programbak_region;
+    else if(MEM_NORMAL == bp->mem_map.rom.program2_region.status)
+        src = &bp->mem_map.rom.program2_region;
     else
         src = NULL;
     
@@ -173,19 +172,19 @@ static int32_t repair_program(boot_param_s *bp)
 {
     int32_t ret = 0;
     boot_notice("programs has errors,try to repair ...");
-    if(MEM_ERROR == bp->mem_map.run.iflash.status)
+    if(MEM_ERROR == bp->mem_map.run.flash.status)
     {
         if(0 != repair_running_space(bp))
             ret = -1;
     }
     if(MEM_ERROR == bp->mem_map.rom.program1_region.status)
     {
-        if(0 != repair_rom_space(&bp->mem_map.rom.programbak_region,&bp->mem_map.rom.program1_region))
+        if(0 != repair_rom_space(&bp->mem_map.rom.program2_region,&bp->mem_map.rom.program1_region))
             ret = -1;
     }
-    if(MEM_ERROR == bp->mem_map.rom.programbak_region.status)
+    if(MEM_ERROR == bp->mem_map.rom.program2_region.status)
     {
-        if(0 != repair_rom_space(&bp->mem_map.rom.program1_region,&bp->mem_map.rom.programbak_region))
+        if(0 != repair_rom_space(&bp->mem_map.rom.program1_region,&bp->mem_map.rom.program2_region))
             ret = -1;
     }
     (void)write_param();
@@ -253,7 +252,7 @@ static int32_t  boot_upgrade_check(void)
     
     img.regname = bp->mem_map.ram.probuf_region.regname;
     img.maxlen = bp->mem_map.ram.probuf_region.maxlen;
-    img.base = g_upgrade_status.addr;
+    img.addr = g_upgrade_status.addr;
     img.lenth = g_upgrade_status.lenth;
     img.type = (memtype_e)g_upgrade_status.mem_type;
 
@@ -264,11 +263,11 @@ static int32_t  boot_upgrade_check(void)
         return -1;
     }
     
-    if(IFLASH == bp->mem_map.rom.program1_region.type)
+    if(MEM_TYPE_ROM == bp->mem_map.rom.program1_region.type)
     {
         ret = flush_code_to_iflash(&bin);
     }
-    else if(XFLASH == bp->mem_map.rom.program1_region.type)
+    else if(MEM_TYPE_ROM == bp->mem_map.rom.program1_region.type)
     {
         ret = flush_code_to_sflash(&img,&bin);
     }
@@ -367,7 +366,7 @@ static int32_t boot_load_app(void)
 
     boot_notice("begin to load App to running space...");
     bp = (boot_param_s *)sys_boot_params();
-    regi = &bp->mem_map.run.iflash;
+    regi = &bp->mem_map.run.flash;
     
     if(NULL == bp)
     {
@@ -389,9 +388,9 @@ static int32_t boot_load_app(void)
         return -1;
     }
 
-    if(IFLASH == bp->mem_map.run.iflash.type)
+    if(MEM_TYPE_ROM == bp->mem_map.run.flash.type)
     {
-        if(MEM_NORMAL == bp->mem_map.run.iflash.status)
+        if(MEM_NORMAL == bp->mem_map.run.flash.status)
         {
             mem_stat = MEM_NORMAL;
         }        
@@ -410,7 +409,7 @@ static int32_t boot_load_app(void)
         return -1;
     }
 
-    if(IFLASH == regi->type)
+    if(MEM_TYPE_ROM == regi->type)
     {
         boot_notice("need not load App to a NORFlash ROM.");
         set_boot_status(BOOT_SET_APP_PARAM);
@@ -433,7 +432,7 @@ static int32_t boot_set_app_param(void)
     
     sp_set_app_rollback(1);
     
-    g_upgrade_status.addr = bp->mem_map.ram.probuf_region.base;
+    g_upgrade_status.addr = bp->mem_map.ram.probuf_region.addr;
     g_upgrade_status.crc = 0xffffffff;
     g_upgrade_status.flag = 0;
     g_upgrade_status.lenth = bp->mem_map.ram.probuf_region.maxlen;
@@ -444,8 +443,7 @@ static int32_t boot_set_app_param(void)
     boot_printf("addr:0x%x\r\n",g_upgrade_status.addr);
     boot_printf("lenth:0x%x\r\n",g_upgrade_status.lenth);
 
-    
-    g_reserve_reg.addr = bp->mem_map.rom.reserve_region.base;
+    g_reserve_reg.addr = bp->mem_map.rom.reserve_region.addr;
     g_reserve_reg.lenth = bp->mem_map.rom.reserve_region.maxlen;
     g_reserve_reg.mem_type = bp->mem_map.rom.reserve_region.type;
     boot_printf("set reserve region params:\r\n");
