@@ -51,19 +51,6 @@ typedef struct
     hw_status_s xram;
 }mem_status_s;
 
-typedef struct 
-{
-    char head[8];
-    uint32_t ver;
-    uint32_t head_len;//文件头部的长度
-    char file_name[64];//加密前的文件名
-    uint32_t file_version;//应用程序的版本号
-    uint32_t file_len;//加密前文件长度
-    uint32_t file_crc;//加密前的CRC校验
-    uint32_t pad;//八字节对齐
-}img_head_s;
-
-
 
 void sp_set_app_rollback(uint8_t is_rollback);
 
@@ -80,10 +67,6 @@ int32_t sp_get_reserve_param(reserve_region_s *reserve);
 void sp_set_mem_status(mem_status_s * mem_status);
 
 int32_t sp_get_mem_status(mem_status_s * mem_status);
-
-void sp_set_upgrade_file_param(img_head_s *img_file);
-
-void sp_set_upgrade_file_param(img_head_s *img_file);
 
 void sp_init_share_param(void);
 

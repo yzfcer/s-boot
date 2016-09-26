@@ -25,9 +25,6 @@
     <ClInclude Include="..\..\..\..\src\crc.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\encrypt.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\src\menu_list.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -67,9 +64,6 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crc.c">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\encrypt.c">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\menu_list.c">

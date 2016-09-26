@@ -16,7 +16,6 @@
 #include "share_param.h"
 #include "program_mgr.h"
 #include "mem_map.h"
-#include "encrypt.h"
 #include "boot_hw_if.h"
 #include "mem_driver.h"
 
@@ -67,9 +66,9 @@ void FILL_BYTES_BY_INT(uint8_t *buf,int32_t index,uint32_t va)
 
 int32_t check_and_decrypt_img(region_s *img,region_s *bin)
 {
-    int32_t ret;
+    int32_t len;
     uint32_t real_addr,cal_crc,crc;
-    img_head_s *imginfo;
+    
     
     real_addr = get_ram_addr(img->index,img->addr);
     if(INVALID_REAL_ADDR == real_addr)
@@ -97,41 +96,18 @@ int32_t check_and_decrypt_img(region_s *img,region_s *bin)
     feed_watchdog();
     boot_notice("img file verify OK.");
     
-        
     //解密
     boot_notice("img file decrypt");
-        //while(1);
-    
     boot_debug("decrypt_data base:0x%x,lenth:%d",real_addr,img->lenth - 4);
-    ret = decrypt_data(real_addr,img->lenth - 4,0);
-    if(0 != ret)
+    len = decrypt_data((uint8_t *)real_addr,img->lenth - 4);
+    if(len < 0)
     {
         boot_warn("img file Decrypt ERROR.");
         return -1;
     }
     feed_watchdog();
     boot_notice("img file decrypt OK.");
-
-    imginfo = (img_head_s*)(real_addr+10);
-    boot_printf("decrypt img file: \r\n");
-    boot_printf("file name:%s\r\n",imginfo->file_name);
-    boot_printf("lenth:%d\r\n",imginfo->file_len);
-
-    //内层校验
-    cal_crc = calc_crc32((char*)(real_addr+imginfo->head_len),imginfo->file_len,0);
-    if(imginfo->file_crc != cal_crc)
-    {
-        boot_warn("bin file crc ERROR.");
-        return -1;
-    }
     feed_watchdog();
-    boot_notice("bin file verify OK.");
-    bin->regname = img->regname;
-    bin->addr = img->addr + imginfo->head_len;
-    bin->lenth = imginfo->file_len;
-    bin->type = img->type;
-    bin->crc = imginfo->file_crc;
-      boot_debug("bin lenth:%d,crc:0x%x.",bin->lenth,cal_crc);
     return 0;
 }
 
@@ -139,9 +115,8 @@ int32_t check_and_decrypt_img(region_s *img,region_s *bin)
 int32_t encrypt_code(region_s *code_reg)
 {
     uint32_t real_addr;
-    int32_t ret;
-    //img_head_s *head;
-    //获取实际地址
+    int32_t len;
+    
     real_addr = get_ram_addr(code_reg->addr,code_reg->type);
     if(INVALID_REAL_ADDR == real_addr)
     {
@@ -150,11 +125,9 @@ int32_t encrypt_code(region_s *code_reg)
     }
 
     //对数据重新加密，将加密后的数据烧录到SFLASH空间
-    //head = (img_head_s*)(real_addr+10);
-    
     boot_debug("decrypt_data base:0x%x,lenth:%d",real_addr,code_reg->lenth - 4);
-    ret = decrypt_data(real_addr,code_reg->lenth -4,1);
-    if(0 != ret)
+    len = encrypt_data((uint8_t *)real_addr,code_reg->lenth -4);
+    if(len < 0)
     {
         boot_warn("img file encrypt ERROR.");
         return -1;
@@ -243,35 +216,6 @@ int32_t copy_region_data(region_s *src,region_s *dest)
 }
 
 
-
-//去掉文件头部，且不用加密，烧录二进制文件
-int32_t write_derect_space(region_s *code_reg,region_s *dest)
-{
-    int32_t ret;
-    region_s bin_reg;
-    img_head_s *head;
-    uint32_t real_addr;
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
-    
-    real_addr = get_ram_addr(code_reg->addr,bp->mem_map.ram.probuf_region.type);
-    if(INVALID_REAL_ADDR == real_addr)
-    {
-        boot_error("memory map error.");
-        return -1;
-    }
-
-    head = (img_head_s*)(real_addr+10);
-    bin_reg.addr = code_reg->addr + head->head_len;
-    bin_reg.lenth = code_reg->lenth - head->head_len - 4;
-    bin_reg.type = code_reg->type;
-    bin_reg.crc = head->file_crc;
-    bin_reg.lenth = head->file_len;
-    
-    ret = copy_region_data(&bin_reg,dest);
-    return ret;    
-}
-
-
 int32_t flush_code_to_ram(region_s *code_region)
 {
     int32_t ret;
@@ -318,68 +262,16 @@ int32_t flush_code_to_iflash(region_s *bin)
 }
 
 
-
-int32_t flush_code_to_sflash(region_s *img,region_s *bin)
-{
-    int32_t ret;
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
-    region_s *old_code;
-
-    boot_notice("begin to flush code to MEM_TYPE_ROM space...");
-    //先将原来的SFLASH程序数据备份
-    old_code = &bp->mem_map.rom.program1_region;
-    ret = copy_region_data(old_code,&bp->mem_map.rom.program2_region);
-    if(0 != ret)
-    {
-        boot_warn("backup old program failed.");
-        return -1;
-    }
-
-    //如果是在IFLASH运行，在加密前先烧录运行程序空间
-    if(MEM_TYPE_ROM == bp->mem_map.run.flash.type)
-    {
-        ret = copy_region_data(bin,&bp->mem_map.run.flash);
-        if(0 != ret)
-        {
-            boot_error("write new program to running space failed.");
-            return -1;
-        }
-    }
-    
-    //将数据重新加密
-    ret = encrypt_code(img);
-    if(0 != ret)
-    {
-        boot_error("encrypt code error");
-        return -1;
-    }
-    
-    ret = copy_region_data(img,&bp->mem_map.rom.program1_region);
-    if(0 != ret)
-    {
-        boot_error("write new program failed.");
-        return -1;
-    }
-    return 0;
-}
-
-
-
-
 int32_t flush_code_data(downtype_e type,region_s *img,region_s *bin)
 {
     int32_t ret;   
     switch(type)
     {
-        case DOWN_IRAM:
-        case DOWN_XRAM:
+        case DOWN_RAM:
             ret = flush_code_to_ram(bin);
             break;
-        case DOWN_IFLASH:
+        case DOWN_ROM:
             ret = flush_code_to_iflash(bin);
-            break;
-        case DOWN_SFLASH:
-            ret = flush_code_to_sflash(img,bin);
             break;
         default:
             boot_error("unknown memory type:%d",type);
@@ -392,7 +284,7 @@ int32_t flush_code_data(downtype_e type,region_s *img,region_s *bin)
         (void)get_boot_params_from_ROM();
         return ret;
     }
-    if(DOWN_IRAM != type && DOWN_XRAM != type)
+    if(DOWN_RAM != type)
         (void)write_param();
     return ret;
 }
@@ -419,7 +311,8 @@ int32_t download_img_file(downtype_e type)
 
     img->lenth = (uint32_t)len;
     ret = check_and_decrypt_img(img,&bin);
-    if(0 != ret)
+    //len = decrypt_data(uint8_t * data,int32_t lenth)
+    if(ret != 0)
     {
         boot_error("check img file ERROR");
         return -1; 

@@ -8,7 +8,6 @@
 ***************************************************************************************/
 #include "boot_param.h"
 #include "port.h"
-//#include "hw_device.h"
 #include "boot_debug.h"
 #include "crc.h"
 #include "mem_map.h"

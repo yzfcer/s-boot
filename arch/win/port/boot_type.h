@@ -29,6 +29,7 @@ typedef enum
     FALSE,
     TRUE,
 }bool_t;
+
 #ifdef __cplusplus
 }
 #endif

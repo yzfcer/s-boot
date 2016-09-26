@@ -21,10 +21,8 @@ extern "C" {
 
 typedef enum 
 {
-    DOWN_IFLASH,
-    DOWN_SFLASH,
-    DOWN_IRAM,
-    DOWN_XRAM,
+    DOWN_ROM,
+    DOWN_RAM,
 }downtype_e;
 
 typedef enum

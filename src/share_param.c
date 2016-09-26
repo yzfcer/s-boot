@@ -38,8 +38,6 @@ typedef struct
     //空间状态参数区
     mem_status_s mem_status;
 
-    //升级文件相关的信息区
-    img_head_s img_head;
     uint32_t pad;
     uint32_t crc;//CRC校验
 }share_param_s;
@@ -153,21 +151,7 @@ int32_t sp_get_mem_status(mem_status_s * mem_status)
     return 0;
 }
 
-void sp_set_upgrade_file_param(img_head_s *img_file)
-{
-    share_param_s *sp = (share_param_s *)(void*)get_share_addr();
-    copy_share_data((char*)img_file,(char*)&sp->img_head,sizeof(img_head_s));
-    update_share_crc();
-}
 
-int32_t sp_get_upgrade_file_param(img_head_s *img_file)
-{
-    share_param_s *sp = (share_param_s *)(void*)get_share_addr();
-    if(check_share_param())
-        return -1;
-    copy_share_data((char*)&sp->img_head,(char*)img_file,sizeof(img_head_s));
-    return 0;
-}
 
 void sp_init_share_param(void)
 {

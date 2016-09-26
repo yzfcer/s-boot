@@ -69,7 +69,6 @@
     <ClInclude Include="..\..\..\..\src\boot_param.h" />
     <ClInclude Include="..\..\..\..\src\boot_test.h" />
     <ClInclude Include="..\..\..\..\src\crc.h" />
-    <ClInclude Include="..\..\..\..\src\encrypt.h" />
     <ClInclude Include="..\..\..\..\src\mem_map.h" />
     <ClInclude Include="..\..\..\..\src\menu_list.h" />
     <ClInclude Include="..\..\..\..\src\program_mgr.h" />
@@ -84,7 +83,6 @@
     <ClCompile Include="..\..\..\..\src\boot_param.c" />
     <ClCompile Include="..\..\..\..\src\boot_test.c" />
     <ClCompile Include="..\..\..\..\src\crc.c" />
-    <ClCompile Include="..\..\..\..\src\encrypt.c" />
     <ClCompile Include="..\..\..\..\src\mem_map.c" />
     <ClCompile Include="..\..\..\..\src\menu_list.c" />
     <ClCompile Include="..\..\..\..\src\program_mgr.c" />

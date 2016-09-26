@@ -31,7 +31,6 @@ void menu_entry(void);
 void print32_t_menu_list(void);
 int32_t get_menu_go_direction(void);
 int32_t flush_code_to_iflash(region_s *code_region);
-int32_t flush_code_to_sflash(region_s *img,region_s *bin);
 
 #ifdef __cplusplus
 }

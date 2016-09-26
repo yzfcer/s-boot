@@ -13,12 +13,12 @@
 #include "boot_param.h"
 #include <conio.h>
 
-int32_t device_init(void)
+int device_init(void)
 {
 	return 0;
 }
 
-int32_t device_deinit(void)
+int device_deinit(void)
 {
 	return 0;
 }
@@ -75,6 +75,14 @@ void set_chip_lock(uint8_t lock_enable)
 
 }
 
+int32_t encrypt_data(uint8_t *data,int32_t lenth)
+{
+    return lenth;
+}
+int32_t decrypt_data(uint8_t *data,int32_t lenth)
+{
+    return lenth;
+}
 
 
 

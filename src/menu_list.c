@@ -63,6 +63,7 @@ static int32_t is_string_equal(char *str1,char *str2,int32_t len)
     }
     return 1;
 }
+
 static void download_img_to_iflash(void)
 {
     boot_param_s *bp = (boot_param_s*)get_boot_params();
@@ -71,17 +72,7 @@ static void download_img_to_iflash(void)
         boot_warn("img can not download to MEM_TYPE_ROM,device NOT support.");
         return;
     }
-    download_img_file(DOWN_IFLASH);
-}
-static void download_img_to_sflash(void)
-{
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
-    if(MEM_TYPE_ROM!= bp->mem_map.rom.program1_region.type)
-    {
-        boot_warn("img can not download to MEM_TYPE_ROM,device NOT support.");
-        return;
-    }
-    download_img_file(DOWN_SFLASH);
+    download_img_file(DOWN_ROM);
 }
 
 static void download_img_to_iram(void)
@@ -93,25 +84,7 @@ static void download_img_to_iram(void)
         boot_warn("img can not download to MEM_TYPE_RAM,device NOT support.");
         return;
     }
-    ret = download_img_file(DOWN_IRAM);
-    if(0 == ret)
-    {
-        g_go_ahead = 1;
-    }
-    set_boot_status(BOOT_SET_APP_PARAM);
-    exit_menu();
-}
-
-static void download_img_to_xram(void)
-{
-    int32_t ret;
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
-    if(MEM_TYPE_RAM != bp->mem_map.run.flash.type)
-    {
-        boot_warn("img can not download to XRAM,device NOT support.");
-        return;
-    }
-    ret = download_img_file(DOWN_XRAM);
+    ret = download_img_file(DOWN_RAM);
     if(0 == ret)
     {
         g_go_ahead = 1;
@@ -282,10 +255,10 @@ static void exit_and_save(void)
 
 static menu_handle_TB g_menu_handleTB[] = 
 {
-    {'1',0,0,"download img file to irom",download_img_to_iflash},
-    {'2',0,0,"download img file to xrom",download_img_to_sflash},
+    {'1',0,0,"download img file to ROM",download_img_to_iflash},
+    //{'2',0,0,"download img file to xrom",download_img_to_sflash},
     {'3',0,0,"download img file to iram",download_img_to_iram},
-    {'4',0,0,"download img file to xram",download_img_to_xram},
+    //{'4',0,0,"download img file to xram",download_img_to_xram},
     
     {'b',2,2,"set debug mode",set_debug_mode},
     {'d',0,0,"show memory map",show_memmap},

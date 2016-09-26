@@ -13,8 +13,8 @@
 
 
 
-int32_t device_init(void);
-int32_t device_deinit(void);
+int device_init(void);
+int device_deinit(void);
 
 int boot_output(char *buf,int len);
 int32_t boot_getchar_noblocking(char *ch);
@@ -26,5 +26,6 @@ void boot_run_system(void);
 void feed_watchdog(void);
 uint8_t is_chip_lock();
 void set_chip_lock(uint8_t lock_enable);
-
+int32_t encrypt_data(uint8_t *data,int32_t lenth);
+int32_t decrypt_data(uint8_t *data,int32_t lenth);
 #endif
