@@ -318,7 +318,7 @@ void print_program_space(mem_map_s *map)
 
 void copy_region_info(region_s *src,region_s *dest)
 {
-    //dest->regname = src->regname;
+    dest->regname = src->regname;
     dest->type = src->type;
     dest->index = src->index;
     dest->addr = src->addr;

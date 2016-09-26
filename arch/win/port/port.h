@@ -11,8 +11,6 @@
 #include "boot_type.h"
 #include <stdio.h>
 
-
-
 int device_init(void);
 int device_deinit(void);
 

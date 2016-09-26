@@ -32,12 +32,12 @@ typedef enum
 }app_idx_e;
 
 int32_t download_img_file(downtype_e type);
-int32_t change_boot_app(int32_t index);void clean_program(void);
+int32_t change_boot_app(int32_t index);
 int32_t copy_region_data(region_s *src,region_s *dest);
 void clean_program(void);
 int32_t check_programs(void);
 int32_t write_encrypt_code_to_run(region_s *src,region_s *run);
-int32_t check_and_decrypt_img(region_s *img,region_s *bin);
+int32_t check_and_decrypt_img(region_s *img);
 
 #ifdef __cplusplus
 }

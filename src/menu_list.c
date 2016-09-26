@@ -64,22 +64,16 @@ static int32_t is_string_equal(char *str1,char *str2,int32_t len)
     return 1;
 }
 
-static void download_img_to_iflash(void)
+static void download_img_to_rom(void)
 {
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
-    if(MEM_TYPE_ROM!= bp->mem_map.rom.program1_region.type)
-    {
-        boot_warn("img can not download to MEM_TYPE_ROM,device NOT support.");
-        return;
-    }
     download_img_file(DOWN_ROM);
 }
 
-static void download_img_to_iram(void)
+static void download_img_to_ram(void)
 {
     int32_t ret;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
-    if(MEM_TYPE_RAM != bp->mem_map.run.flash.type)
+    if(bp->mem_map.run.ram.maxlen <= 0)
     {
         boot_warn("img can not download to MEM_TYPE_RAM,device NOT support.");
         return;
@@ -255,11 +249,8 @@ static void exit_and_save(void)
 
 static menu_handle_TB g_menu_handleTB[] = 
 {
-    {'1',0,0,"download img file to ROM",download_img_to_iflash},
-    //{'2',0,0,"download img file to xrom",download_img_to_sflash},
-    {'3',0,0,"download img file to iram",download_img_to_iram},
-    //{'4',0,0,"download img file to xram",download_img_to_xram},
-    
+    {'1',0,0,"download img file to ROM",download_img_to_rom},
+    {'2',0,0,"download img file to RAM",download_img_to_ram},
     {'b',2,2,"set debug mode",set_debug_mode},
     {'d',0,0,"show memory map",show_memmap},
     {'k',0,0,"lock MCU chip",lock_mcu},

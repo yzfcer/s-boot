@@ -64,7 +64,7 @@ void FILL_BYTES_BY_INT(uint8_t *buf,int32_t index,uint32_t va)
     }
 }
 
-int32_t check_and_decrypt_img(region_s *img,region_s *bin)
+int32_t check_and_decrypt_img(region_s *img)
 {
     int32_t len;
     uint32_t real_addr,cal_crc,crc;
@@ -105,9 +105,9 @@ int32_t check_and_decrypt_img(region_s *img,region_s *bin)
         boot_warn("img file Decrypt ERROR.");
         return -1;
     }
+    img->lenth = (uint32_t)len;
     feed_watchdog();
     boot_notice("img file decrypt OK.");
-    feed_watchdog();
     return 0;
 }
 
@@ -262,16 +262,16 @@ int32_t flush_code_to_iflash(region_s *bin)
 }
 
 
-int32_t flush_code_data(downtype_e type,region_s *img,region_s *bin)
+int32_t flush_code_data(downtype_e type,region_s *img)
 {
     int32_t ret;   
     switch(type)
     {
         case DOWN_RAM:
-            ret = flush_code_to_ram(bin);
+            ret = flush_code_to_ram(img);
             break;
         case DOWN_ROM:
-            ret = flush_code_to_iflash(bin);
+            ret = flush_code_to_iflash(img);
             break;
         default:
             boot_error("unknown memory type:%d",type);
@@ -292,7 +292,7 @@ int32_t flush_code_data(downtype_e type,region_s *img,region_s *bin)
 int32_t download_img_file(downtype_e type)
 {
     int32_t ret,len;
-    region_s *img,bin;
+    region_s *img;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
 
     if(bp->debug_mode)
@@ -310,15 +310,14 @@ int32_t download_img_file(downtype_e type)
     }
 
     img->lenth = (uint32_t)len;
-    ret = check_and_decrypt_img(img,&bin);
-    //len = decrypt_data(uint8_t * data,int32_t lenth)
+    ret = check_and_decrypt_img(img);
     if(ret != 0)
     {
         boot_error("check img file ERROR");
         return -1; 
     }
         
-    ret = flush_code_data(type,img,&bin);
+    ret = flush_code_data(type,img);
     if(0 != ret)
     {
         boot_warn("flush data to %s failed.",memtype_name(type));
@@ -353,7 +352,7 @@ void clean_program(void)
 int32_t write_encrypt_code_to_run(region_s *src,region_s *run)
 {
     int32_t ret;
-    region_s img,bin;
+    region_s img;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
 
     ret = copy_region_data(src,&bp->mem_map.ram.probuf_region);
@@ -366,14 +365,14 @@ int32_t write_encrypt_code_to_run(region_s *src,region_s *run)
     copy_region_info(&bp->mem_map.ram.probuf_region,&img);
     img.lenth = src->lenth;
 
-    ret = check_and_decrypt_img(&img,&bin);
+    ret = check_and_decrypt_img(&img);
     if(0 != ret)
     {
         boot_error("check img file ERROR.");
         return -1;
     }
     
-    ret = copy_region_data(&bin,run);
+    ret = copy_region_data(&img,run);
     if(0 != ret)
     {
         boot_warn("flush data to running space error.");
@@ -459,7 +458,7 @@ int32_t check_rom_program(region_s *code)
     region_s prog;
 
     copy_region_info(code,&prog);
-    
+    prog.regname = code->regname;
     if(prog.status == MEM_NULL)
     {
         boot_notice("  ***  space %s type %s base 0x%x lenth %d is empty.",
