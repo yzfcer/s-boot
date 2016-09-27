@@ -66,7 +66,8 @@ static int32_t is_string_equal(char *str1,char *str2,int32_t len)
 
 static void download_img_to_rom(void)
 {
-    download_img_file(DOWN_ROM);
+    download_img_file(MEM_TYPE_ROM);    
+    
 }
 
 static void download_img_to_ram(void)
@@ -78,7 +79,7 @@ static void download_img_to_ram(void)
         boot_warn("img can not download to MEM_TYPE_RAM,device NOT support.");
         return;
     }
-    ret = download_img_file(DOWN_RAM);
+    ret = download_img_file(MEM_TYPE_RAM);
     if(0 == ret)
     {
         g_go_ahead = 1;

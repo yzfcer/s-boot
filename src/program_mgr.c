@@ -24,7 +24,7 @@ extern "C" {
 #endif
 
 //通用缓存器，一般在拷贝数据时做缓存，或者接收命令字符
-char commbuffer[BLOCK_SIZE];
+uint8_t commbuffer[BLOCK_SIZE];
 
 static void print32_t_copy_percents(int32_t numerator, int32_t denominator,int32_t del)
 {
@@ -35,7 +35,6 @@ static void print32_t_copy_percents(int32_t numerator, int32_t denominator,int32
 }
 
 uint32_t get_ram_addr(uint32_t memidx,uint32_t addr)
-
 {
 	uint32_t base;
     base = get_ram_base(memidx);
@@ -44,7 +43,7 @@ uint32_t get_ram_addr(uint32_t memidx,uint32_t addr)
     return base + addr;
 }
 
-uint32_t GET_INT_BY_STR(uint8_t *str,int32_t index)
+uint32_t convert_byte_to_uint32(uint8_t *str,int32_t index)
 {
     uint32_t i,tmp,va = 0;
     for(i = 0;i < 4;i ++)
@@ -55,7 +54,7 @@ uint32_t GET_INT_BY_STR(uint8_t *str,int32_t index)
     return va;
 }
 
-void FILL_BYTES_BY_INT(uint8_t *buf,int32_t index,uint32_t va)
+void convert_uint32_to_byte(uint8_t *buf,int32_t index,uint32_t va)
 {
     int32_t i;
     for(i = 0;i < 4;i ++)
@@ -68,8 +67,6 @@ int32_t check_and_decrypt_img(region_s *img)
 {
     int32_t len;
     uint32_t real_addr,cal_crc,crc;
-    
-    
     real_addr = get_ram_addr(img->index,img->addr);
     if(INVALID_REAL_ADDR == real_addr)
     {
@@ -85,7 +82,7 @@ int32_t check_and_decrypt_img(region_s *img)
         return -1;
     }
     feed_watchdog();
-    crc = GET_INT_BY_STR((uint8_t*)real_addr,img->lenth - 4);
+    crc = convert_byte_to_uint32((uint8_t*)real_addr,img->lenth - 4);
     cal_crc = calc_crc32((char*)real_addr,img->lenth - 4,0);
     boot_debug("crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
     if(cal_crc != crc)
@@ -136,8 +133,7 @@ int32_t encrypt_code(region_s *code_reg)
     boot_notice("img file encrypt OK.");
     
     code_reg->crc = calc_crc32((char *)real_addr,code_reg->lenth - 4,0);
-    //code_reg->lenth -= 4;
-    FILL_BYTES_BY_INT((uint8_t *)real_addr,code_reg->lenth - 4,code_reg->crc);
+    convert_uint32_to_byte((uint8_t *)real_addr,code_reg->lenth - 4,code_reg->crc);
     
     boot_debug("new file CRC:0x%x.",code_reg->crc);
     return 0;
@@ -262,15 +258,15 @@ int32_t flush_code_to_iflash(region_s *bin)
 }
 
 
-int32_t flush_code_data(downtype_e type,region_s *img)
+int32_t flush_code_data(memtype_e type,region_s *img)
 {
     int32_t ret;   
     switch(type)
     {
-        case DOWN_RAM:
+        case MEM_TYPE_RAM:
             ret = flush_code_to_ram(img);
             break;
-        case DOWN_ROM:
+        case MEM_TYPE_ROM:
             ret = flush_code_to_iflash(img);
             break;
         default:
@@ -284,12 +280,12 @@ int32_t flush_code_data(downtype_e type,region_s *img)
         (void)get_boot_params_from_ROM();
         return ret;
     }
-    if(DOWN_RAM != type)
+    if(MEM_TYPE_ROM != type)
         (void)write_param();
     return ret;
 }
 
-int32_t download_img_file(downtype_e type)
+int32_t download_img_file(memtype_e type)
 {
     int32_t ret,len;
     region_s *img;
@@ -316,7 +312,6 @@ int32_t download_img_file(downtype_e type)
         boot_error("check img file ERROR");
         return -1; 
     }
-        
     ret = flush_code_data(type,img);
     if(0 != ret)
     {

@@ -21,7 +21,7 @@ extern "C" {
 #if BOOT_TEST_ENABLE
 extern upgrade_region_s g_upgrade_status;
 extern uint32_t get_ram_addr(uint32_t memidx,uint32_t addr);
-extern uint32_t GET_INT_BY_STR(uint8_t *str,int32_t index);
+extern uint32_t convert_byte_to_uint32(uint8_t *str,int32_t index);
 boot_stub_s boot_stub = {0,0,0};
 void clear_errors(void)
 {
@@ -56,7 +56,7 @@ void test_sflash_error(void)
 void destroy_code_space(region_s *code)
 {
     uint32_t i;
-    extern char commbuffer[BLOCK_SIZE];
+    extern uint8_t commbuffer[BLOCK_SIZE];
     for(i = 0;i < sizeof(commbuffer);i ++)
     {
         commbuffer[i] = 0xff;
