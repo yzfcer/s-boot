@@ -55,7 +55,7 @@ uint32_t boot_get_sys_ms(void)
 	return GetTickCount();
 }
 
-void boot_run_system(void)
+void boot_jump_to_app(void)
 {
 
 }

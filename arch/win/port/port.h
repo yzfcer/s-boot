@@ -24,7 +24,7 @@ int32_t boot_getchar_noblocking(char *ch);
 int32_t boot_receive_img(uint32_t addr,uint32_t maxlen);
 
 uint32_t boot_get_sys_ms(void);
-void boot_run_system(void);
+void boot_jump_to_app(void);
 
 void feed_watchdog(void);
 uint8_t is_chip_lock();
