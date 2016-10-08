@@ -108,8 +108,8 @@ int32_t check_and_decrypt_img(region_s *img)
     return 0;
 }
 
-//对解密状态的数据重新加密
-int32_t encrypt_code(region_s *code_reg)
+
+int32_t encrypt_code_calc_crc(region_s *code_reg)
 {
     uint32_t real_addr;
     int32_t len;
@@ -121,7 +121,7 @@ int32_t encrypt_code(region_s *code_reg)
         return -1;
     }
 
-    //对数据重新加密，将加密后的数据烧录到SFLASH空间
+
     boot_debug("decrypt_data base:0x%x,lenth:%d",real_addr,code_reg->lenth - 4);
     len = encrypt_data((uint8_t *)real_addr,code_reg->lenth -4);
     if(len < 0)

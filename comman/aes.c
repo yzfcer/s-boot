@@ -8,26 +8,22 @@ void cleardog(void)
 
 
 
-#define BPOLY 0x1b //!< Lower 8 bits of (x^8+x^4+x^3+x+1), ie. (x^4+x^3+x+1).
-#define BLOCKSIZE 16 //!< Block size in number of uint8_ts.
+#define AES_BPOLY 0x1b //!< Lower 8 bits of (x^8+x^4+x^3+x+1), ie. (x^4+x^3+x+1).
+#define AES_BLOCKSIZE 16 //!< Block size in number of uint8_ts.
+
+#define AES_KEYBITS 128 //!< Use AES128.
+#define AES_ROUNDS 10 //!< Number of rounds.
+#define AES_KEYLENGTH 16 //!< Key length in number of uint8_ts.
 
 
+static uint8_t  block1[256]; //!< Workspace 1.
+static uint8_t  block2[256]; //!< Worksapce 2.
 
-#define KEYBITS 128 //!< Use AES128.
-#define ROUNDS 10 //!< Number of rounds.
-#define KEYLENGTH 16 //!< Key length in number of uint8_ts.
-
-
-uint8_t  block1[256]; //!< Workspace 1.
-uint8_t  block2[256]; //!< Worksapce 2.
-
-uint8_t  * powTbl; //!< Final location of exponentiation lookup table.
-uint8_t  * logTbl; //!< Final location of logarithm lookup table.
-uint8_t  * sBox; //!< Final location of s-box.
-uint8_t  * sBoxInv; //!< Final location of inverse s-box.
-uint8_t  * expandedKey; //!< Final location of expanded key.
-
-
+static uint8_t  * powTbl; //!< Final location of exponentiation lookup table.
+static uint8_t  * logTbl; //!< Final location of logarithm lookup table.
+static uint8_t  * sBox; //!< Final location of s-box.
+static uint8_t  * sBoxInv; //!< Final location of inverse s-box.
+static uint8_t  * expandedKey; //!< Final location of expanded key.
 
 
 void CalcPowLog(uint8_t * powTbl, uint8_t * logTbl)
@@ -42,7 +38,7 @@ void CalcPowLog(uint8_t * powTbl, uint8_t * logTbl)
         logTbl[t] = i;
         i++;
         // Muliply t by 3 in GF(2^8).
-        t ^= (t << 1) ^ (t & 0x80 ? BPOLY : 0);
+        t ^= (t << 1) ^ (t & 0x80 ? AES_BPOLY : 0);
     } while(t != 1); // Cyclic properties ensure that i < 255.
     powTbl[255] = powTbl[0]; // 255 = '-0', 254 = -1, etc.
 }
@@ -127,30 +123,30 @@ void InvMixColumn(uint8_t * column)
     r2 = column[0] ^ column[1] ^ column[3];
     r3 = column[0] ^ column[1] ^ column[2];
 
-    column[0] = (column[0] << 1) ^ (column[0] & 0x80 ? BPOLY : 0);
-    column[1] = (column[1] << 1) ^ (column[1] & 0x80 ? BPOLY : 0);
-    column[2] = (column[2] << 1) ^ (column[2] & 0x80 ? BPOLY : 0);
-    column[3] = (column[3] << 1) ^ (column[3] & 0x80 ? BPOLY : 0);
+    column[0] = (column[0] << 1) ^ (column[0] & 0x80 ? AES_BPOLY : 0);
+    column[1] = (column[1] << 1) ^ (column[1] & 0x80 ? AES_BPOLY : 0);
+    column[2] = (column[2] << 1) ^ (column[2] & 0x80 ? AES_BPOLY : 0);
+    column[3] = (column[3] << 1) ^ (column[3] & 0x80 ? AES_BPOLY : 0);
 
     r0 ^= column[0] ^ column[1];
     r1 ^= column[1] ^ column[2];
     r2 ^= column[2] ^ column[3];
     r3 ^= column[0] ^ column[3];
 
-    column[0] = (column[0] << 1) ^ (column[0] & 0x80 ? BPOLY : 0);
-    column[1] = (column[1] << 1) ^ (column[1] & 0x80 ? BPOLY : 0);
-    column[2] = (column[2] << 1) ^ (column[2] & 0x80 ? BPOLY : 0);
-    column[3] = (column[3] << 1) ^ (column[3] & 0x80 ? BPOLY : 0);
+    column[0] = (column[0] << 1) ^ (column[0] & 0x80 ? AES_BPOLY : 0);
+    column[1] = (column[1] << 1) ^ (column[1] & 0x80 ? AES_BPOLY : 0);
+    column[2] = (column[2] << 1) ^ (column[2] & 0x80 ? AES_BPOLY : 0);
+    column[3] = (column[3] << 1) ^ (column[3] & 0x80 ? AES_BPOLY : 0);
 
     r0 ^= column[0] ^ column[2];
     r1 ^= column[1] ^ column[3];
     r2 ^= column[0] ^ column[2];
     r3 ^= column[1] ^ column[3];
 
-    column[0] = (column[0] << 1) ^ (column[0] & 0x80 ? BPOLY : 0);
-    column[1] = (column[1] << 1) ^ (column[1] & 0x80 ? BPOLY : 0);
-    column[2] = (column[2] << 1) ^ (column[2] & 0x80 ? BPOLY : 0);
-    column[3] = (column[3] << 1) ^ (column[3] & 0x80 ? BPOLY : 0);
+    column[0] = (column[0] << 1) ^ (column[0] & 0x80 ? AES_BPOLY : 0);
+    column[1] = (column[1] << 1) ^ (column[1] & 0x80 ? AES_BPOLY : 0);
+    column[2] = (column[2] << 1) ^ (column[2] & 0x80 ? AES_BPOLY : 0);
+    column[3] = (column[3] << 1) ^ (column[3] & 0x80 ? AES_BPOLY : 0);
 
     column[0] ^= column[1] ^ column[2] ^ column[3];
     r0 ^= column[0];
@@ -181,7 +177,7 @@ uint8_t Multiply(uint8_t num, uint8_t factor)
         mask <<= 1;
 
         // Double num.
-        num = (num << 1) ^ (num & 0x80 ? BPOLY : 0);
+        num = (num << 1) ^ (num & 0x80 ? AES_BPOLY : 0);
     }
 
     return result;
@@ -376,7 +372,7 @@ void KeyExpansion(uint8_t * expandedKey)
     ////////////////////////////////////////////
 
     // Copy key to start of expanded key.
-    i = KEYLENGTH;
+    i = AES_KEYLENGTH;
     do 
     {
         *expandedKey = *key;
@@ -392,29 +388,29 @@ void KeyExpansion(uint8_t * expandedKey)
     temp[3] = *(expandedKey++);
 
     // Expand key.
-    i = KEYLENGTH;
-    while(i < BLOCKSIZE*(ROUNDS+1)) 
+    i = AES_KEYLENGTH;
+    while(i < AES_BLOCKSIZE*(AES_ROUNDS+1)) 
     {
         // Are we at the start of a multiple of the key size?
-        if((i % KEYLENGTH) == 0) 
+        if((i % AES_KEYLENGTH) == 0) 
         {
             CycleLeft(temp); // Cycle left once.
             SubBytes(temp, 4); // Substitute each uint8_t.
             XORBytes(temp, Rcon, 4); // Add constant in GF(2).
-            *Rcon = (*Rcon << 1) ^ (*Rcon & 0x80 ? BPOLY : 0);
+            *Rcon = (*Rcon << 1) ^ (*Rcon & 0x80 ? AES_BPOLY : 0);
         }
 
         // Keysize larger than 24 uint8_ts, ie. larger that 192 bits?
-#if KEYLENGTH > 24
+#if AES_KEYLENGTH > 24
         // Are we right past a block size?
-        else if((i % KEYLENGTH) == BLOCKSIZE) 
+        else if((i % AES_KEYLENGTH) == AES_BLOCKSIZE) 
         {
             SubBytes(temp, 4); // Substitute each uint8_t.
         }
 #endif
 
-        // Add uint8_ts in GF(2) one KEYLENGTH away.
-        XORBytes(temp, expandedKey - KEYLENGTH, 4);
+        // Add uint8_ts in GF(2) one AES_KEYLENGTH away.
+        XORBytes(temp, expandedKey - AES_KEYLENGTH, 4);
 
         // Copy result to current 4 uint8_ts.
         *(expandedKey++) = temp[ 0 ];
@@ -429,16 +425,16 @@ void KeyExpansion(uint8_t * expandedKey)
 
 void InvCipher(uint8_t * block, uint8_t * expandedKey)
 {
-    uint8_t round = ROUNDS-1;
-    expandedKey += BLOCKSIZE * ROUNDS;
+    uint8_t round = AES_ROUNDS-1;
+    expandedKey += AES_BLOCKSIZE * AES_ROUNDS;
 
     XORBytes(block, expandedKey, 16);
-    expandedKey -= BLOCKSIZE;
+    expandedKey -= AES_BLOCKSIZE;
     do 
     {
         InvShiftRows(block);
         InvSubBytesAndXOR(block, expandedKey, 16);
-        expandedKey -= BLOCKSIZE;
+        expandedKey -= AES_BLOCKSIZE;
         InvMixColumns(block);
     } while(--round);
 
@@ -448,10 +444,10 @@ void InvCipher(uint8_t * block, uint8_t * expandedKey)
 
 void Cipher(uint8_t * block, uint8_t * expandedKey)    //完成一个块(16字节，128bit)的加密
 {
-    uint8_t round = ROUNDS-1;
+    uint8_t round = AES_ROUNDS-1;
 
     XORBytes(block, expandedKey, 16);
-    expandedKey += BLOCKSIZE;
+    expandedKey += AES_BLOCKSIZE;
 
     do 
     {
@@ -459,7 +455,7 @@ void Cipher(uint8_t * block, uint8_t * expandedKey)    //完成一个块(16字节，128b
         ShiftRows(block);
         MixColumns(block);
         XORBytes(block, expandedKey, 16);
-        expandedKey += BLOCKSIZE;
+        expandedKey += AES_BLOCKSIZE;
     } while(--round);
 
     SubBytes(block, 16);
@@ -487,19 +483,19 @@ void aes_init(uint8_t * tempbuf)
 //对一个16字节块解密,参数buffer是解密密缓存，chainBlock是要解密的块
 void aesDecrypt(uint8_t * buffer, uint8_t * chainBlock)
 {
-    CopyBytes(buffer,chainBlock,BLOCKSIZE);
+    CopyBytes(buffer,chainBlock,AES_BLOCKSIZE);
     InvCipher(buffer, expandedKey);
-    //XORBytes(buffer, chainBlock, BLOCKSIZE);
-    CopyBytes(chainBlock, buffer, BLOCKSIZE);
+    //XORBytes(buffer, chainBlock, AES_BLOCKSIZE);
+    CopyBytes(chainBlock, buffer, AES_BLOCKSIZE);
 }
 
 //对一个16字节块完成加密，参数buffer是加密缓存，chainBlock是要加密的块
 void aesEncrypt(uint8_t * buffer, uint8_t * chainBlock)
 {
-    CopyBytes(buffer, chainBlock, BLOCKSIZE);
-    //XORBytes(buffer, chainBlock, BLOCKSIZE);
+    CopyBytes(buffer, chainBlock, AES_BLOCKSIZE);
+    //XORBytes(buffer, chainBlock, AES_BLOCKSIZE);
     Cipher(buffer, expandedKey);
-    CopyBytes(chainBlock, buffer, BLOCKSIZE);
+    CopyBytes(chainBlock, buffer, AES_BLOCKSIZE);
 }
 
 //加解密函数，参数为加解密标志，要加解密的数据缓存起始指针，要加解密的数据长度（如果解密运算，必须是16的整数倍。）

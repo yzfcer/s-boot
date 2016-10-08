@@ -9,6 +9,8 @@
 #include "port.h"
 #include "boot_debug.h"
 #include "boot_hw_if.h"
+#include "boot_param.h"
+#include "mem_driver.h"
 #include <stdarg.h>
 
 #ifdef __cplusplus
@@ -216,18 +218,103 @@ int32_t boot_receive_img(uint32_t addr,uint32_t maxlen)
 }
 #endif
 
+static int read_ram(uint32_t memidx,uint32_t realaddr,uint8_t *buf,int32_t lenth)
+{
+    int i;
+    uint8_t *data;
+    uint32_t size;
+    data = (uint8_t*)realaddr;
+    size = get_ram_lenth(memidx);
+    if(realaddr + lenth >= size)
+        return -1;
+    data += realaddr;
+    for(i = 0;i < lenth;i ++)
+    {
+        data[i] = buf[i];
+    }
+    return lenth;
+}
+
+static int write_ram(uint32_t memidx,uint32_t realaddr,uint8_t *buf,int32_t lenth)
+{
+    int i;
+    uint8_t *data;
+    uint32_t size;
+    data = (uint8_t*)realaddr;
+    size = get_ram_lenth(memidx);
+    if(realaddr + lenth >= size)
+        return -1;
+    data += realaddr;
+    for(i = 0;i < lenth;i ++)
+    {
+        buf[i] = data[i];
+    }
+    return lenth;
+}
+
 int32_t read_block(uint8_t memtype,uint32_t memidx,uint32_t addr,uint8_t *buf,int32_t blkcount)
 {
+    int len;
+    uint32_t realaddr;
+    switch(memtype)
+    {
+        case MEM_TYPE_RAM:
+            realaddr = get_ram_base(memidx);
+            len = read_ram(memidx,realaddr,buf,blkcount*BLOCK_SIZE);
+            if(len < 0)
+                return len;
+            break;
+        case MEM_TYPE_ROM:
+            realaddr = get_rom_base(memidx);
+            len = read_rom(memidx,realaddr,buf,blkcount*BLOCK_SIZE);
+            if(len < 0)
+                return len;
+            break;
+        default:
+            return -1;
+    }
     return blkcount;
 }
 
 int32_t write_block(uint8_t memtype,uint32_t memidx,uint32_t addr,uint8_t *buf,int32_t blkcount)
 {
+    int len; 
+    uint32_t realaddr;
+    switch(memtype)
+    {
+        case MEM_TYPE_RAM:
+            realaddr = get_ram_base(memidx);
+            len = write_ram(memidx,realaddr,buf,blkcount*BLOCK_SIZE);
+            if(len < 0)
+                return len;
+            break;
+        case MEM_TYPE_ROM:
+            realaddr = get_ram_base(memidx);
+            len = write_rom(memidx,realaddr,buf,blkcount*BLOCK_SIZE);
+            if(len < 0)
+                return len;
+            break;
+        default:
+            return -1;
+    }
     return blkcount;
 }
 
 int32_t erase_block(uint8_t memtype,uint32_t memidx,uint32_t addr,int32_t blkcount)
 {
+    int len; 
+    uint32_t realaddr;
+    switch(memtype)
+    {
+        case MEM_TYPE_ROM:
+            realaddr = get_ram_base(memidx);
+            len = erase_rom(memidx,realaddr,blkcount*BLOCK_SIZE);
+            if(len < 0)
+                return len;
+            break;
+        default:
+            return -1;
+    }
 	return blkcount;
 }
 

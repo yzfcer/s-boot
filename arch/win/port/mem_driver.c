@@ -71,5 +71,21 @@ uint32_t get_rom_lenth(int32_t idx)
     }
 }
 
+int read_rom(uint8_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth)
+{
+    //uint8_t *data;
+    //data = 
+    return lenth;
+}
+
+int write_rom(uint8_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth)
+{
+    return lenth;
+}
+
+int erase_rom(uint8_t memidx,uint32_t addr,int32_t lenth)
+{
+    return lenth;
+}
 
 
