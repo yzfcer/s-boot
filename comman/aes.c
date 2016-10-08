@@ -529,8 +529,8 @@ uint8_t aesBlockDecrypt(uint8_t Direct,uint8_t *ChiperDataBuf,uint8_t DataLen)
         ChiperDataBuf[3]=OrignLen>>24;
     }
     cleardog();
-    aes_init(sBoxbuf);   //≥ı ºªØ
-    if(Direct==0)    //Ω‚√‹
+    aes_init(sBoxbuf);   
+    if(Direct==0)    
     {
         Blocks=DataLen/16;
         for(i=0;i<Blocks;i++)

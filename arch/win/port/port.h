@@ -11,6 +11,11 @@
 #include "boot_type.h"
 #include <stdio.h>
 
+#define CPU_NAME "Intel core i3-4170"
+#define ARCH_NAME "Intel i3"
+#define BOARD_NAME "windows simulation"
+
+
 int device_init(void);
 int device_deinit(void);
 
