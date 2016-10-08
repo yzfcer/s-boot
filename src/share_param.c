@@ -1,14 +1,18 @@
-/***************************************************************************************
-** 文件名：
-** 文件信息：
-** 创建时间：2016.09.25
-** 创建人：清风海岸
-**文件版本1.0
-** 修改记录：
-***************************************************************************************/
+/*********************************************************************************
+  *Copyright(C),2016-2018,yzfcer@163.com
+  *FileName:  
+  *Author:      Zhou Jiangcun
+  *Version:     1.0
+  *Date:        2016/10/08
+  *Description:  
+  *Others:  
+  *History:  
+     1.Date:
+       Author:
+       Modification:
+**********************************************************************************/
 #include "share_param.h"
 #include "port.h"
-////#include "hw_device.h"
 #include "boot_debug.h"
 #include "crc.h"
 
@@ -19,12 +23,12 @@ extern "C" {
 //#define get_share_addr get_share_addr()//0x2003F000
 extern uint32_t get_share_addr (void);
 
-#define SHARE_VERSION 1// share版本号，考虑到以后结构扩充，需要兼容处理, 兼容处理的细节，以后再考虑
+#define SHARE_VERSION 0x0001
 typedef struct
 {
-    uint32_t magic;//魔术字，用于参数头部校验
-    uint32_t lenth;//本参数结构体的长度
-    uint32_t share_version;//共享区版本
+    uint32_t magic;
+    uint32_t lenth;
+    uint32_t share_version;
 
     //回滚标记
     uint32_t rollback_flag;//应用程序在异常时设置位1，正常为0
@@ -39,7 +43,7 @@ typedef struct
     mem_status_s mem_status;
 
     uint32_t pad;
-    uint32_t crc;//CRC校验
+    uint32_t crc;
 }share_param_s;
 
 static void update_share_crc(void)
@@ -58,7 +62,7 @@ static void copy_share_data(char *src,char *dest,int32_t len)
     }
 }
 
-//检查参数是否有效，有效返回1，无效返回0
+
 static int32_t check_share_param(void)
 {
     
