@@ -155,9 +155,9 @@ int32_t mem_region_init(void)
 	alloc_region(&map->rom.program2_region,rombase,PROGRAM_LENTH);
 	alloc_region(&map->rom.reserve_region,rombase,RESERVED_LENTH);   
     
-	alloc_region(&map->ram.app_region,rambase,BOOTRAM_LENTH);
-	alloc_region(&map->ram.probuf_region,rambase,PROGRAMBUF_LENTH);
-	alloc_region(&map->ram.share_region,rambase,SHARE_PARAM_LENTH);
+	alloc_region(&map->ram.app_region,&rambase,BOOTRAM_LENTH);
+	alloc_region(&map->ram.probuf_region,&rambase,PROGRAMBUF_LENTH);
+	alloc_region(&map->ram.share_region,&rambase,SHARE_PARAM_LENTH);
     copy_region_info(&map->rom.program1_region,&map->run.flash);
     map->run.flash.maxlen = map->rom.program1_region.maxlen;
 	return 0;

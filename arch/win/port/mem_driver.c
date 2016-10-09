@@ -12,7 +12,8 @@
        Modification:
 **********************************************************************************/
 #include "mem_driver.h"
-
+#include <string.h>
+#include <stdio.h>
 //存储系统总体空间定义
 #define RAM1_LENTH 0x40000
 #define RAM2_LENTH 0x100000
@@ -76,20 +77,55 @@ uint32_t get_rom_lenth(int32_t idx)
     }
 }
 
-int read_rom(uint8_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth)
+
+
+static void flush_rom_file(uint8_t memidx)
 {
-    //uint8_t *data;
-    //data = 
+    int fd;
+    FILE *fil;
+    char filename[16];
+    uint8_t *buf = (char*)get_rom_base(memidx);
+    uint32_t len = get_rom_lenth(memidx);
+    sprintf(filename,"rom%d.bin",memidx);
+    fil = fopen(filename,"wb+");
+    fwrite(buf,1,len,fil);
+    fclose(fil);
+}
+
+static void read_rom_file(uint8_t memidx)
+{
+    int fd;
+    FILE *fil;
+    char filename[16];
+    uint8_t *buf = (char*)get_rom_base(memidx);
+    uint32_t len = get_rom_lenth(memidx);
+    sprintf(filename,"rom%d.bin",memidx);
+    fil = fopen(filename,"rb+");
+    fread(buf,1,len,fil);
+    fclose(fil);
+}
+
+int read_rom(uint8_t memidx,uint32_t realaddr,uint8_t *buf,int32_t lenth)
+{
+    uint8_t *src = realaddr;
+    read_rom_file(memidx);
+    memcpy(buf,src,lenth);
     return lenth;
 }
 
-int write_rom(uint8_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth)
+int write_rom(uint8_t memidx,uint32_t realaddr,uint8_t *buf,int32_t lenth)
 {
+    uint8_t *dest = (uint8_t *)realaddr;
+    memcpy(dest,buf,lenth);
+    flush_rom_file(memidx);
     return lenth;
 }
 
-int erase_rom(uint8_t memidx,uint32_t addr,int32_t lenth)
+int erase_rom(uint8_t memidx,uint32_t realaddr,int32_t lenth)
 {
+    uint8_t *dest = (uint8_t *)realaddr;
+    memset(dest,0,lenth);
+    flush_rom_file(memidx);
     return lenth;
 }
 

@@ -98,7 +98,6 @@ void init_boot_param(const mem_map_s *mmap)
 //检查参数是否有效，有效返回1，无效返回0
 int32_t check_boot_param(boot_param_s *btprm)
 {
-    
     boot_param_s *bp = btprm;
     if(bp->magic != BOOT_PARAM_MAGIC)
     {
