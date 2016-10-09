@@ -461,7 +461,7 @@ int32_t check_rom_program(region_s *code)
     prog.regname = code->regname;
     if(prog.status == MEM_NULL)
     {
-        boot_notice("  ***  space %s type %s base 0x%x lenth %d is empty.",
+        boot_notice("region %s type %s base 0x%x lenth %d is empty.",
                     prog.regname,memtype_name(prog.type),prog.addr,prog.lenth);
         return 0;
     }
