@@ -1,4 +1,4 @@
-#加密方式可选：none,AES,DES和RC4中的一种，其中选择none表示不加密
+﻿#加密方式可选：none,AES,DES和RC4中的一种，其中选择none表示不加密
 encrypttype=AES
 #加密密钥
 encryptkey=bjbjhgbkhhhfdb

@@ -14,8 +14,10 @@ namespace boot_img
         List<TextBox> offsettb;
         List<TextBox> pathtb;
         byte[] filehead;
-        UInt32 imglen;//img文件长度
+        byte[] imgdata;
+        Int32 imglen;//img文件长度
         UInt32 filecrc;
+        List<fileinfo> listfi;
 
         public Form1()
         {
@@ -147,6 +149,9 @@ namespace boot_img
             pathtb.Add(pathtextBox4);
             pathtb.Add(pathtextBox5);
             filehead = new byte[512];
+            info.ForeColor = Color.Red;
+            info.Text = "";
+            listfi = new List<fileinfo>();
             init_hardware_info();
             //encryptcomboBox.SelectedIndex = 0;
         }
@@ -154,6 +159,7 @@ namespace boot_img
         void set_path(int idx)
         {
             OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Title = "选择文件";
             if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 pathtb[idx].Text = ofd.FileName;
@@ -198,7 +204,26 @@ namespace boot_img
                 outpathtextBox.Text = sfd.FileName;
             }
         }
+        private void loadcfgbutton_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                load_config(ofd.FileName);
+            }
+        }
 
+        private void savecfgbutton_Click(object sender, EventArgs e)
+        {
+
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.FileName = "config.txt";
+            sfd.Title = "保存配置文件";
+            if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                save_config(sfd.FileName);
+            }
+        }
 
         private void keytextBox_MouseClick(object sender, MouseEventArgs e)
         {
@@ -206,7 +231,58 @@ namespace boot_img
                 keytextBox.UseSystemPasswordChar = false;
             else
                 keytextBox.UseSystemPasswordChar = true;
+        }
 
+
+        /*****************************************************************************************/
+        void set_error(string errstr)
+        {
+            info.Text = errstr;
+        }
+
+        bool check_params()
+        {
+            if (boardcomboBox.SelectedIndex < 0)
+            {
+                set_error("请选择单板名称");
+                return false;
+            }
+            if (archcomboBox.SelectedIndex < 0)
+            {
+                set_error("请选择CPU架构");
+                return false;
+            }
+            if (cpucomboBox.SelectedIndex < 0)
+            {
+                set_error("请选择CPU型号");
+                return false;
+            }
+            if (encryptcomboBox.SelectedIndex < 0)
+            {
+                set_error("请选择加密方式");
+                return false;
+            }
+            if (softvertextBox.Text == "")
+            {
+                set_error("请输入软件版本");
+                return false;
+            }
+            if ((encryptcomboBox.SelectedIndex != 0) && (keytextBox.Text == ""))
+            {
+                set_error("请输入加密密钥");
+                return false;
+            }
+            if (pathtextBox1.Text == "")
+            {
+                set_error("第一个文件不能为空");
+                return false;
+            }
+            if (outpathtextBox.Text  == "")
+            {
+                set_error("请选择输出路径");
+                return false;
+            }
+           return true;
         }
 
         int fill_bytearr(byte[] arr, int idx, string str)
@@ -226,10 +302,9 @@ namespace boot_img
         void fill_file_head()
         {
             int idx = 0;
-            
             Array.Clear(filehead, 0, filehead.Length);
             idx += fill_bytearr(filehead, idx, "S_BOOT10");
-            idx += fill_bytearr(filehead, idx, imglen);
+            idx += fill_bytearr(filehead, idx, (UInt32)imglen);
             idx += fill_bytearr(filehead, idx, 512);
             idx += fill_bytearr(filehead, idx, 1);
             idx += fill_bytearr(filehead, idx, softvertextBox.Text);
@@ -237,43 +312,47 @@ namespace boot_img
             int encrypttype = encryptcomboBox.SelectedIndex;
             idx += fill_bytearr(filehead, idx, (UInt32)encrypttype);
             idx += 20;
-
             idx += fill_bytearr(filehead, idx, outpathtextBox.Text);
-
-
-
-
-            
-
         }
+
         private void generatebutton_Click(object sender, EventArgs e)
         {
+            if (!check_params())
+                return;
+            set_error("");
+            listfi.Clear();
+            for (int i = 0; i < 5; i++)
+            {
+                fileinfo fi = new fileinfo();
+                fi.Path = pathtb[i].Text;
+                fi.Offset = Convert.ToInt32(offsettb[i].Text,16);
+                fi.read_file();
+                if(fi.Filelen > 0)
+                    listfi.Add(fi);
+            }
+            int cnt = listfi.Count - 1;
+            for (int i = 0; i < cnt; i++)
+            {
+                if (listfi[i].Offset + listfi[i].Filelen >= listfi[i + 1].Offset)
+                {
+                    set_error("文件"+listfi[i].Path+"的长度超出了填充范围！");
+                    return;
+                }
+            }
+            imglen = listfi[cnt].Offset + listfi[cnt].Filelen;
+            imgdata = new byte[imglen];
+            for (int i = 0; i < listfi.Count; i++)
+            {
+                Array.Copy(listfi[i].Data, 0, imgdata, listfi[i].Offset,listfi[i].Filelen);
+            }
             fill_file_head();
+            Array.Copy(filehead, imgdata, 512);
+
+            //这里需奥加密和校验
+            filecrc = (UInt32)Crc32.calc_crc32(imgdata, 512, imglen - 512);
+            System.IO.FileStream fs = new System.IO.FileStream(outpathtextBox.Text, System.IO.FileMode.Create);
+            fs.Write(imgdata, 0, imglen);
+            fs.Close();
         }
-
-        private void loadcfgbutton_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog ofd = new OpenFileDialog();
-            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                load_config(ofd.FileName);
-            }
-
-        }
-
-        private void savecfgbutton_Click(object sender, EventArgs e)
-        {
-            
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.FileName = "config.txt";
-            sfd.Title = "保存配置文件";
-            if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                save_config(sfd.FileName);
-            }
-        }
-
-        
-        
     }
 }

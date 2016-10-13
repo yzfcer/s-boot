@@ -73,8 +73,12 @@
             this.generatebutton = new System.Windows.Forms.Button();
             this.loadcfgbutton = new System.Windows.Forms.Button();
             this.savecfgbutton = new System.Windows.Forms.Button();
+            this.statusStrip = new System.Windows.Forms.StatusStrip();
+            this.label11 = new System.Windows.Forms.Label();
+            this.info = new System.Windows.Forms.ToolStripStatusLabel();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.statusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -106,6 +110,7 @@
             // 
             // boardcomboBox
             // 
+            this.boardcomboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.boardcomboBox.FormattingEnabled = true;
             this.boardcomboBox.Location = new System.Drawing.Point(95, 21);
             this.boardcomboBox.Name = "boardcomboBox";
@@ -114,6 +119,7 @@
             // 
             // cpucomboBox
             // 
+            this.cpucomboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cpucomboBox.FormattingEnabled = true;
             this.cpucomboBox.Location = new System.Drawing.Point(419, 22);
             this.cpucomboBox.Name = "cpucomboBox";
@@ -122,6 +128,7 @@
             // 
             // archcomboBox
             // 
+            this.archcomboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.archcomboBox.FormattingEnabled = true;
             this.archcomboBox.Location = new System.Drawing.Point(95, 50);
             this.archcomboBox.Name = "archcomboBox";
@@ -166,12 +173,13 @@
             this.label7.AutoSize = true;
             this.label7.Location = new System.Drawing.Point(349, 84);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(29, 12);
+            this.label7.Size = new System.Drawing.Size(53, 12);
             this.label7.TabIndex = 10;
-            this.label7.Text = "密钥";
+            this.label7.Text = "加密密钥";
             // 
             // encryptcomboBox
             // 
+            this.encryptcomboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.encryptcomboBox.FormattingEnabled = true;
             this.encryptcomboBox.Items.AddRange(new object[] {
             "none",
@@ -263,8 +271,10 @@
             // 
             this.outpathtextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.outpathtextBox.BackColor = System.Drawing.SystemColors.Window;
             this.outpathtextBox.Location = new System.Drawing.Point(96, 235);
             this.outpathtextBox.Name = "outpathtextBox";
+            this.outpathtextBox.ReadOnly = true;
             this.outpathtextBox.Size = new System.Drawing.Size(452, 21);
             this.outpathtextBox.TabIndex = 31;
             // 
@@ -345,8 +355,10 @@
             // 
             this.pathtextBox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.pathtextBox5.BackColor = System.Drawing.SystemColors.Window;
             this.pathtextBox5.Location = new System.Drawing.Point(231, 195);
             this.pathtextBox5.Name = "pathtextBox5";
+            this.pathtextBox5.ReadOnly = true;
             this.pathtextBox5.Size = new System.Drawing.Size(319, 21);
             this.pathtextBox5.TabIndex = 23;
             // 
@@ -379,8 +391,10 @@
             // 
             this.pathtextBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.pathtextBox4.BackColor = System.Drawing.SystemColors.Window;
             this.pathtextBox4.Location = new System.Drawing.Point(231, 155);
             this.pathtextBox4.Name = "pathtextBox4";
+            this.pathtextBox4.ReadOnly = true;
             this.pathtextBox4.Size = new System.Drawing.Size(319, 21);
             this.pathtextBox4.TabIndex = 18;
             // 
@@ -413,8 +427,10 @@
             // 
             this.pathtextBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.pathtextBox3.BackColor = System.Drawing.SystemColors.Window;
             this.pathtextBox3.Location = new System.Drawing.Point(231, 115);
             this.pathtextBox3.Name = "pathtextBox3";
+            this.pathtextBox3.ReadOnly = true;
             this.pathtextBox3.Size = new System.Drawing.Size(319, 21);
             this.pathtextBox3.TabIndex = 13;
             // 
@@ -447,8 +463,10 @@
             // 
             this.pathtextBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.pathtextBox2.BackColor = System.Drawing.SystemColors.Window;
             this.pathtextBox2.Location = new System.Drawing.Point(231, 75);
             this.pathtextBox2.Name = "pathtextBox2";
+            this.pathtextBox2.ReadOnly = true;
             this.pathtextBox2.Size = new System.Drawing.Size(319, 21);
             this.pathtextBox2.TabIndex = 8;
             // 
@@ -481,8 +499,11 @@
             // 
             this.pathtextBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.pathtextBox1.BackColor = System.Drawing.SystemColors.Window;
+            this.pathtextBox1.ForeColor = System.Drawing.SystemColors.WindowText;
             this.pathtextBox1.Location = new System.Drawing.Point(231, 35);
             this.pathtextBox1.Name = "pathtextBox1";
+            this.pathtextBox1.ReadOnly = true;
             this.pathtextBox1.Size = new System.Drawing.Size(319, 21);
             this.pathtextBox1.TabIndex = 3;
             // 
@@ -534,11 +555,38 @@
             this.savecfgbutton.UseVisualStyleBackColor = true;
             this.savecfgbutton.Click += new System.EventHandler(this.savecfgbutton_Click);
             // 
+            // statusStrip
+            // 
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.info});
+            this.statusStrip.Location = new System.Drawing.Point(0, 462);
+            this.statusStrip.Name = "statusStrip";
+            this.statusStrip.Size = new System.Drawing.Size(680, 22);
+            this.statusStrip.TabIndex = 11;
+            this.statusStrip.Text = "statusStrip";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(0, 0);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(47, 12);
+            this.label11.TabIndex = 12;
+            this.label11.Text = "label11";
+            // 
+            // info
+            // 
+            this.info.Name = "info";
+            this.info.Size = new System.Drawing.Size(131, 17);
+            this.info.Text = "toolStripStatusLabel1";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(680, 484);
+            this.Controls.Add(this.label11);
+            this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.savecfgbutton);
             this.Controls.Add(this.loadcfgbutton);
             this.Controls.Add(this.generatebutton);
@@ -554,7 +602,10 @@
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.statusStrip.ResumeLayout(false);
+            this.statusStrip.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -605,6 +656,9 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Button loadcfgbutton;
         private System.Windows.Forms.Button savecfgbutton;
+        private System.Windows.Forms.StatusStrip statusStrip;
+        private System.Windows.Forms.ToolStripStatusLabel info;
+        private System.Windows.Forms.Label label11;
     }
 }
 
