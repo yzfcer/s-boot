@@ -42,6 +42,9 @@
             this.softvertextBox = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.outviewbutton = new System.Windows.Forms.Button();
+            this.outpathtextBox = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
             this.viewbutton2 = new System.Windows.Forms.Button();
             this.viewbutton5 = new System.Windows.Forms.Button();
             this.viewbutton4 = new System.Windows.Forms.Button();
@@ -68,9 +71,6 @@
             this.offsettextBox1 = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.generatebutton = new System.Windows.Forms.Button();
-            this.label8 = new System.Windows.Forms.Label();
-            this.outviewbutton = new System.Windows.Forms.Button();
-            this.outpathtextBox = new System.Windows.Forms.TextBox();
             this.loadcfgbutton = new System.Windows.Forms.Button();
             this.savecfgbutton = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
@@ -199,7 +199,6 @@
             this.softvertextBox.Name = "softvertextBox";
             this.softvertextBox.Size = new System.Drawing.Size(210, 21);
             this.softvertextBox.TabIndex = 7;
-            this.softvertextBox.Text = "1.0.0";
             // 
             // label4
             // 
@@ -248,6 +247,35 @@
             this.groupBox2.TabIndex = 7;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "文件列表";
+            // 
+            // outviewbutton
+            // 
+            this.outviewbutton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.outviewbutton.Location = new System.Drawing.Point(554, 232);
+            this.outviewbutton.Name = "outviewbutton";
+            this.outviewbutton.Size = new System.Drawing.Size(75, 23);
+            this.outviewbutton.TabIndex = 32;
+            this.outviewbutton.Text = "浏览";
+            this.outviewbutton.UseVisualStyleBackColor = true;
+            this.outviewbutton.Click += new System.EventHandler(this.outviewbutton_Click);
+            // 
+            // outpathtextBox
+            // 
+            this.outpathtextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.outpathtextBox.Location = new System.Drawing.Point(96, 235);
+            this.outpathtextBox.Name = "outpathtextBox";
+            this.outpathtextBox.Size = new System.Drawing.Size(452, 21);
+            this.outpathtextBox.TabIndex = 31;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(6, 236);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(77, 12);
+            this.label8.TabIndex = 30;
+            this.label8.Text = "文件输出路径";
             // 
             // viewbutton2
             // 
@@ -460,8 +488,10 @@
             // 
             // offsettextBox1
             // 
+            this.offsettextBox1.BackColor = System.Drawing.SystemColors.Window;
             this.offsettextBox1.Location = new System.Drawing.Point(96, 35);
             this.offsettextBox1.Name = "offsettextBox1";
+            this.offsettextBox1.ReadOnly = true;
             this.offsettextBox1.Size = new System.Drawing.Size(94, 21);
             this.offsettextBox1.TabIndex = 2;
             // 
@@ -483,35 +513,6 @@
             this.generatebutton.Text = "生成映像文件";
             this.generatebutton.UseVisualStyleBackColor = true;
             this.generatebutton.Click += new System.EventHandler(this.generatebutton_Click);
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(6, 236);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(77, 12);
-            this.label8.TabIndex = 30;
-            this.label8.Text = "文件输出路径";
-            // 
-            // outviewbutton
-            // 
-            this.outviewbutton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.outviewbutton.Location = new System.Drawing.Point(554, 232);
-            this.outviewbutton.Name = "outviewbutton";
-            this.outviewbutton.Size = new System.Drawing.Size(75, 23);
-            this.outviewbutton.TabIndex = 32;
-            this.outviewbutton.Text = "浏览";
-            this.outviewbutton.UseVisualStyleBackColor = true;
-            this.outviewbutton.Click += new System.EventHandler(this.outviewbutton_Click);
-            // 
-            // outpathtextBox
-            // 
-            this.outpathtextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.outpathtextBox.Location = new System.Drawing.Point(96, 235);
-            this.outpathtextBox.Name = "outpathtextBox";
-            this.outpathtextBox.Size = new System.Drawing.Size(452, 21);
-            this.outpathtextBox.TabIndex = 31;
             // 
             // loadcfgbutton
             // 

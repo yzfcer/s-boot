@@ -86,7 +86,9 @@ namespace boot_img
         {
             string strline = "";
             System.IO.StreamWriter sw = new System.IO.StreamWriter(filename);
+            sw.WriteLine("#加密方式可选填：none,AES,DES和RC4中的一种，其中选择none表示不加密");
             sw.WriteLine("encrypttype="+encryptcomboBox.Text);
+            sw.WriteLine("#加密密钥");
             sw.WriteLine("encryptkey=" + keytextBox.Text);
             sw.WriteLine();
             sw.WriteLine(strline);
@@ -98,16 +100,19 @@ namespace boot_img
             }
             sw.WriteLine("outpath="+outpathtextBox.Text);
             sw.WriteLine();
+            sw.WriteLine("#在下面添加设备板卡信息：");
             for (int i = 0; i < boardcomboBox.Items.Count; i++)
             {
                 sw.WriteLine("board="+boardcomboBox.Items[i].ToString());
             }
             sw.WriteLine();
+            sw.WriteLine("#在下面添加CPU架构信息：");
             for (int i = 0; i < archcomboBox.Items.Count; i++)
             {
                 sw.WriteLine("arch=" + archcomboBox.Items[i].ToString());
             }
             sw.WriteLine();
+            sw.WriteLine("#在下面添加CPU型号信息：");
             for (int i = 0; i < cpucomboBox.Items.Count; i++)
             {
                 sw.WriteLine("cpu=" + cpucomboBox.Items[i].ToString());
@@ -118,6 +123,7 @@ namespace boot_img
         void init_hardware_info()
         {
             load_config("config.txt");
+            offsettextBox1.Text = "0x200";
             if (boardcomboBox.Items.Count > 0)
                 boardcomboBox.SelectedIndex = 0;
             if (archcomboBox.Items.Count > 0)

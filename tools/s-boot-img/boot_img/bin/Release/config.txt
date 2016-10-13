@@ -1,4 +1,6 @@
+#加密方式可选：none,AES,DES和RC4中的一种，其中选择none表示不加密
 encrypttype=AES
+#加密密钥
 encryptkey=bjbjhgbkhhhfdb
 
 
@@ -19,11 +21,14 @@ path5=
 
 outpath=
 
+#在下面添加设备板卡信息：
 board=IMT407Z V2.1
 board=windows simulation
 
+#在下面添加CPU架构信息：
 arch=Cortex-M4
 arch=Intel i3
 
+#在下面添加CPU型号信息：
 cpu=STM32F407ZET6
 cpu=Intel core i3-4170
