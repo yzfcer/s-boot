@@ -1,0 +1,29 @@
+encrypttype=AES
+encryptkey=bjbjhgbkhhhfdb
+
+
+position1=0x200
+path1=
+
+position2=0x20000
+path2=
+
+position3=0x30000
+path3=
+
+position4=0x50000
+path4=
+
+position5=0x60000
+path5=
+
+outpath=
+
+board=IMT407Z V2.1
+board=windows simulation
+
+arch=Cortex-M4
+arch=Intel i3
+
+cpu=STM32F407ZET6
+cpu=Intel core i3-4170
