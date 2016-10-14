@@ -303,16 +303,27 @@ namespace boot_img
         {
             int idx = 0;
             Array.Clear(filehead, 0, filehead.Length);
-            idx += fill_bytearr(filehead, idx, "S_BOOT10");
+            fill_bytearr(filehead, idx, "S_BOOT10");
+            idx += 8;
             idx += fill_bytearr(filehead, idx, (UInt32)imglen);
             idx += fill_bytearr(filehead, idx, 512);
             idx += fill_bytearr(filehead, idx, 1);
-            idx += fill_bytearr(filehead, idx, softvertextBox.Text);
+            fill_bytearr(filehead, idx, softvertextBox.Text);
+            idx += 16;
             idx += fill_bytearr(filehead, idx, filecrc);
             int encrypttype = encryptcomboBox.SelectedIndex;
             idx += fill_bytearr(filehead, idx, (UInt32)encrypttype);
             idx += 20;
             idx += fill_bytearr(filehead, idx, outpathtextBox.Text);
+            idx += 64;
+            fill_bytearr(filehead, idx, boardcomboBox.Text);
+            idx += 32;
+            fill_bytearr(filehead, idx, archcomboBox.Text);
+            idx += 32;
+            fill_bytearr(filehead, idx, cpucomboBox.Text);
+            idx += 32;
+            UInt32 crc = (UInt32)Crc32.calc_crc32(filehead, 0, 512 - 4);
+            fill_bytearr(filehead, 512-4, crc);
         }
 
         private void generatebutton_Click(object sender, EventArgs e)

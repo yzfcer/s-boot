@@ -62,7 +62,11 @@ uint32_t boot_get_sys_ms(void)
 
 void boot_jump_to_app(void)
 {
-
+    char ch;
+    while(1)
+    {
+        scanf("%c",&ch);
+    }
 }
 
 void feed_watchdog(void)
