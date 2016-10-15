@@ -306,11 +306,8 @@ namespace boot_img
             fill_bytearr(filehead, 512-4, crc);
         }
 
-        private void generatebutton_Click(object sender, EventArgs e)
+        bool pack_img()
         {
-            if (!check_params())
-                return;
-            set_info("正在转换...");
             listfi.Clear();
             for (int i = 0; i < dataGridView1.Rows.Count; i++)
             {
@@ -327,7 +324,7 @@ namespace boot_img
                 if (listfi[i].Offset + listfi[i].Filelen > listfi[i + 1].Offset)
                 {
                     set_error("文件"+listfi[i].Path+"的长度超出了填充范围！");
-                    return;
+                    return false;
                 }
             }
             imglen = listfi[cnt].Offset + listfi[cnt].Filelen;
@@ -346,7 +343,24 @@ namespace boot_img
             System.IO.FileStream fs = new System.IO.FileStream(outpathtextBox.Text, System.IO.FileMode.Create);
             fs.Write(imgdata, 0, imglen);
             fs.Close();
-            set_info("生成img文件成功");
+            return true;
+        }
+        private void generatebutton_Click(object sender, EventArgs e)
+        {
+            if (!check_params())
+                return;
+            
+            try
+            {
+                set_info("正在转换...");
+                if(pack_img() == true)
+                    set_info("生成img文件成功");
+            }
+            catch(Exception ex)
+            {
+                set_error(ex.Message);
+            }
+            
         }
 
         private void removebutton_Click(object sender, EventArgs e)
@@ -362,6 +376,7 @@ namespace boot_img
             if (offsettextBox.Text == "" || srcpathtextBox.Text == "")
                 return;
             dataGridView1.Rows.Add(offsettextBox.Text,srcpathtextBox.Text);
+            
         }
 
        

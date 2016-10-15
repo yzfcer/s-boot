@@ -14,8 +14,6 @@ sourcefile=0x4000,J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test
 
 sourcefile=0x6000,J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test4.txt
 
-sourcefile=0x8000,J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test5.txt
-
 outputfile=J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\imgfile.none.img
 
 #在下面添加CPU架构信息：
