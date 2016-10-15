@@ -359,7 +359,7 @@ namespace boot_img
             fill_file_head();
             Array.Copy(filehead, imgdata, 512);
 
-            //这里需奥加密和校验
+            //这里加密和校验
             filecrc = (UInt32)Crc32.calc_crc32(imgdata, 512, imglen - 512);
             System.IO.FileStream fs = new System.IO.FileStream(outpathtextBox.Text, System.IO.FileMode.Create);
             fs.Write(imgdata, 0, imglen);
