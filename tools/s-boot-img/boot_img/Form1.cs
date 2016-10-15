@@ -310,7 +310,7 @@ namespace boot_img
         {
             if (!check_params())
                 return;
-            set_error("");
+            set_info("正在转换...");
             listfi.Clear();
             for (int i = 0; i < dataGridView1.Rows.Count; i++)
             {
