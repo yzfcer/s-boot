@@ -11,8 +11,6 @@ namespace boot_img
 {
     public partial class Form1 : Form
     {
-        List<TextBox> offsettb;
-        List<TextBox> pathtb;
         byte[] filehead;
         byte[] imgdata;
         Int32 imglen;//img文件长度
@@ -61,23 +59,14 @@ namespace boot_img
                             }
                         }
                     }
-                    else if (strarr[0].CompareTo("outpath") == 0)
+                    else if (strarr[0].CompareTo("outputfile") == 0)
                     {
                         outpathtextBox.Text = strarr[1];
                     }
-                    else
+                    else if (strarr[0].CompareTo("sourcefile") == 0)
                     {
-                        for (int i = 1; i < 6; i++)
-                        {
-                            if (strarr[0].CompareTo("path" + i.ToString()) == 0)
-                            {
-                                pathtb[i - 1].Text = strarr[1];
-                            }
-                            else if (strarr[0].CompareTo("position" + i.ToString()) == 0)
-                            {
-                                offsettb[i - 1].Text = strarr[1];
-                            }
-                        }
+                        this.dataGridView1.Rows.Add(strarr[1],strarr[2]);
+                        
                     }
                 }
             }
@@ -94,38 +83,47 @@ namespace boot_img
             sw.WriteLine("encryptkey=" + keytextBox.Text);
             sw.WriteLine();
             sw.WriteLine(strline);
-            for (int i = 1; i < 6; i++)
+            sw.WriteLine("#打包源文件的在img中的偏移地址和文件的路径");
+            sw.WriteLine("#偏移位置从0x200开始,0x200之前的空间用于保存img描述信息");
+            for (int i = 0; i < dataGridView1.Rows.Count; i++)
             {
-                sw.WriteLine("position" + i.ToString() + "=" + offsettb[i - 1].Text);
-                sw.WriteLine("path" + i.ToString() + "=" + pathtb[i - 1].Text);
+                string filestr = "sourcefile="+ dataGridView1.Rows[i].Cells["offset"].Value.ToString();
+                filestr += ("," + dataGridView1.Rows[i].Cells["path"].Value.ToString());
+                sw.WriteLine(filestr);
                 sw.WriteLine();
             }
-            sw.WriteLine("outpath="+outpathtextBox.Text);
+
+            sw.WriteLine("outputfile="+outpathtextBox.Text);
             sw.WriteLine();
-            sw.WriteLine("#在下面添加设备板卡信息：");
-            for (int i = 0; i < boardcomboBox.Items.Count; i++)
-            {
-                sw.WriteLine("board="+boardcomboBox.Items[i].ToString());
-            }
-            sw.WriteLine();
+
+
+
+
             sw.WriteLine("#在下面添加CPU架构信息：");
             for (int i = 0; i < archcomboBox.Items.Count; i++)
             {
                 sw.WriteLine("arch=" + archcomboBox.Items[i].ToString());
             }
             sw.WriteLine();
+
             sw.WriteLine("#在下面添加CPU型号信息：");
             for (int i = 0; i < cpucomboBox.Items.Count; i++)
             {
                 sw.WriteLine("cpu=" + cpucomboBox.Items[i].ToString());
             }
-            sw.Close();
+
+            sw.WriteLine("#在下面添加设备板卡信息：");
+            for (int i = 0; i < boardcomboBox.Items.Count; i++)
+            {
+                sw.WriteLine("board=" + boardcomboBox.Items[i].ToString());
+            }
+            sw.WriteLine(); sw.Close();
         }
 
         void init_hardware_info()
         {
             load_config("config.txt");
-            offsettextBox1.Text = "0x200";
+            //offsettextBox1.Text = "0x200";
             if (boardcomboBox.Items.Count > 0)
                 boardcomboBox.SelectedIndex = 0;
             if (archcomboBox.Items.Count > 0)
@@ -136,18 +134,8 @@ namespace boot_img
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            offsettb = new List<TextBox>();
-            offsettb.Add(offsettextBox1);
-            offsettb.Add(offsettextBox2);
-            offsettb.Add(offsettextBox3);
-            offsettb.Add(offsettextBox4);
-            offsettb.Add(offsettextBox5);
-            pathtb = new List<TextBox>();
-            pathtb.Add(pathtextBox1);
-            pathtb.Add(pathtextBox2);
-            pathtb.Add(pathtextBox3);
-            pathtb.Add(pathtextBox4);
-            pathtb.Add(pathtextBox5);
+            
+
             filehead = new byte[512];
             info.ForeColor = Color.Red;
             info.Text = "";
@@ -158,39 +146,21 @@ namespace boot_img
 
         void set_path(int idx)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Title = "选择文件";
-            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                pathtb[idx].Text = ofd.FileName;
-            }
         }
 
         
 
-        private void viewbutton1_Click(object sender, EventArgs e)
-        {
-            set_path(0);
-        }
 
-        private void viewbutton2_Click(object sender, EventArgs e)
-        {
-            set_path(1);
-        }
 
-        private void viewbutton3_Click(object sender, EventArgs e)
+        private void viewbutton_Click(object sender, EventArgs e)
         {
-            set_path(2);
-        }
-
-        private void viewbutton4_Click(object sender, EventArgs e)
-        {
-            set_path(3);
-        }
-
-        private void viewbutton5_Click(object sender, EventArgs e)
-        {
-            set_path(4);
+             OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Title = "选择文件";
+            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                srcpathtextBox.Text = ofd.FileName;
+            }
+           
         }
 
         private void outviewbutton_Click(object sender, EventArgs e)
@@ -209,7 +179,9 @@ namespace boot_img
             OpenFileDialog ofd = new OpenFileDialog();
             if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
+                dataGridView1.Rows.Clear();
                 load_config(ofd.FileName);
+                set_info("导入成功");
             }
         }
 
@@ -222,6 +194,7 @@ namespace boot_img
             if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 save_config(sfd.FileName);
+                set_info("保存成功");
             }
         }
 
@@ -237,7 +210,14 @@ namespace boot_img
         /*****************************************************************************************/
         void set_error(string errstr)
         {
+            info.ForeColor = Color.Red;
             info.Text = errstr;
+        }
+
+        void set_info(string infostr)
+        {
+            info.ForeColor = Color.Green;
+            info.Text = infostr;
         }
 
         bool check_params()
@@ -272,11 +252,7 @@ namespace boot_img
                 set_error("请输入加密密钥");
                 return false;
             }
-            if (pathtextBox1.Text == "")
-            {
-                set_error("第一个文件不能为空");
-                return false;
-            }
+            
             if (outpathtextBox.Text  == "")
             {
                 set_error("请选择输出路径");
@@ -313,8 +289,12 @@ namespace boot_img
             idx += fill_bytearr(filehead, idx, filecrc);
             int encrypttype = encryptcomboBox.SelectedIndex;
             idx += fill_bytearr(filehead, idx, (UInt32)encrypttype);
-            idx += 20;
-            idx += fill_bytearr(filehead, idx, outpathtextBox.Text);
+
+            idx += fill_bytearr(filehead, idx, 0x12345678);
+            idx += 16;
+            string[] split = outpathtextBox.Text.Split('/', '\\');
+            int count = split.Length;
+            idx += fill_bytearr(filehead, idx, split[count-1]);
             idx += 64;
             fill_bytearr(filehead, idx, boardcomboBox.Text);
             idx += 32;
@@ -330,13 +310,13 @@ namespace boot_img
         {
             if (!check_params())
                 return;
-            set_error("");
+            set_info("正在转换...");
             listfi.Clear();
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < dataGridView1.Rows.Count; i++)
             {
                 fileinfo fi = new fileinfo();
-                fi.Path = pathtb[i].Text;
-                fi.Offset = Convert.ToInt32(offsettb[i].Text,16);
+                fi.Path = dataGridView1.Rows[i].Cells["path"].Value.ToString();
+                fi.Offset = Convert.ToInt32(dataGridView1.Rows[i].Cells["offset"].Value.ToString(),16);
                 fi.read_file();
                 if(fi.Filelen > 0)
                     listfi.Add(fi);
@@ -344,7 +324,7 @@ namespace boot_img
             int cnt = listfi.Count - 1;
             for (int i = 0; i < cnt; i++)
             {
-                if (listfi[i].Offset + listfi[i].Filelen >= listfi[i + 1].Offset)
+                if (listfi[i].Offset + listfi[i].Filelen > listfi[i + 1].Offset)
                 {
                     set_error("文件"+listfi[i].Path+"的长度超出了填充范围！");
                     return;
@@ -359,11 +339,31 @@ namespace boot_img
             fill_file_head();
             Array.Copy(filehead, imgdata, 512);
 
-            //这里加密和校验
+            //这里需添加加密功能
+
+
             filecrc = (UInt32)Crc32.calc_crc32(imgdata, 512, imglen - 512);
             System.IO.FileStream fs = new System.IO.FileStream(outpathtextBox.Text, System.IO.FileMode.Create);
             fs.Write(imgdata, 0, imglen);
             fs.Close();
+            set_info("生成img文件成功");
         }
+
+        private void removebutton_Click(object sender, EventArgs e)
+        {
+            if (dataGridView1.SelectedRows.Count > 0)
+            {
+                dataGridView1.Rows.Remove(dataGridView1.SelectedRows[0]);
+            }
+        }
+
+        private void insertbutton_Click(object sender, EventArgs e)
+        {
+            if (offsettextBox.Text == "" || srcpathtextBox.Text == "")
+                return;
+            dataGridView1.Rows.Add(offsettextBox.Text,srcpathtextBox.Text);
+        }
+
+       
     }
 }
