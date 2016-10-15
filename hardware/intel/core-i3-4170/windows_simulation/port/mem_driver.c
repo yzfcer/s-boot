@@ -100,7 +100,12 @@ static void read_rom_file(uint8_t memidx)
     uint8_t *buf = (char*)get_rom_base(memidx);
     uint32_t len = get_rom_lenth(memidx);
     sprintf(filename,"rom%d.bin",memidx);
-    fil = fopen(filename,"rb+");
+    fil = fopen(filename,"rb");
+    if(!fil)
+        flush_rom_file(memidx);
+    fil = fopen(filename,"rb");
+    if(!fil)
+        return;
     fread(buf,1,len,fil);
     fclose(fil);
 }
