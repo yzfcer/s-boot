@@ -1,34 +1,37 @@
 #加密方式可选填：none,AES,DES和RC4中的一种，其中选择none表示不加密
-encrypttype=AES
+encrypttype=none
 #加密密钥
 encryptkey=bjbjhgbkhhhfdb
 
 
-position1=0x200
-path1=J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test1.txt
+#打包源文件的在img中的偏移地址和文件的路径
+#偏移位置从0x200开始,0x200之前的空间用于保存img描述信息
+sourcefile=0x200,J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test1.txt
 
-position2=0x2000
-path2=J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test2.txt
+sourcefile=0x2800,J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test2.txt
 
-position3=0x3000
-path3=J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test3.txt
+sourcefile=0x4000,J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test3.txt
 
-position4=0x5000
-path4=J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test4.txt
+sourcefile=0x6000,J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test4.txt
 
-position5=0x6000
-path5=
+sourcefile=0x8000,J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test5.txt
 
-outpath=J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\imgfile.AES.img
-
-#在下面添加设备板卡信息：
-board=IMT407Z V2.1
-board=windows simulation
+outputfile=J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\imgfile.none.img
 
 #在下面添加CPU架构信息：
+arch=Cortex-M4
+arch=Intel i3
 arch=Cortex-M4
 arch=Intel i3
 
 #在下面添加CPU型号信息：
 cpu=STM32F407ZET6
 cpu=Intel core i3-4170
+cpu=STM32F407ZET6
+cpu=Intel core i3-4170
+#在下面添加设备板卡信息：
+board=IMT407Z V2.1
+board=windows simulation
+board=IMT407Z V2.1
+board=windows simulation
+
