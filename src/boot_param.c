@@ -83,15 +83,15 @@ void init_boot_param(const mem_map_s *mmap)
     boot_param_s *bp = (boot_param_s*)g_bootparam;
     bp->magic = BOOT_PARAM_MAGIC;
     bp->lenth = sizeof(boot_param_s);
-    
+    bp->flush_num = g_param_write_num;
+
     bp->version = BOOT_VERSION;
     bp->debug_mode = 0;
-    
-
-    bp->flush_num = g_param_write_num;
-    bp->encrypt_en = ENCRYPT_ENABLE;
     bp->wait_sec = WAIT_KEY_SEC;
+    bp->run_type = RUN_SPACE_TYPE;
+    bp->encrypt_type = ENCRYPT_TYPE;
     bp->lock_en = MCU_LOCK_ENABLE;
+    
     src = (char*)mmap;
     dest = (char*)&bp->mem_map;
     for(i = 0;i < sizeof(mem_map_s);i ++)

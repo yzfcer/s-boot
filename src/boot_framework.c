@@ -276,7 +276,7 @@ static int32_t  boot_upgrade_check(void)
     
     if(MEM_TYPE_ROM == bp->mem_map.rom.program1_region.type)
     {
-        ret = flush_code_to_iflash(&img);
+        ret = flush_code_to_rom(&img);
     }
     else
     {

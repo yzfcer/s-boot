@@ -37,11 +37,13 @@ typedef struct
     uint32_t lenth;//本参数结构体的长度
     uint32_t flush_num;//参数区擦写次数
     
-    uint8_t version;//bootloader`
-    uint8_t debug_mode;//调试模式
-    uint8_t wait_sec;//等待键盘事件秒数
-    bool_t encrypt_en;//程序加密使能
-    bool_t lock_en;//芯片锁定使能
+    uint8_t version;    //bootloader`
+    uint8_t debug_mode; //调试模式
+    uint8_t wait_sec;   //等待键盘事件秒数
+    uint8_t run_type;   //运行在RAM或Flash
+    uint8_t encrypt_type;//程序加密使能
+    bool_t lock_en;     //芯片锁定使能
+    
     mem_map_s mem_map;//系统的空间映射表
     uint32_t crc;//CRC校验
 }boot_param_s;

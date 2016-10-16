@@ -318,13 +318,12 @@ int32_t flush_code_to_ram(region_s *code_region)
 
 
 //先备份原来的程序，再烧录新程序到运行区
-int32_t flush_code_to_iflash(region_s *bin)
+int32_t flush_code_to_rom(region_s *bin)
 {
     int32_t ret;
     region_s *src;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     boot_notice("begin to flush code to rom space...");
-    
     //先将原来的程序拷贝到备份空间    
     src = &bp->mem_map.rom.program1_region;
     ret = copy_region_data(src,&bp->mem_map.rom.program2_region);
@@ -358,7 +357,7 @@ int32_t flush_code_data(memtype_e type,region_s *img)
             ret = flush_code_to_ram(img);
             break;
         case MEM_TYPE_ROM:
-            ret = flush_code_to_iflash(img);
+            ret = flush_code_to_rom(img);
             break;
         default:
             boot_error("unknown memory type:%d",type);
