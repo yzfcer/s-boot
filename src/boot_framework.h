@@ -21,8 +21,8 @@ extern "C" {
 typedef enum 
 {
     BOOT_INIT = 0,
-    BOOT_APP_DEBUG_CHECK,
     BOOT_FIRST_CHECK,
+    BOOT_APP_DEBUG_CHECK,
     BOOT_SELF_CHECK,
     BOOT_CHIP_LOCK_CHECK,
     BOOT_UPGRADE_CHECK,

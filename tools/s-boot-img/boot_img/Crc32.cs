@@ -7,38 +7,35 @@ namespace boot_img
 {
     class Crc32
     {
-        static protected ulong[] Crc32Table;
+        //static protected ulong[] Crc32Table;
+        static UInt32  POLYNOMIAL = 0xEDB88320;
+        static bool have_table = false;
+        static UInt32[] table = new UInt32[256];
+
         //生成CRC32码表
-        static public void make_table()
+        static void make_table()
         {
-            ulong Crc;
-            Crc32Table = new ulong[256];
-            int i, j;
+            UInt32 i, j;
+            have_table = true;
             for (i = 0; i < 256; i++)
-            {
-                Crc = (ulong)i;
-                for (j = 8; j > 0; j--)
-                {
-                    if ((Crc & 1) == 1)
-                        Crc = (Crc >> 1) ^ 0xEDB88320;
-                    else
-                        Crc >>= 1;
-                }
-                Crc32Table[i] = Crc;
-            }
+                for (j = 0, table[i] = i; j < 8; j++)
+                    table[i] = (table[i] >> 1) ^ (((table[i] & 1) != 0)? POLYNOMIAL : 0);
         }
 
         //获取字符串的CRC32校验值
-        static public ulong calc_crc32(byte[] buffer,int offset,int len)
+        public static UInt32 calc_crc32(byte[] buff, int offset,int len, UInt32 crc)
         {
-            //生成码表
-            make_table();
-            ulong value = 0xffffffff;
-            for (int i = 0; i < len; i++)
-            {
-                value = (value >> 8) ^ Crc32Table[(value & 0xFF) ^ buffer[i]];
-            }
-            return value ^ 0xffffffff;
+            int i;
+            if (!have_table)
+                make_table();
+            //boot_debug("calculate CRC base 0x%x,len %d",buff,len);
+            crc = ~crc;
+            for (i = offset; i < offset + len; i++)
+                crc = (crc >> 8) ^ table[(crc ^ buff[i]) & 0xff];
+            return ~crc;
         }
+
+        
+        
     }
 }

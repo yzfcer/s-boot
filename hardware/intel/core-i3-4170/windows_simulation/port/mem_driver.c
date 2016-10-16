@@ -110,27 +110,24 @@ static void read_rom_file(uint8_t memidx)
     fclose(fil);
 }
 
-int read_rom(uint8_t memidx,uint32_t offsetaddr,uint8_t *buf,int32_t lenth)
+int read_rom(uint8_t memidx,uint32_t realaddr,uint8_t *buf,int32_t lenth)
 {
-    uint32_t realaddr = get_rom_base(memidx) + offsetaddr;
     uint8_t *src = (uint8_t *)realaddr;
     read_rom_file(memidx);
     memcpy(buf,src,lenth);
     return lenth;
 }
 
-int write_rom(uint8_t memidx,uint32_t offsetaddr,uint8_t *buf,int32_t lenth)
+int write_rom(uint8_t memidx,uint32_t realaddr,uint8_t *buf,int32_t lenth)
 {
-    uint32_t realaddr = get_rom_base(memidx) + offsetaddr;
     uint8_t *dest = (uint8_t *)realaddr;
     memcpy(dest,buf,lenth);
     flush_rom_file(memidx);
     return lenth;
 }
 
-int erase_rom(uint8_t memidx,uint32_t offsetaddr,int32_t lenth)
+int erase_rom(uint8_t memidx,uint32_t realaddr,int32_t lenth)
 {
-    uint32_t realaddr = get_rom_base(memidx) + offsetaddr;
     uint8_t *dest = (uint8_t *)realaddr;
     memset(dest,0,lenth);
     flush_rom_file(memidx);
