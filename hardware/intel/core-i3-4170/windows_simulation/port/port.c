@@ -52,7 +52,15 @@ int32_t boot_getchar_noblocking(char *ch)
 
 int32_t boot_receive_img(uint32_t addr,uint32_t maxlen)
 {
-	return 0;
+    int fd;
+    FILE *fil;
+    int len;
+    fil = fopen("imgfile.none.img","rb");
+    if(!fil)
+        return -1;
+    len = fread((uint8_t*)addr,1,maxlen,fil);
+    fclose(fil);
+	return len;
 }
 
 uint32_t boot_get_sys_ms(void)

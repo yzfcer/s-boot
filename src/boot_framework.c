@@ -103,6 +103,7 @@ static int32_t boot_first_check(void)
     return 0;
     
 }
+
 static int32_t boot_chip_lock_check(void)
 {
     if(!is_chip_lock())
