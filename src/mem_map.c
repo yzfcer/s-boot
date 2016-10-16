@@ -141,11 +141,11 @@ int32_t mem_region_init(void)
 	mem_map_s *map = &g_memmap;
     for(i = 0;i < RAM_COUNT;i ++)
     {
-        rambase[i] = 0;
+        rambase[i] = get_ram_base(i);
     }
     for(i = 0;i < ROM_COUNT;i ++)
     {
-        rombase[i] = 0;
+        rombase[i] = get_rom_base(i);
     }
 
 	alloc_region(&map->rom.boot_region,rombase,BOOTLOADER_LENTH);    

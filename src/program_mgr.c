@@ -48,15 +48,16 @@ static char *encty_type[] =
 
 static void print_img_head(img_head_s *head)
 {
-    boot_printf("img head info:");
-    boot_printf("board:%s",head->board_name);
-    boot_printf("arch :%s",head->arch_name);
-    boot_printf("CPU  :%s",head->cpu_name);
-    boot_printf("img file name  :%s",head->img_name);
-    boot_printf("img file lenth :%s",head->img_len);
-    boot_printf("soft version   :%s",head->bin_ver);
+    boot_printf("img head info:\r\n");
+	//boot_printf("board index:%d\r\n",(uint32_t)(&head->board_name)-(uint32_t)(&head->magic));
+    boot_printf("board:%s\r\n",(char*)head->board_name);
+    boot_printf("arch :%s\r\n",(char*)head->arch_name);
+    boot_printf("CPU  :%s\r\n",(char*)head->cpu_name);
+    boot_printf("img file name  :%s\r\n",(char*)head->img_name);
+    boot_printf("img file lenth :%d\r\n",head->img_len);
+    boot_printf("soft version   :%s\r\n",head->bin_ver);
     if(head->encry_type < 4);
-        boot_printf("encrypt type   :%s",encty_type[head->encry_type]);
+        boot_printf("encrypt type   :%s\r\n",encty_type[head->encry_type]);
 }
 
 static int head_endian_convert(img_head_s *head)
@@ -77,14 +78,6 @@ static int head_endian_convert(img_head_s *head)
     return -1;        
 }
 
-uint32_t get_ram_addr(uint32_t memidx,uint32_t addr)
-{
-	uint32_t base;
-    base = get_ram_base(memidx);
-    if(MEM_BASE_INVALID == base)
-        return MEM_BASE_INVALID;
-    return base + addr;
-}
 
 uint32_t convert_byte_to_uint32(uint8_t *str,int32_t index)
 {
@@ -110,25 +103,19 @@ void convert_uint32_to_byte(uint8_t *buf,int32_t index,uint32_t va)
 int32_t check_and_decrypt_img(region_s *img)
 {
     int32_t len;
-    uint32_t real_addr,cal_crc,crc;
+    uint32_t cal_crc,crc;
     img_head_s *head;
     //对接受的数据做CRC校验
-    real_addr = get_ram_addr(img->index,img->addr);
-    if(INVALID_REAL_ADDR == real_addr)
-    {
-        boot_error("memory map error.");
-        return -1;
-    }
     feed_watchdog();
-    head = (img_head_s*)real_addr;
+	head = (img_head_s*)img->addr;
     if(0 != head_endian_convert(head))
     {
         boot_warn("img file head endian convert ERROR.");
         return -1;
     }
     
-    crc = convert_byte_to_uint32((uint8_t*)head,head->head_len - 4);
-    cal_crc = head->head_crc;
+    cal_crc = calc_crc32((uint8_t*)head,head->head_len - 4,0xffffffff);
+    crc = head->head_crc;
     
     boot_debug("img file head crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
     if(cal_crc != crc)
@@ -139,7 +126,7 @@ int32_t check_and_decrypt_img(region_s *img)
     print_img_head(head);
     
     feed_watchdog();
-    crc = convert_byte_to_uint32((uint8_t*)(real_addr+head->head_len),head->img_len - head->head_len);
+	crc = calc_crc32((uint8_t*)(img->addr+head->head_len),head->img_len - head->head_len,0xffffffff);
     cal_crc = head->bin_crc;
     
     boot_debug("bin file crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
@@ -154,8 +141,8 @@ int32_t check_and_decrypt_img(region_s *img)
     
     //解密
     boot_notice("img file decrypt");
-    boot_debug("decrypt_data base:0x%x,lenth:%d",real_addr,img->lenth - 4);
-    len = decrypt_data((uint8_t *)real_addr,img->lenth - 4);
+    boot_debug("decrypt_data base:0x%x,lenth:%d",img->addr,img->lenth - 4);
+    len = decrypt_data((uint8_t *)img->addr,img->lenth - 4);
     if(len < 0)
     {
         boot_warn("img file Decrypt ERROR.");
@@ -170,19 +157,10 @@ int32_t check_and_decrypt_img(region_s *img)
 
 int32_t encrypt_code_calc_crc(region_s *code_reg)
 {
-    uint32_t real_addr;
     int32_t len;
-    
-    real_addr = get_ram_addr(code_reg->addr,code_reg->type);
-    if(INVALID_REAL_ADDR == real_addr)
-    {
-        boot_error("memory map error.");
-        return -1;
-    }
 
-
-    boot_debug("decrypt_data base:0x%x,lenth:%d",real_addr,code_reg->lenth - 4);
-    len = encrypt_data((uint8_t *)real_addr,code_reg->lenth -4);
+    boot_debug("decrypt_data base:0x%x,lenth:%d",code_reg->addr,code_reg->lenth - 4);
+    len = encrypt_data((uint8_t *)code_reg->addr,code_reg->lenth -4);
     if(len < 0)
     {
         boot_warn("img file encrypt ERROR.");
@@ -191,8 +169,8 @@ int32_t encrypt_code_calc_crc(region_s *code_reg)
     
     boot_notice("img file encrypt OK.");
     
-    code_reg->crc = calc_crc32((char *)real_addr,code_reg->lenth - 4,0);
-    convert_uint32_to_byte((uint8_t *)real_addr,code_reg->lenth - 4,code_reg->crc);
+    code_reg->crc = calc_crc32((char *)code_reg->addr,code_reg->lenth - 4,0);
+    convert_uint32_to_byte((uint8_t *)code_reg->addr,code_reg->lenth - 4,code_reg->crc);
     
     boot_debug("new file CRC:0x%x.",code_reg->crc);
     return 0;
@@ -339,7 +317,7 @@ int32_t flush_code_data(memtype_e type,region_s *img)
         (void)get_boot_params_from_ROM();
         return ret;
     }
-    if(MEM_TYPE_ROM != type)
+    if(MEM_TYPE_ROM == type)
         (void)write_param();
     return ret;
 }
@@ -385,7 +363,7 @@ void clean_program(void)
 {
     int idx = 0;
     uint32_t i,blocknum;
-    region_s *code[6];
+    region_s *code[5];
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     boot_printf("clearing program ...\r\n");
     code[idx++] = &bp->mem_map.rom.program1_region;
@@ -394,7 +372,7 @@ void clean_program(void)
     code[idx++] = &bp->mem_map.rom.param1_region;
     code[idx++] = &bp->mem_map.rom.param2_region;
     
-    for(i = 0;i < 6;i ++)
+    for(i = 0;i < 5;i ++)
     {   
         boot_notice("erase base 0x%x,lenth %d.",code[i]->addr,code[i]->lenth);
         blocknum = (code[i]->lenth + BLOCK_SIZE - 1) / BLOCK_SIZE;

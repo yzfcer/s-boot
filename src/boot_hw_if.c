@@ -223,38 +223,41 @@ int32_t boot_receive_img(uint32_t addr,uint32_t maxlen)
 }
 #endif
 
-static int read_ram(uint32_t memidx,uint32_t offsetaddr,uint8_t *buf,int32_t lenth)
+static int read_ram(uint32_t memidx,uint32_t realaddr,uint8_t *buf,int32_t lenth)
 {
     int i;
-    uint8_t *data;
+    uint8_t *src;
+    uint32_t base;
     uint32_t size;
-    uint32_t realaddr = get_rom_base(memidx) + offsetaddr;
-    data = (uint8_t*)realaddr;
+
+    src = (uint8_t*)realaddr;
+    base = get_ram_base(memidx);
     size = get_ram_lenth(memidx);
-    if(realaddr + lenth >= size)
+    if(realaddr - base + lenth >= size)
         return -1;
-    data += realaddr;
     for(i = 0;i < lenth;i ++)
     {
-        data[i] = buf[i];
+        buf[i] = src[i];
     }
     return lenth;
 }
 
-static int write_ram(uint32_t memidx,uint32_t offsetaddr,uint8_t *buf,int32_t lenth)
+static int write_ram(uint32_t memidx,uint32_t realaddr,uint8_t *buf,int32_t lenth)
 {
     int i;
-    uint8_t *data;
+    uint8_t *dest;
+    uint32_t base;
     uint32_t size;
-    uint32_t realaddr = get_rom_base(memidx) + offsetaddr;
-    data = (uint8_t*)realaddr;
+
+    dest = (uint8_t*)realaddr;
+    base = get_ram_base(memidx);
     size = get_ram_lenth(memidx);
-    if(realaddr + lenth >= size)
+    if(realaddr - base + lenth >= size)
         return -1;
-    data += realaddr;
+
     for(i = 0;i < lenth;i ++)
     {
-        buf[i] = data[i];
+        dest[i] = buf[i];
     }
     return lenth;
 }
@@ -262,7 +265,7 @@ static int write_ram(uint32_t memidx,uint32_t offsetaddr,uint8_t *buf,int32_t le
 int32_t read_block(uint8_t memtype,uint32_t memidx,uint32_t addr,uint8_t *buf,int32_t blkcount)
 {
     int len;
-    boot_notice("read block base:0x%x",addr);
+    //boot_notice("read block base:0x%x",addr);
     switch(memtype)
     {
         case MEM_TYPE_RAM:
@@ -284,7 +287,7 @@ int32_t read_block(uint8_t memtype,uint32_t memidx,uint32_t addr,uint8_t *buf,in
 int32_t write_block(uint8_t memtype,uint32_t memidx,uint32_t addr,uint8_t *buf,int32_t blkcount)
 {
     int len; 
-    boot_notice("write block base:0x%x",addr);
+    //boot_notice("write block base:0x%x",addr);
     switch(memtype)
     {
         case MEM_TYPE_RAM:

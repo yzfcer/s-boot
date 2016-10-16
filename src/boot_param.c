@@ -47,8 +47,9 @@ void *get_boot_params(void)
 
 void *get_boot_params_from_ROM(void)
 {
-    int32_t ret;
-
+    int32_t i,ret;
+    mem_map_s *map;
+    region_s *src,*dest;
     ret = read_param();
     if(0 != ret)
     {
@@ -56,9 +57,16 @@ void *get_boot_params_from_ROM(void)
         g_pbp = NULL;
         return NULL;
     }
+    map = get_memory_map();
     init_reg_name((boot_param_s *)&g_bootparam);
     g_pbp = (boot_param_s *)&g_bootparam;
     g_param_write_num = g_pbp->flush_num;
+    src = (region_s*)map;
+    dest = (region_s*)&g_pbp->mem_map;
+    for(i = 0;i < sizeof(g_pbp->mem_map)/sizeof(region_s);i ++)
+    {
+        dest[i].addr = src[i].addr;
+    }
     return (void*)g_pbp;
 }
 

@@ -97,7 +97,7 @@ void test_app_type_not_match(void)
 void test_upgrade(void)
 {
     region_s *img;
-    uint32_t real_addr;
+
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     extern mem_status_s g_memstatus;
     img = &bp->mem_map.ram.probuf_region;
@@ -109,10 +109,9 @@ void test_upgrade(void)
         return;
     }
 
-    real_addr = get_ram_addr(img->index,img->addr);
     sp_init_share_param();
 
-    g_upgrade_status.addr = real_addr;
+    g_upgrade_status.addr = img->addr;
     g_upgrade_status.lenth = img->lenth;
     g_upgrade_status.mem_type = img->type;
     g_upgrade_status.lenth = img->lenth;

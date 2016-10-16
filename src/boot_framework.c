@@ -487,8 +487,9 @@ static int32_t boot_run_system(void)
 boot_handle_TB g_status_handTB[] = 
 {
     {BOOT_INIT,"init",boot_init},
+    {BOOT_FIRST_CHECK,"first_check",boot_first_check},   
     {BOOT_APP_DEBUG_CHECK,"app_debug_check",boot_app_debug_check},
-    {BOOT_FIRST_CHECK,"first_check",boot_first_check},
+
     {BOOT_CHIP_LOCK_CHECK,"chip_lock_check",boot_chip_lock_check},
     {BOOT_SELF_CHECK,"self_check",boot_self_check},
     {BOOT_UPGRADE_CHECK,"upgrade_check",boot_upgrade_check},

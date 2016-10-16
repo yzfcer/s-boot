@@ -261,11 +261,11 @@ namespace boot_img
            return true;
         }
 
-        int fill_bytearr(byte[] arr, int idx, string str)
+        int fill_bytearr(byte[] arr, int idx, string str,int maxlen)
         {
             byte[] tag = System.Text.Encoding.Default.GetBytes(str);
             tag.CopyTo(filehead, idx);
-            return tag.Length;
+            return maxlen;
         }
 
         int fill_bytearr(byte[] arr, int idx, UInt32 value)
@@ -278,32 +278,37 @@ namespace boot_img
         void fill_file_head()
         {
             int idx = 0;
+
+            uint headlen = 0x200;
+            uint headver = 1;
             Array.Clear(filehead, 0, filehead.Length);
-            fill_bytearr(filehead, idx, "S_BOOT10");
-            idx += 8;
+            idx += fill_bytearr(filehead, idx, "S_BOOT10", 8);
+
             idx += fill_bytearr(filehead, idx, (UInt32)imglen);
-            idx += fill_bytearr(filehead, idx, 512);
-            idx += fill_bytearr(filehead, idx, 1);
-            fill_bytearr(filehead, idx, softvertextBox.Text);
-            idx += 16;
+            idx += fill_bytearr(filehead, idx, headlen);
+            idx += fill_bytearr(filehead, idx, headver);
+
+            idx += fill_bytearr(filehead, idx, softvertextBox.Text,16);
+
             idx += fill_bytearr(filehead, idx, filecrc);
             int encrypttype = encryptcomboBox.SelectedIndex;
             idx += fill_bytearr(filehead, idx, (UInt32)encrypttype);
 
             idx += fill_bytearr(filehead, idx, 0x12345678);
-            idx += 16;
+            idx += fill_bytearr(filehead, idx, "", 16);
             string[] split = outpathtextBox.Text.Split('/', '\\');
             int count = split.Length;
-            idx += fill_bytearr(filehead, idx, split[count-1]);
-            idx += 64;
-            fill_bytearr(filehead, idx, boardcomboBox.Text);
-            idx += 32;
-            fill_bytearr(filehead, idx, archcomboBox.Text);
-            idx += 32;
-            fill_bytearr(filehead, idx, cpucomboBox.Text);
-            idx += 32;
-            UInt32 crc = (UInt32)Crc32.calc_crc32(filehead, 0, 512 - 4);
+            idx += fill_bytearr(filehead, idx, split[count - 1], 64);
+            
+
+            idx += fill_bytearr(filehead, idx, boardcomboBox.Text,32);
+            idx +=fill_bytearr(filehead, idx, archcomboBox.Text,32);
+
+            idx += fill_bytearr(filehead, idx, cpucomboBox.Text,32);
+            
+            UInt32 crc = (UInt32)Crc32.calc_crc32(filehead, 0, 512 - 4,0xffffffff);
             fill_bytearr(filehead, 512-4, crc);
+
         }
 
         bool pack_img()
@@ -333,13 +338,14 @@ namespace boot_img
             {
                 Array.Copy(listfi[i].Data, 0, imgdata, listfi[i].Offset,listfi[i].Filelen);
             }
-            fill_file_head();
-            Array.Copy(filehead, imgdata, 512);
+            
 
             //这里需添加加密功能
 
 
-            filecrc = (UInt32)Crc32.calc_crc32(imgdata, 512, imglen - 512);
+            filecrc = (UInt32)Crc32.calc_crc32(imgdata, 512, imglen - 512,0xffffffff);
+            fill_file_head();
+            Array.Copy(filehead, imgdata, 512);
             System.IO.FileStream fs = new System.IO.FileStream(outpathtextBox.Text, System.IO.FileMode.Create);
             fs.Write(imgdata, 0, imglen);
             fs.Close();
