@@ -81,7 +81,7 @@ static void download_img_to_ram(void)
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     if(bp->mem_map.run.ram.maxlen <= 0)
     {
-        boot_warn("img can not download to MEM_TYPE_RAM,device NOT support.");
+        boot_warn("img can not download to RAM,device NOT support.");
         return;
     }
     ret = download_img_file(MEM_TYPE_RAM);
@@ -93,6 +93,10 @@ static void download_img_to_ram(void)
     exit_menu();
 }
 
+static void download_filesystem(void)
+{
+    boot_warn("s-boot can NOT support file system right now.");
+}
 
 static void set_debug_mode(void)
 {
@@ -257,6 +261,7 @@ static menu_handle_TB g_menu_handleTB[] =
 {
     {'1',0,0,"download img file to ROM",download_img_to_rom},
     {'2',0,0,"download img file to RAM",download_img_to_ram},
+    {'3',0,0,"download file system",download_filesystem},
     {'b',2,2,"set debug mode",set_debug_mode},
     {'d',0,0,"show memory map",show_memmap},
     {'k',0,0,"lock MCU chip",lock_mcu},
@@ -359,11 +364,9 @@ void menu_entry(void)
                 ret = open_super_prio();
                 if(0 == ret)
                 {
-                    boot_printf("You have got some advanced priority. ^_^\r\n");
+                    boot_notice("You have opened advanced function.");
                 }
             }
-            //else
-            //    boot_warn("no such an option to handle:%c.",ch);
         }
     }
 }    
