@@ -50,14 +50,15 @@ static void print_img_head(img_head_s *head)
 {
     boot_printf("img head info:\r\n");
 	//boot_printf("board index:%d\r\n",(uint32_t)(&head->board_name)-(uint32_t)(&head->magic));
-    boot_printf("board:%s\r\n",(char*)head->board_name);
-    boot_printf("arch :%s\r\n",(char*)head->arch_name);
-    boot_printf("CPU  :%s\r\n",(char*)head->cpu_name);
-    boot_printf("img file name  :%s\r\n",(char*)head->img_name);
-    boot_printf("img file lenth :%d\r\n",head->img_len);
-    boot_printf("soft version   :%s\r\n",head->bin_ver);
+    boot_printf("board name     : %s\r\n",(char*)head->board_name);
+    boot_printf("cpu arch       : %s\r\n",(char*)head->arch_name);
+    boot_printf("CPU model      : %s\r\n",(char*)head->cpu_name);
+    boot_printf("img file name  : %s\r\n",(char*)head->img_name);
+    boot_printf("img file lenth : %d\r\n",head->img_len);
+    boot_printf("soft version   : %s\r\n",head->bin_ver);
     if(head->encry_type < 4);
-        boot_printf("encrypt type   :%s\r\n",encty_type[head->encry_type]);
+        boot_printf("encrypt type   : %s\r\n",encty_type[head->encry_type]);
+    boot_printf("\r\n");
 }
 
 static int head_endian_convert(img_head_s *head)
@@ -158,6 +159,7 @@ int32_t check_and_decrypt_img(region_s *img)
 int32_t encrypt_code_calc_crc(region_s *code_reg)
 {
     int32_t len;
+    
 
     boot_debug("decrypt_data base:0x%x,lenth:%d",code_reg->addr,code_reg->lenth - 4);
     len = encrypt_data((uint8_t *)code_reg->addr,code_reg->lenth -4);
@@ -169,7 +171,7 @@ int32_t encrypt_code_calc_crc(region_s *code_reg)
     
     boot_notice("img file encrypt OK.");
     
-    code_reg->crc = calc_crc32((char *)code_reg->addr,code_reg->lenth - 4,0);
+    code_reg->crc = calc_crc32((char *)code_reg->addr,code_reg->lenth,0);
     convert_uint32_to_byte((uint8_t *)code_reg->addr,code_reg->lenth - 4,code_reg->crc);
     
     boot_debug("new file CRC:0x%x.",code_reg->crc);
@@ -253,6 +255,7 @@ int32_t flush_code_to_ram(region_s *code_region)
 {
     int32_t ret;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
+    boot_notice("begin to copy code to memory...");
     ret = copy_region_data(code_region,&bp->mem_map.run.flash);
     if(0 != ret)
     {
@@ -269,7 +272,7 @@ int32_t flush_code_to_iflash(region_s *bin)
     int32_t ret;
     region_s *src;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
-    boot_notice("begin to flush code to MEM_TYPE_ROM space...");
+    boot_notice("begin to flush code to rom space...");
     
     //先将原来的程序拷贝到备份空间    
     src = &bp->mem_map.rom.program1_region;
@@ -499,10 +502,6 @@ int32_t check_rom_program(region_s *code)
     }
     if(prog.status != MEM_ERROR)
     {
-        if(MEM_TYPE_ROM == prog.type)
-        {
-            prog.lenth -= 4;
-        }
         boot_debug("check program base 0x%x,lenth %d",prog.addr,prog.lenth);
         blocks = (prog.lenth + BLOCK_SIZE - 1) / BLOCK_SIZE;
         for(i = 0;i < blocks;i ++)
