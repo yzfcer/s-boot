@@ -99,7 +99,48 @@ void convert_uint32_to_byte(uint8_t *buf,int32_t index,uint32_t va)
         buf[i + index] = (uint8_t)(va >> (i*8));
     }
 }
+int memory_compare(uint8_t *dest,uint8_t *src,int len)
+{
+    int i;
+    for(i = 0;i < len;i ++)
+    {
+        if(dest[i] > src[i])
+            return 1;
+        else if(dest[i] < src[i])
+            return -1;
+    }
+    return 0;
+}
 
+int string_len(const char *str)
+{
+    int i = 0;
+    if(str == NULL)
+        return 0;
+    while(str[i])
+        i ++;
+    return i;
+}
+
+bool_t check_hardware_matched(img_head_s *head)
+{
+    if(0 != memory_compare(head->board_name,BOARD_NAME,string_len(BOARD_NAME)))
+    {
+        boot_notice("dest board name:%s",BOARD_NAME);
+        return B_FALSE;
+    }
+    if(0 != memory_compare(head->arch_name,ARCH_NAME,string_len(ARCH_NAME)))
+    {
+        boot_notice("dest arch name:%s",ARCH_NAME);
+        return B_FALSE;
+    }
+    if(0 != memory_compare(head->cpu_name,CPU_NAME,string_len(CPU_NAME)))
+    {
+        boot_notice("dest cpu model:%s",CPU_NAME);
+        return B_FALSE;
+    }
+    return B_TRUE;    
+}
 
 int32_t check_and_decrypt_img(region_s *img)
 {
@@ -125,6 +166,11 @@ int32_t check_and_decrypt_img(region_s *img)
         return -1;
     }
     print_img_head(head);
+    if(!check_hardware_matched(head))
+    {
+        boot_warn("hardware is NOT matched.");
+        return -1;
+    }
     
     feed_watchdog();
 	crc = calc_crc32((uint8_t*)(img->addr+head->head_len),head->img_len - head->head_len,0xffffffff);
