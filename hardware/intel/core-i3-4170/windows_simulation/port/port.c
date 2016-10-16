@@ -52,7 +52,6 @@ int32_t boot_getchar_noblocking(char *ch)
 
 int32_t boot_receive_img(uint32_t addr,uint32_t maxlen)
 {
-    int fd;
     FILE *fil;
     int len;
     fil = fopen("imgfile.none.img","rb");

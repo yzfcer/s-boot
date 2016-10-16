@@ -17,10 +17,13 @@
 #include "boot_param.h"
 #include "mem_driver.h"
 #include <stdarg.h>
-
+#include "boot_config.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+//通用缓存器，一般在拷贝数据时做缓存，或者接收命令字符
+uint8_t commbuffer[BLOCK_SIZE];
 
 void boot_delay(uint32_t ms)
 {
@@ -262,6 +265,10 @@ static int write_ram(uint32_t memidx,uint32_t realaddr,uint8_t *buf,int32_t lent
     return lenth;
 }
 
+uint8_t *get_block_buffer(void)
+{
+    return commbuffer;
+}
 int32_t read_block(uint8_t memtype,uint32_t memidx,uint32_t addr,uint8_t *buf,int32_t blkcount)
 {
     int len;

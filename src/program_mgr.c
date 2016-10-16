@@ -11,6 +11,7 @@
        Author:
        Modification:
 **********************************************************************************/
+#include "boot_config.h"
 #include "menu_list.h"
 #include "port.h"
 #include "boot_debug.h"
@@ -23,13 +24,16 @@
 #include "mem_map.h"
 #include "boot_hw_if.h"
 #include "mem_driver.h"
-#define LE_TO_BE32(x) (((x)&0xff)<<24) + (((x>>8)&0xff)<<16) + (((x>>16)&0xff)<<8) + (((x>>24)&0xff))
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-//通用缓存器，一般在拷贝数据时做缓存，或者接收命令字符
-uint8_t commbuffer[BLOCK_SIZE];
+
+static uint32_t LE_TO_BE32(uint32_t x) 
+{
+    return (((x)&0xff)<<24) + (((x>>8)&0xff)<<16) + (((x>>16)&0xff)<<8) + (((x>>24)&0xff));
+}
 
 static void print32_t_copy_percents(int32_t numerator, int32_t denominator,int32_t del)
 {
@@ -231,6 +235,7 @@ int32_t copy_region_data(region_s *src,region_s *dest)
 {
     int32_t i,j,len,blocks,times;
     uint32_t addr;
+    uint8_t *buff = get_block_buffer();
 
     if(0 >= src->lenth)
         return 0;
@@ -252,33 +257,33 @@ int32_t copy_region_data(region_s *src,region_s *dest)
     {    
         for(times = 0;times < 3;times ++)
         {
-            addr = src->addr + i * sizeof(commbuffer);
+            addr = src->addr + i * BLOCK_SIZE;
             if(i >= blocks - 1)
             {
-                for(j = 0;j < sizeof(commbuffer);j ++)
-                    commbuffer[j] = 0;
+                for(j = 0;j < BLOCK_SIZE;j ++)
+                    buff[j] = 0;
             }
-            len = read_block(src->type,src->index,addr,commbuffer,sizeof(commbuffer)/BLOCK_SIZE);
+            len = read_block(src->type,src->index,addr,buff,1);
             if(len > 0)
                 break;
         }
         if(times >= 3)
         {
-            boot_warn("read block 0x%x,lenth %d failed.",addr,sizeof(commbuffer));
+            boot_warn("read block 0x%x,lenth %d failed.",addr,BLOCK_SIZE);
             dest->status = MEM_ERROR;
             return -1;
         }
 
         for(times = 0;times < 3;times ++)
         {
-            addr = dest->addr + i * sizeof(commbuffer);
-            len = write_block(dest->type,dest->index,addr,commbuffer,sizeof(commbuffer)/BLOCK_SIZE);
+            addr = dest->addr + i * BLOCK_SIZE;
+            len = write_block(dest->type,dest->index,addr,buff,1);
             if(len > 0)
                 break;
         }
         if(times >= 3)
         {
-            boot_warn("read block 0x%x,lenth %d failed.",addr,sizeof(commbuffer));
+            boot_warn("read block 0x%x,lenth %d failed.",addr,BLOCK_SIZE);
             dest->status = MEM_ERROR;
             return -1;
         }
@@ -537,6 +542,7 @@ int32_t check_rom_program(region_s *code)
     int32_t i,blocks,len;
     uint32_t base;
     region_s prog;
+    uint8_t *buff = get_block_buffer();
 
     copy_region_info(code,&prog);
     prog.regname = code->regname;
@@ -552,12 +558,12 @@ int32_t check_rom_program(region_s *code)
         blocks = (prog.lenth + BLOCK_SIZE - 1) / BLOCK_SIZE;
         for(i = 0;i < blocks;i ++)
         {
-            base = prog.addr + i * sizeof(commbuffer);
-            len = read_block(prog.type,prog.index,base,commbuffer,sizeof(commbuffer)/BLOCK_SIZE);
+            base = prog.addr + i * BLOCK_SIZE;
+            len = read_block(prog.type,prog.index,base,buff,1);
             if(len <= 0)
             {
                 boot_warn("read %s block base 0x%x,lenth %d failed.",
-                            memtype_name(prog.type),base,sizeof(commbuffer));
+                            memtype_name(prog.type),base,BLOCK_SIZE);
                 return -1;
             }
             
@@ -569,7 +575,7 @@ int32_t check_rom_program(region_s *code)
             {
                 len = BLOCK_SIZE;
             }
-            cal_crc = calc_crc32(commbuffer,len,cal_crc);
+            cal_crc = calc_crc32(buff,len,cal_crc);
         }
     }
     

@@ -86,7 +86,7 @@ void init_boot_param(const mem_map_s *mmap)
     
     bp->version = BOOT_VERSION;
     bp->debug_mode = 0;
-    //bp->pad1[0] = 0xaa;
+    
 
     bp->flush_num = g_param_write_num;
     bp->encrypt_en = ENCRYPT_ENABLE;

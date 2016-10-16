@@ -21,7 +21,7 @@ extern "C" {
 
 #define BOOT_PARAM_MAGIC 0X2561C5A0
 #define BOOT_VERSION 0x000001
-#define BLOCK_SIZE 4096
+
 
 typedef struct 
 {

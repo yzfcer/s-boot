@@ -32,6 +32,7 @@ void clear_errors(void)
 {
     
 }
+
 void set_error(uint8_t err_type,uint8_t err)
 {
     if(err_type < ERR_CNT)
@@ -61,12 +62,12 @@ void test_sflash_error(void)
 void destroy_code_space(region_s *code)
 {
     uint32_t i;
-    extern uint8_t commbuffer[BLOCK_SIZE];
-    for(i = 0;i < sizeof(commbuffer);i ++)
+    uint8_t *buff = get_block_buffer();
+    for(i = 0;i < BLOCK_SIZE;i ++)
     {
-        commbuffer[i] = 0xff;
+        buff[i] = 0xff;
     }
-    write_block(code->type,code->index,code->addr,commbuffer,sizeof(commbuffer) / BLOCK_SIZE);
+    write_block(code->type,code->index,code->addr,buff,1);
 }
 
 void test_pro1_error(void)

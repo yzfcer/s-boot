@@ -81,7 +81,6 @@ uint32_t get_rom_lenth(int32_t idx)
 
 static void flush_rom_file(uint8_t memidx)
 {
-    int fd;
     FILE *fil;
     char filename[16];
     uint8_t *buf = (uint8_t*)get_rom_base(memidx);
@@ -94,7 +93,6 @@ static void flush_rom_file(uint8_t memidx)
 
 static void read_rom_file(uint8_t memidx)
 {
-    int fd;
     FILE *fil;
     char filename[16];
     uint8_t *buf = (uint8_t*)get_rom_base(memidx);

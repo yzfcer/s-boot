@@ -26,6 +26,8 @@ extern "C" {
 #define RUN_IN_ROM 2
 #define RUN_SPACE RUN_IN_ROM
 
+//读写ROM时的基本块大小
+#define BLOCK_SIZE 4096
 #ifdef __cplusplus
 }
 #endif
