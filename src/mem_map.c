@@ -82,7 +82,7 @@ char *region_name(uint32_t regidx)
 
 mem_map_s *get_memory_map(void)
 {
-    return &g_memmap;;
+    return &g_memmap;
 }
 
 
@@ -141,11 +141,11 @@ int32_t mem_region_init(void)
 	mem_map_s *map = &g_memmap;
     for(i = 0;i < RAM_COUNT;i ++)
     {
-        rambase[i] = get_ram_base(i);
+        rambase[i] = 0;
     }
     for(i = 0;i < ROM_COUNT;i ++)
     {
-        rombase[i] = get_rom_base(i);
+        rombase[i] = 0;
     }
 
 	alloc_region(&map->rom.boot_region,rombase,BOOTLOADER_LENTH);    
@@ -155,9 +155,9 @@ int32_t mem_region_init(void)
 	alloc_region(&map->rom.program2_region,rombase,PROGRAM_LENTH);
 	alloc_region(&map->rom.reserve_region,rombase,RESERVED_LENTH);   
     
-	alloc_region(&map->ram.app_region,&rambase,BOOTRAM_LENTH);
-	alloc_region(&map->ram.probuf_region,&rambase,PROGRAMBUF_LENTH);
-	alloc_region(&map->ram.share_region,&rambase,SHARE_PARAM_LENTH);
+	alloc_region(&map->ram.app_region,rambase,BOOTRAM_LENTH);
+	alloc_region(&map->ram.probuf_region,rambase,PROGRAMBUF_LENTH);
+	alloc_region(&map->ram.share_region,rambase,SHARE_PARAM_LENTH);
     copy_region_info(&map->rom.program1_region,&map->run.flash);
     map->run.flash.maxlen = map->rom.program1_region.maxlen;
 	return 0;
@@ -297,14 +297,26 @@ int32_t check_map_valid(void)
 
 void print_map_info(mem_map_s *map)
 {
-#define REGION_FORMAT "%-15s0x%-12x0x%-12x%s\r\n" 
-#define REGION_PARAM(reg) (reg)->regname,(reg)->addr,(reg)->maxlen,memtype_name((reg)->type)
+#define REGION_FORMAT "%-15s%-8d0x%-12x0x%-12x%s\r\n" 
+#define REGION_PARAM(reg) (reg)->regname,(reg)->index,(reg)->addr,(reg)->maxlen,memtype_name((reg)->type)
     int32_t i;
     region_s *reg;
-    reg = (region_s*)map;
     boot_printf("memory map as following:\r\n");
-    boot_printf("%-15s%-14s%-14s%-12s\r\n","region","base","maxlen","type");
-    for(i = 0;i < sizeof(mem_map_s)/sizeof(region_s);i ++)
+    boot_printf("%-15s%-8s%-14s%-14s%-12s\r\n","region","memidx","addr","maxlen","type");
+    reg = (region_s*)&map->rom;
+    for(i = 0;i < sizeof(map->rom)/sizeof(region_s);i ++)
+    {
+        boot_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
+    }
+    boot_printf("\r\n");
+    reg = (region_s*)&map->ram;
+    for(i = 0;i < sizeof(map->ram)/sizeof(region_s);i ++)
+    {
+        boot_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
+    }
+    boot_printf("\r\n");
+    reg = (region_s*)&map->run;
+    for(i = 0;i < sizeof(map->run)/sizeof(region_s);i ++)
     {
         boot_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
     }
@@ -312,10 +324,10 @@ void print_map_info(mem_map_s *map)
 
 void print_program_space(mem_map_s *map)
 {
-#define REGION_FORMAT1 "%-15s0x%-10x0x%-9x0x%-9x%-9s%4d%%\r\n" 
-#define REGION_PARAM1(reg) (reg)->regname,(reg)->addr,(reg)->maxlen,\
+#define REGION_FORMAT1 "%-15s%-8d0x%-10x0x%-9x0x%-9x%-9s%4d%%\r\n" 
+#define REGION_PARAM1(reg) (reg)->regname,(reg)->index,(reg)->addr,(reg)->maxlen,\
                         (reg)->lenth,memtype_name((reg)->type),(reg)->maxlen?((reg)->lenth*100)/(reg)->maxlen:0
-        boot_printf("%-15s%-12s%-11s%-11s%-9s%-8s\r\n","area","base","maxlen","lenth","type","usage");
+        boot_printf("%-15s%-8s%-12s%-11s%-11s%-9s%-8s\r\n","region","memidx","addr","maxlen","lenth","type","usage");
         boot_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.program1_region));
         boot_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.program2_region));
         boot_printf(REGION_FORMAT1,REGION_PARAM1(&map->run.flash));

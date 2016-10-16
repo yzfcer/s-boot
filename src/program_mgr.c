@@ -23,7 +23,7 @@
 #include "mem_map.h"
 #include "boot_hw_if.h"
 #include "mem_driver.h"
-
+#define LE_TO_BE32(x) (((x)&0xff)<<24) + (((x>>8)&0xff)<<16) + (((x>>16)&0xff)<<8) + (((x>>24)&0xff))
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -37,6 +37,44 @@ static void print32_t_copy_percents(int32_t numerator, int32_t denominator,int32
         boot_printf("%c%c%c%c",8,8,8,8);
     boot_printf("%3d%%",numerator*100/denominator);
         feed_watchdog();
+}
+static char *encty_type[] = 
+{
+    "no encrypt",
+    "AES",
+    "DES",
+    "RC4"
+};
+
+static void print_img_head(img_head_s *head)
+{
+    boot_printf("img head info:");
+    boot_printf("board:%s",head->board_name);
+    boot_printf("arch :%s",head->arch_name);
+    boot_printf("CPU  :%s",head->cpu_name);
+    boot_printf("img file name  :%s",head->img_name);
+    boot_printf("img file lenth :%s",head->img_len);
+    boot_printf("soft version   :%s",head->bin_ver);
+    if(head->encry_type < 4);
+        boot_printf("encrypt type   :%s",encty_type[head->encry_type]);
+}
+
+static int head_endian_convert(img_head_s *head)
+{
+    if(head->endian_test = 0x12345678)
+        return 0;
+    else if(head->endian_test = 0x78563412)
+    {
+        LE_TO_BE32(head->img_len);
+        LE_TO_BE32(head->head_len);
+        LE_TO_BE32(head->head_ver);
+        LE_TO_BE32(head->bin_crc);
+        LE_TO_BE32(head->encry_type);
+        LE_TO_BE32(head->endian_test);
+        LE_TO_BE32(head->head_crc);
+        return 0;        
+    }
+    return -1;        
 }
 
 uint32_t get_ram_addr(uint32_t memidx,uint32_t addr)
@@ -68,17 +106,12 @@ void convert_uint32_to_byte(uint8_t *buf,int32_t index,uint32_t va)
     }
 }
 
+
 int32_t check_and_decrypt_img(region_s *img)
 {
     int32_t len;
     uint32_t real_addr,cal_crc,crc;
-    real_addr = get_ram_addr(img->index,img->addr);
-    if(INVALID_REAL_ADDR == real_addr)
-    {
-        boot_error("memory map error.");
-        return -1;
-    }
-    
+    img_head_s *head;
     //对接受的数据做CRC校验
     real_addr = get_ram_addr(img->index,img->addr);
     if(INVALID_REAL_ADDR == real_addr)
@@ -87,14 +120,35 @@ int32_t check_and_decrypt_img(region_s *img)
         return -1;
     }
     feed_watchdog();
-    crc = convert_byte_to_uint32((uint8_t*)real_addr,img->lenth - 4);
-    cal_crc = calc_crc32((char*)real_addr,img->lenth - 4,0);
-    boot_debug("crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
-    if(cal_crc != crc)
+    head = (img_head_s*)real_addr;
+    if(0 != head_endian_convert(head))
     {
-        boot_warn("img file crc ERROR.");
+        boot_warn("img file head endian convert ERROR.");
         return -1;
     }
+    
+    crc = convert_byte_to_uint32((uint8_t*)head,head->head_len - 4);
+    cal_crc = head->head_crc;
+    
+    boot_debug("img file head crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
+    if(cal_crc != crc)
+    {
+        boot_warn("img file head crc ERROR.");
+        return -1;
+    }
+    print_img_head(head);
+    
+    feed_watchdog();
+    crc = convert_byte_to_uint32((uint8_t*)(real_addr+head->head_len),head->img_len - head->head_len);
+    cal_crc = head->bin_crc;
+    
+    boot_debug("bin file crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
+    if(cal_crc != crc)
+    {
+        boot_warn("bin file crc ERROR.");
+        return -1;
+    }
+    
     feed_watchdog();
     boot_notice("img file verify OK.");
     

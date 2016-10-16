@@ -223,11 +223,12 @@ int32_t boot_receive_img(uint32_t addr,uint32_t maxlen)
 }
 #endif
 
-static int read_ram(uint32_t memidx,uint32_t realaddr,uint8_t *buf,int32_t lenth)
+static int read_ram(uint32_t memidx,uint32_t offsetaddr,uint8_t *buf,int32_t lenth)
 {
     int i;
     uint8_t *data;
     uint32_t size;
+    uint32_t realaddr = get_rom_base(memidx) + offsetaddr;
     data = (uint8_t*)realaddr;
     size = get_ram_lenth(memidx);
     if(realaddr + lenth >= size)
@@ -240,11 +241,12 @@ static int read_ram(uint32_t memidx,uint32_t realaddr,uint8_t *buf,int32_t lenth
     return lenth;
 }
 
-static int write_ram(uint32_t memidx,uint32_t realaddr,uint8_t *buf,int32_t lenth)
+static int write_ram(uint32_t memidx,uint32_t offsetaddr,uint8_t *buf,int32_t lenth)
 {
     int i;
     uint8_t *data;
     uint32_t size;
+    uint32_t realaddr = get_rom_base(memidx) + offsetaddr;
     data = (uint8_t*)realaddr;
     size = get_ram_lenth(memidx);
     if(realaddr + lenth >= size)
