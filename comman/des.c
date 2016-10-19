@@ -3,44 +3,40 @@
 #include "time.h"  
 #include "stdlib.h"  
 
-#define PLAIN_FILE_OPEN_ERROR -1  
-#define KEY_FILE_OPEN_ERROR -2  
-#define CIPHER_FILE_OPEN_ERROR -3  
-#define OK 1     
 //初始置换表IP  
-int IP_Table[64] = {  57,49,41,33,25,17,9,1,  
-                                 59,51,43,35,27,19,11,3,  
-                                 61,53,45,37,29,21,13,5,  
-                                 63,55,47,39,31,23,15,7,  
-                                 56,48,40,32,24,16,8,0,  
-                                 58,50,42,34,26,18,10,2,  
-                                 60,52,44,36,28,20,12,4,  
-                                 62,54,46,38,30,22,14,6};   
+int IP_Table[64] = {57,49,41,33,25,17,9,1,  
+                    59,51,43,35,27,19,11,3,  
+                    61,53,45,37,29,21,13,5,  
+                    63,55,47,39,31,23,15,7,  
+                    56,48,40,32,24,16,8,0,  
+                    58,50,42,34,26,18,10,2,  
+                    60,52,44,36,28,20,12,4,  
+                    62,54,46,38,30,22,14,6};
 //逆初始置换表IP^-1  
-int IP_1_Table[64] = {39,7,47,15,55,23,63,31,  
-           38,6,46,14,54,22,62,30,  
-           37,5,45,13,53,21,61,29,  
-           36,4,44,12,52,20,60,28,  
-           35,3,43,11,51,19,59,27,  
-           34,2,42,10,50,18,58,26,  
-           33,1,41,9,49,17,57,25,  
-           32,0,40,8,48,16,56,24};  
+int IP_1_Table[64] = {  39,7,47,15,55,23,63,31,  
+                        38,6,46,14,54,22,62,30,  
+                        37,5,45,13,53,21,61,29,  
+                        36,4,44,12,52,20,60,28,  
+                        35,3,43,11,51,19,59,27,  
+                        34,2,42,10,50,18,58,26,  
+                        33,1,41,9,49,17,57,25,  
+                        32,0,40,8,48,16,56,24};  
   
-//扩充置换表E  
+//扩充置换表E
 int E_Table[48] = {31, 0, 1, 2, 3, 4,  
-                  3,  4, 5, 6, 7, 8,  
-                  7,  8,9,10,11,12,  
-                  11,12,13,14,15,16,  
-                  15,16,17,18,19,20,  
-                  19,20,21,22,23,24,  
-                  23,24,25,26,27,28,  
-                  27,28,29,30,31, 0};  
+                    3,  4, 5, 6, 7, 8,  
+                    7,  8,9,10,11,12,  
+                    11,12,13,14,15,16,  
+                    15,16,17,18,19,20,  
+                    19,20,21,22,23,24,  
+                    23,24,25,26,27,28,  
+                    27,28,29,30,31, 0};  
   
 //置换函数P  
 int P_Table[32] = {15,6,19,20,28,11,27,16,  
-                  0,14,22,25,4,17,30,9,  
-                  1,7,23,13,31,26,2,8,  
-                  18,12,29,5,21,10,3,24};  
+                    0,14,22,25,4,17,30,9,  
+                    1,7,23,13,31,26,2,8,  
+                    18,12,29,5,21,10,3,24};  
   
 //S盒  
 int S[8][4][16] =//S1  
@@ -85,48 +81,49 @@ int S[8][4][16] =//S1
               {2,1,14,7,4,10,8,13,15,12,9,0,3,5,6,11}}};  
 //置换选择1  
 int PC_1[56] = {56,48,40,32,24,16,8,  
-              0,57,49,41,33,25,17,  
-              9,1,58,50,42,34,26,  
-              18,10,2,59,51,43,35,  
-              62,54,46,38,30,22,14,  
-              6,61,53,45,37,29,21,  
-              13,5,60,52,44,36,28,  
-              20,12,4,27,19,11,3};  
+                0,57,49,41,33,25,17,  
+                9,1,58,50,42,34,26,  
+                18,10,2,59,51,43,35,  
+                62,54,46,38,30,22,14,  
+                6,61,53,45,37,29,21,  
+                13,5,60,52,44,36,28,  
+                20,12,4,27,19,11,3};  
   
 //置换选择2  
 int PC_2[48] = {13,16,10,23,0,4,2,27,  
-              14,5,20,9,22,18,11,3,  
-              25,7,15,6,26,19,12,1,  
-              40,51,30,36,46,54,29,39,  
-              50,44,32,46,43,48,38,55,  
-              33,52,45,41,49,35,28,31};  
+                14,5,20,9,22,18,11,3,  
+                25,7,15,6,26,19,12,1,  
+                40,51,30,36,46,54,29,39,  
+                50,44,32,46,43,48,38,55,  
+                33,52,45,41,49,35,28,31};  
   
 //对左移次数的规定  
 int MOVE_TIMES[16] = {1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1};  
 
-typedef char ElemType;  
-int ByteToBit(ElemType ch,ElemType bit[8]);  
-int BitToByte(ElemType bit[8],ElemType *ch);  
-int Char8ToBit64(ElemType ch[8],ElemType bit[64]);  
-int Bit64ToChar8(ElemType bit[64],ElemType ch[8]);  
-int DES_MakeSubKeys(ElemType key[64],ElemType subKeys[16][48]);  
-int DES_PC1_Transform(ElemType key[64], ElemType tempbts[56]);  
-int DES_PC2_Transform(ElemType key[56], ElemType tempbts[48]);  
-int DES_ROL(ElemType data[56], int time);  
-int DES_IP_Transform(ElemType data[64]);  
-int DES_IP_1_Transform(ElemType data[64]);  
-int DES_E_Transform(ElemType data[48]);  
-int DES_P_Transform(ElemType data[32]);  
-int DES_SBOX(ElemType data[48]);  
-int DES_XOR(ElemType R[48], ElemType L[48],int count);  
-int DES_Swap(ElemType left[32],ElemType right[32]);  
-int DES_EncryptBlock(ElemType plainBlock[8], ElemType subKeys[16][48], ElemType cipherBlock[8]);  
-int DES_DecryptBlock(ElemType cipherBlock[8], ElemType subKeys[16][48], ElemType plainBlock[8]);  
-int DES_Encrypt(char *plainFile, char *keyStr,char *cipherFile);  
-int DES_Decrypt(char *cipherFile, char *keyStr,char *plainFile);  
+typedef char uint8_t;  
+int ByteToBit(uint8_t ch,uint8_t bit[8]);  
+int BitToByte(uint8_t bit[8],uint8_t *ch);  
+int Char8ToBit64(uint8_t ch[8],uint8_t bit[64]);  
+int Bit64ToChar8(uint8_t bit[64],uint8_t ch[8]);  
+int DES_MakeSubKeys(uint8_t key[64],uint8_t subKeys[16][48]);  
+int DES_PC1_Transform(uint8_t key[64], uint8_t tempbts[56]);  
+int DES_PC2_Transform(uint8_t key[56], uint8_t tempbts[48]);  
+int DES_ROL(uint8_t data[56], int time);  
+int DES_IP_Transform(uint8_t data[64]);  
+int DES_IP_1_Transform(uint8_t data[64]);  
+int DES_E_Transform(uint8_t data[48]);  
+int DES_P_Transform(uint8_t data[32]);  
+int DES_SBOX(uint8_t data[48]);  
+int DES_XOR(uint8_t R[48], uint8_t L[48],int count);  
+int DES_Swap(uint8_t left[32],uint8_t right[32]);  
+int DES_EncryptBlock(uint8_t plainBlock[8], uint8_t subKeys[16][48], uint8_t cipherBlock[8]);  
+int DES_DecryptBlock(uint8_t cipherBlock[8], uint8_t subKeys[16][48], uint8_t plainBlock[8]);  
+
+int DES_encrypt(uint8_t *data, char *keyStr,int lenth);
+int DES_decrypt(uint8_t *data, char *keyStr,int lenth);
 
 //字节转换成二进制  
-int ByteToBit(ElemType ch, ElemType bit[8]){  
+int ByteToBit(uint8_t ch, uint8_t bit[8]){  
     int cnt;  
     for(cnt = 0;cnt < 8; cnt++){  
         *(bit+cnt) = (ch>>cnt)&1;  
@@ -135,7 +132,7 @@ int ByteToBit(ElemType ch, ElemType bit[8]){
 }  
   
 //二进制转换成字节  
-int BitToByte(ElemType bit[8],ElemType *ch){  
+int BitToByte(uint8_t bit[8],uint8_t *ch){  
     int cnt;  
     for(cnt = 0;cnt < 8; cnt++){  
         *ch |= *(bit + cnt);
@@ -144,7 +141,8 @@ int BitToByte(ElemType bit[8],ElemType *ch){
 }  
   
 //将长度为8的字符串转为二进制位串  
-int Char8ToBit64(ElemType ch[8],ElemType bit[64]){  
+int Char8ToBit64(uint8_t ch[8],uint8_t bit[64])
+{  
     int cnt;  
     for(cnt = 0; cnt < 8; cnt++){          
         ByteToBit(*(ch+cnt),bit+(cnt<<3));  
@@ -153,18 +151,19 @@ int Char8ToBit64(ElemType ch[8],ElemType bit[64]){
 }  
   
 //将二进制位串转为长度为8的字符串  
-int Bit64ToChar8(ElemType bit[64],ElemType ch[8]){  
+int Bit64ToChar8(uint8_t bit[64],uint8_t ch[8]){  
     int cnt;  
     memset(ch,0,8);  
-    for(cnt = 0; cnt < 8; cnt++){  
+    for(cnt = 0; cnt < 8; cnt++)
+    {  
         BitToByte(bit+(cnt<<3),ch+cnt);  
     }  
     return 0;  
 }  
   
 //生成子密钥  
-int DES_MakeSubKeys(ElemType key[64],ElemType subKeys[16][48]){  
-    ElemType temp[56];  
+int DES_MakeSubKeys(uint8_t key[64],uint8_t subKeys[16][48]){  
+    uint8_t temp[56];  
     int cnt;  
     DES_PC1_Transform(key,temp);//PC1置换  
     for(cnt = 0; cnt < 16; cnt++){//16轮跌代，产生16个子密钥  
@@ -175,7 +174,7 @@ int DES_MakeSubKeys(ElemType key[64],ElemType subKeys[16][48]){
 }  
   
 //密钥置换1  
-int DES_PC1_Transform(ElemType key[64], ElemType tempbts[56]){  
+int DES_PC1_Transform(uint8_t key[64], uint8_t tempbts[56]){  
     int cnt;      
     for(cnt = 0; cnt < 56; cnt++){  
         tempbts[cnt] = key[PC_1[cnt]];  
@@ -184,7 +183,7 @@ int DES_PC1_Transform(ElemType key[64], ElemType tempbts[56]){
 }  
   
 //密钥置换2  
-int DES_PC2_Transform(ElemType key[56], ElemType tempbts[48]){  
+int DES_PC2_Transform(uint8_t key[56], uint8_t tempbts[48]){  
     int cnt;  
     for(cnt = 0; cnt < 48; cnt++){  
         tempbts[cnt] = key[PC_2[cnt]];  
@@ -193,12 +192,12 @@ int DES_PC2_Transform(ElemType key[56], ElemType tempbts[48]){
 }  
   
 //循环左移  
-int DES_ROL(ElemType data[56], int time){     
-    ElemType temp[56];  
+int DES_ROL(uint8_t data[56], int time){
+    uint8_t temp[56];  
   
     //保存将要循环移动到右边的位  
     memcpy(temp,data,time);  
-    memcpy(temp+time,data+28,time);  
+    memcpy(temp+time,data+28,time);
       
     //前28位移动  
     memcpy(data,data+time,28-time);  
@@ -212,9 +211,9 @@ int DES_ROL(ElemType data[56], int time){
 }  
   
 //IP置换  
-int DES_IP_Transform(ElemType data[64]){  
+int DES_IP_Transform(uint8_t data[64]){  
     int cnt;  
-    ElemType temp[64];  
+    uint8_t temp[64];  
     for(cnt = 0; cnt < 64; cnt++){  
         temp[cnt] = data[IP_Table[cnt]];  
     }  
@@ -223,9 +222,9 @@ int DES_IP_Transform(ElemType data[64]){
 }  
   
 //IP逆置换  
-int DES_IP_1_Transform(ElemType data[64]){  
+int DES_IP_1_Transform(uint8_t data[64]){  
     int cnt;  
-    ElemType temp[64];  
+    uint8_t temp[64];  
     for(cnt = 0; cnt < 64; cnt++){  
         temp[cnt] = data[IP_1_Table[cnt]];  
     }  
@@ -234,9 +233,9 @@ int DES_IP_1_Transform(ElemType data[64]){
 }  
   
 //扩展置换  
-int DES_E_Transform(ElemType data[48]){  
+int DES_E_Transform(uint8_t data[48]){  
     int cnt;  
-    ElemType temp[48];  
+    uint8_t temp[48];  
     for(cnt = 0; cnt < 48; cnt++){  
         temp[cnt] = data[E_Table[cnt]];  
     }     
@@ -245,9 +244,9 @@ int DES_E_Transform(ElemType data[48]){
 }  
   
 //P置换  
-int DES_P_Transform(ElemType data[32]){  
+int DES_P_Transform(uint8_t data[32]){  
     int cnt;  
-    ElemType temp[32];  
+    uint8_t temp[32];  
     for(cnt = 0; cnt < 32; cnt++){  
         temp[cnt] = data[P_Table[cnt]];  
     }     
@@ -256,7 +255,7 @@ int DES_P_Transform(ElemType data[32]){
 }  
   
 //异或  
-int DES_XOR(ElemType R[48], ElemType L[48] ,int count){  
+int DES_XOR(uint8_t R[48], uint8_t L[48] ,int count){  
     int cnt;  
     for(cnt = 0; cnt < count; cnt++){  
         R[cnt] ^= L[cnt];  
@@ -265,7 +264,7 @@ int DES_XOR(ElemType R[48], ElemType L[48] ,int count){
 }  
   
 //S盒置换  
-int DES_SBOX(ElemType data[48]){  
+int DES_SBOX(uint8_t data[48]){  
     int cnt;  
     int line,row,output;  
     int cur1,cur2;  
@@ -289,8 +288,8 @@ int DES_SBOX(ElemType data[48]){
 }  
   
 //交换  
-int DES_Swap(ElemType left[32], ElemType right[32]){  
-    ElemType temp[32];  
+int DES_Swap(uint8_t left[32], uint8_t right[32]){  
+    uint8_t temp[32];  
     memcpy(temp,left,32);     
     memcpy(left,right,32);    
     memcpy(right,temp,32);  
@@ -298,9 +297,9 @@ int DES_Swap(ElemType left[32], ElemType right[32]){
 }  
   
 //加密单个分组  
-int DES_EncryptBlock(ElemType plainBlock[8], ElemType subKeys[16][48], ElemType cipherBlock[8]){  
-    ElemType plainBits[64];  
-    ElemType copyRight[48];  
+int DES_EncryptBlock(uint8_t plainBlock[8], uint8_t subKeys[16][48], uint8_t cipherBlock[8]){  
+    uint8_t plainBits[64];  
+    uint8_t copyRight[48];  
     int cnt;  
   
     Char8ToBit64(plainBlock,plainBits);       
@@ -332,9 +331,9 @@ int DES_EncryptBlock(ElemType plainBlock[8], ElemType subKeys[16][48], ElemType 
 }  
   
 //解密单个分组  
-int DES_DecryptBlock(ElemType cipherBlock[8], ElemType subKeys[16][48],ElemType plainBlock[8]){  
-    ElemType cipherBits[64];  
-    ElemType copyRight[48];  
+int DES_DecryptBlock(uint8_t cipherBlock[8], uint8_t subKeys[16][48],uint8_t plainBlock[8]){  
+    uint8_t cipherBits[64];  
+    uint8_t copyRight[48];  
     int cnt;  
   
     Char8ToBit64(cipherBlock,cipherBits);         
@@ -364,103 +363,65 @@ int DES_DecryptBlock(ElemType cipherBlock[8], ElemType subKeys[16][48],ElemType 
     Bit64ToChar8(cipherBits,plainBlock);  
     return 0;  
 }  
-  
-//加密文件  
-int DES_Encrypt(char *plainFile, char *keyStr,char *cipherFile){  
-    FILE *plain,*cipher;  
-    int count;  
-    ElemType plainBlock[8],cipherBlock[8],keyBlock[8];  
-    ElemType bKey[64];  
-    ElemType subKeys[16][48];  
-    if((plain = fopen(plainFile,"rb")) == NULL){  
-        return PLAIN_FILE_OPEN_ERROR;  
-    }     
-    if((cipher = fopen(cipherFile,"wb")) == NULL){  
-        return CIPHER_FILE_OPEN_ERROR;  
-    }  
-    //设置密钥  
+
+
+//加密数据
+int DES_encrypt(uint8_t *data, char *keyStr,int lenth)
+{  
+    uint8_t cipherBlock[8],keyBlock[8];  
+    uint8_t bKey[64];  
+    uint8_t subKeys[16][48];  
+    int i,idx,block_cnt;
+
     memcpy(keyBlock,keyStr,8);  
-    //将密钥转换为二进制流  
-    Char8ToBit64(keyBlock,bKey);  
-    //生成子密钥  
+    Char8ToBit64(keyBlock,bKey);
     DES_MakeSubKeys(bKey,subKeys);  
-      
-    while(!feof(plain)){  
-        //每次读8个字节，并返回成功读取的字节数  
-        if((count = fread(plainBlock,sizeof(char),8,plain)) == 8){  
-            DES_EncryptBlock(plainBlock,subKeys,cipherBlock);  
-            fwrite(cipherBlock,sizeof(char),8,cipher);    
-        }  
-    }  
-    if(count){  
-        //填充  
-        memset(plainBlock + count,'\0',7 - count);  
-        //最后一个字符保存包括最后一个字符在内的所填充的字符数量  
-        plainBlock[7] = 8 - count;  
-        DES_EncryptBlock(plainBlock,subKeys,cipherBlock);  
-        fwrite(cipherBlock,sizeof(char),8,cipher);  
-    }  
-    fclose(plain);  
-    fclose(cipher);  
-    return OK;  
+    block_cnt = (lenth+7)/8;
+    for(i = 0;i < block_cnt;i ++)
+    {
+        idx = (i << 3);
+        if(lenth - idx < 8)
+        {
+            memset(&data[lenth],0,8 + idx - lenth);
+        }
+        DES_EncryptBlock(&data[idx],subKeys,cipherBlock); 
+        memcpy(&data[idx],cipherBlock,8);
+    }
+    idx = (block_cnt << 3);
+    for(i = 0;i < 4;i ++)
+    {
+        data[idx++] = (uint8_t)(lenth >> (8*i));
+    }
+    return idx + 4;
 }  
-  
+
 //解密文件  
-int DES_Decrypt(char *cipherFile, char *keyStr,char *plainFile){  
-    FILE *plain, *cipher;  
-    int count,times = 0;  
-    long fileLen;  
-    ElemType plainBlock[8],cipherBlock[8],keyBlock[8];  
-    ElemType bKey[64];  
-    ElemType subKeys[16][48];  
-    if((cipher = fopen(cipherFile,"rb")) == NULL){  
-        return CIPHER_FILE_OPEN_ERROR;  
-    }  
-    if((plain = fopen(plainFile,"wb")) == NULL){  
-        return PLAIN_FILE_OPEN_ERROR;  
-    }  
+int DES_decrypt(uint8_t *data, char *keyStr,int lenth)
+{  
+    int len;
+    int i,idx,block_cnt;
+    uint8_t plainBlock[8],keyBlock[8];  
+    uint8_t bKey[64];
+    uint8_t subKeys[16][48];
   
-    //设置密钥  
     memcpy(keyBlock,keyStr,8);  
-    //将密钥转换为二进制流  
     Char8ToBit64(keyBlock,bKey);  
-    //生成子密钥  
-    DES_MakeSubKeys(bKey,subKeys);  
+    DES_MakeSubKeys(bKey,subKeys);
+    len = 0;
+    idx  = lenth - 4;
+    for(i = 3;i >= 0;i --)
+    {
+        lenth = lenth * 256 + data[idx+i];
+    }
+    block_cnt = lenth / 8;
   
-    //取文件长度   
-    fseek(cipher,0,SEEK_END);   //将文件指针置尾  
-    fileLen = ftell(cipher);    //取文件指针当前位置  
-    rewind(cipher);             //将文件指针重指向文件头  
-    while(1){  
-        //密文的字节数一定是8的整数倍  
-        fread(cipherBlock,sizeof(char),8,cipher);  
-        DES_DecryptBlock(cipherBlock,subKeys,plainBlock);                         
-        times += 8;  
-        if(times < fileLen){  
-            fwrite(plainBlock,sizeof(char),8,plain);  
-        }  
-        else{  
-            break;  
-        }  
-    }  
-    //判断末尾是否被填充  
-    if(plainBlock[7] < 8){  
-        for(count = 8 - plainBlock[7]; count < 7; count++){  
-            if(plainBlock[count] != '\0'){  
-                break;  
-            }  
-        }  
-    }     
-    if(count == 7){//有填充  
-        fwrite(plainBlock,sizeof(char),8 - plainBlock[7],plain);  
-    }  
-    else{//无填充  
-        fwrite(plainBlock,sizeof(char),8,plain);  
-    }  
-  
-    fclose(plain);  
-    fclose(cipher);  
-    return OK;  
+    for(i = 0;i < block_cnt;i ++)
+    {
+        idx = (i << 3);
+        DES_DecryptBlock(&data[idx],subKeys,plainBlock); 
+        memcpy(&data[idx],plainBlock,8);
+    }
+    return len;  
 }  
 
 
@@ -468,13 +429,13 @@ int main()
 {     
     clock_t a,b;  
     a = clock();  
-    DES_Encrypt("1.txt","key.txt","2.txt");  
+    DES_encrypt("1.txt","key.txt","2.txt");  
     b = clock();  
-    printf("加密消耗%d毫秒\n",b-a);  
+    printf("加密消耗%d毫秒\n",b-a);
       
     system("pause");  
     a = clock();  
-    DES_Decrypt("2.txt","key.txt","3.txt");  
+    DES_decrypt("2.txt","key.txt","3.txt");
     b = clock();  
     printf("解密消耗%d毫秒\n",b-a);  
     getchar();  

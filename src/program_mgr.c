@@ -192,8 +192,8 @@ int32_t check_and_decrypt_img(region_s *img)
     
     //½âÃÜ
     boot_notice("img file decrypt");
-    boot_debug("decrypt_data base:0x%x,lenth:%d",img->addr,img->lenth - 4);
-    len = decrypt_data((uint8_t *)img->addr,img->lenth - 4);
+    boot_debug("decrypt_data base:0x%x,lenth:%d",img->addr,img->lenth);
+    len = decrypt_data((uint8_t *)img->addr,img->lenth);
     if(len < 0)
     {
         boot_warn("img file Decrypt ERROR.");

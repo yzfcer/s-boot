@@ -1,12 +1,6 @@
 #include <string.h>
 #include "aes.h"
 
-void cleardog(void)
-{
-}
-
-
-
 
 #define AES_BPOLY 0x1b //!< Lower 8 bits of (x^8+x^4+x^3+x+1), ie. (x^4+x^3+x+1).
 #define AES_BLOCKSIZE 16 //!< Block size in number of uint8_ts.
@@ -21,16 +15,18 @@ static uint8_t  block2[256]; //!< Worksapce 2.
 
 static uint8_t  * powTbl; //!< Final location of exponentiation lookup table.
 static uint8_t  * logTbl; //!< Final location of logarithm lookup table.
-static uint8_t  * sBox; //!< Final location of s-box.
-static uint8_t  * sBoxInv; //!< Final location of inverse s-box.
-static uint8_t  * expandedKey; //!< Final location of expanded key.
+static uint8_t  * sbox; //!< Final location of s-box.
+static uint8_t  * sbox_inv; //!< Final location of inverse s-box.
+static uint8_t  * expand_key; //!< Final location of expanded key.
 
+void feed_watchdog(void)
+{
+}
 
-void CalcPowLog(uint8_t * powTbl, uint8_t * logTbl)
+void calc_pow_log(uint8_t * powTbl, uint8_t * logTbl)
 {
     uint8_t  i = 0;
     uint8_t  t = 1;
-
     do 
     {
         // Use 0x03 as root for exponentiation and logarithms.
@@ -45,13 +41,12 @@ void CalcPowLog(uint8_t * powTbl, uint8_t * logTbl)
 
 
 
-void CalcSBox(uint8_t * sBox)
+void calc_sbox(uint8_t * sBox)
 {
     uint8_t  i, rot;
     uint8_t  temp;
     uint8_t  result;
 
-    // Fill all entries of sBox[].
     i = 0;
     do 
     {
@@ -77,23 +72,23 @@ void CalcSBox(uint8_t * sBox)
 
 
 
-void CalcSBoxInv(uint8_t * sBox, uint8_t * sBoxInv)
+void calc_sbox_inv(uint8_t * sBox, uint8_t * sbox_inv)
 {
     uint8_t  i = 0;
     uint8_t  j = 0;
 
-    // Iterate through all elements in sBoxInv using  i.
+    // Iterate through all elements in sbox_inv using  i.
     do 
     {
         // Search through sBox using j.
-        cleardog();
+        feed_watchdog();
         do 
         {
             // Check if current j is the inverse of current i.
             if(sBox[ j ] == i) 
             {
                 // If so, set sBoxInc and indicate search finished.
-                sBoxInv[ i ] = j;
+                sbox_inv[ i ] = j;
                 j = 255;
             }
         } while(++j != 0);
@@ -102,7 +97,7 @@ void CalcSBoxInv(uint8_t * sBox, uint8_t * sBoxInv)
 
 
 
-void CycleLeft(uint8_t * row)
+void cycle_left(uint8_t * row)
 {
     // Cycle 4 uint8_ts in an array left once.
     uint8_t  temp = row[0];
@@ -114,7 +109,7 @@ void CycleLeft(uint8_t * row)
 
 
 
-void InvMixColumn(uint8_t * column)
+void inv_mix_column(uint8_t * column)
 {
     uint8_t  r0, r1, r2, r3;
 
@@ -160,7 +155,7 @@ void InvMixColumn(uint8_t * column)
     column[3] = r3;
 }
 
-uint8_t Multiply(uint8_t num, uint8_t factor)
+uint8_t multiply(uint8_t num, uint8_t factor)
 {
     uint8_t mask = 1;
     uint8_t result = 0;
@@ -184,19 +179,19 @@ uint8_t Multiply(uint8_t num, uint8_t factor)
 }
 
 
-uint8_t DotProduct(uint8_t * vector1, uint8_t * vector2)
+uint8_t dot_product(uint8_t * vector1, uint8_t * vector2)
 {
     uint8_t result = 0;
 
-    result ^= Multiply(*vector1++, *vector2++);
-    result ^= Multiply(*vector1++, *vector2++);
-    result ^= Multiply(*vector1++, *vector2++);
-    result ^= Multiply(*vector1  , *vector2  );
+    result ^= multiply(*vector1++, *vector2++);
+    result ^= multiply(*vector1++, *vector2++);
+    result ^= multiply(*vector1++, *vector2++);
+    result ^= multiply(*vector1  , *vector2  );
 
     return result;
 }
 
-void MixColumn(uint8_t * column)
+void mix_column(uint8_t * column)
 {
     // Prepare first row of matrix twice, to eliminate need for cycling.
     uint8_t  row[8] = 
@@ -206,10 +201,10 @@ void MixColumn(uint8_t * column)
     uint8_t  result[4];
      
     // Take dot products of each matrix row and the column vector.
-    result[0] = DotProduct(row+0, column);
-    result[1] = DotProduct(row+3, column);
-    result[2] = DotProduct(row+2, column);
-    result[3] = DotProduct(row+1, column);
+    result[0] = dot_product(row+0, column);
+    result[1] = dot_product(row+3, column);
+    result[2] = dot_product(row+2, column);
+    result[3] = dot_product(row+1, column);
 
     // Copy temporary result to original column.
     column[0] = result[0];
@@ -219,23 +214,23 @@ void MixColumn(uint8_t * column)
 }
 
 
-void SubBytes(uint8_t * uint8_ts, uint8_t count)
+void sub_bytes(uint8_t * uint8_ts, uint8_t count)
 {
     do 
     {
         // Substitute every uint8_t in state.
-        *uint8_ts = sBox[ *uint8_ts ]; 
+        *uint8_ts = sbox[ *uint8_ts ]; 
         uint8_ts++;
     } while(--count);
 }
 
 
 
-void InvSubBytesAndXOR(uint8_t * uint8_ts, uint8_t * key, uint8_t count)
+void inv_subbytes_and_xor(uint8_t * uint8_ts, uint8_t * key, uint8_t count)
 {
     do 
     {
-        //  *uint8_ts = sBoxInv[ *uint8_ts ] ^ *key; // Inverse substitute every uint8_t in state and add key.
+        //  *uint8_ts = sbox_inv[ *uint8_ts ] ^ *key; // Inverse substitute every uint8_t in state and add key.
         *uint8_ts = block2[ *uint8_ts ] ^ *key; // Use block2 directly. Increases speed.
         uint8_ts++;
         key++;
@@ -244,7 +239,7 @@ void InvSubBytesAndXOR(uint8_t * uint8_ts, uint8_t * key, uint8_t count)
 
 
 
-void InvShiftRows(uint8_t * state)
+void inv_shift_rows(uint8_t * state)
 {
     uint8_t temp;
 
@@ -273,7 +268,7 @@ void InvShiftRows(uint8_t * state)
     state[ 3 + 3*4 ] = temp;
 }
 
-void ShiftRows(uint8_t * state)
+void shift_rows(uint8_t * state)
 {
     uint8_t temp;
 
@@ -303,24 +298,24 @@ void ShiftRows(uint8_t * state)
 }
 
 
-void InvMixColumns(uint8_t * state)
+void inv_mix_columns(uint8_t * state)
 {
-    InvMixColumn(state + 0*4);
-    InvMixColumn(state + 1*4);
-    InvMixColumn(state + 2*4);
-    InvMixColumn(state + 3*4);
+    inv_mix_column(state + 0*4);
+    inv_mix_column(state + 1*4);
+    inv_mix_column(state + 2*4);
+    inv_mix_column(state + 3*4);
 }
 
-void MixColumns(uint8_t * state)
+void mix_columns(uint8_t * state)
 {
-    MixColumn(state + 0*4);
-    MixColumn(state + 1*4);
-    MixColumn(state + 2*4);
-    MixColumn(state + 3*4);
+    mix_column(state + 0*4);
+    mix_column(state + 1*4);
+    mix_column(state + 2*4);
+    mix_column(state + 3*4);
 }
 
 
-void XORBytes(uint8_t * uint8_ts1, uint8_t * uint8_ts2, uint8_t count)
+void xor_bytes(uint8_t * uint8_ts1, uint8_t * uint8_ts2, uint8_t count)
 {
     do 
     {
@@ -332,7 +327,7 @@ void XORBytes(uint8_t * uint8_ts1, uint8_t * uint8_ts2, uint8_t count)
 
 
 
-void CopyBytes(uint8_t * to, uint8_t * from, uint8_t count)
+void copy_bytes(uint8_t * to, uint8_t * from, uint8_t count)
 {
     do 
     {
@@ -344,7 +339,7 @@ void CopyBytes(uint8_t * to, uint8_t * from, uint8_t count)
 
 
 
-void KeyExpansion(uint8_t * expandedKey)
+void key_expansion(uint8_t * expand_key)
 {
     uint8_t  temp[4];
     uint8_t i;
@@ -375,17 +370,17 @@ void KeyExpansion(uint8_t * expandedKey)
     i = AES_KEYLENGTH;
     do 
     {
-        *expandedKey = *key;
-        expandedKey++;
+        *expand_key = *key;
+        expand_key++;
         key++;
     } while(--i);
 
     // Prepare last 4 uint8_ts of key in temp.
-    expandedKey -= 4;
-    temp[0] = *(expandedKey++);
-    temp[1] = *(expandedKey++);
-    temp[2] = *(expandedKey++);
-    temp[3] = *(expandedKey++);
+    expand_key -= 4;
+    temp[0] = *(expand_key++);
+    temp[1] = *(expand_key++);
+    temp[2] = *(expand_key++);
+    temp[3] = *(expand_key++);
 
     // Expand key.
     i = AES_KEYLENGTH;
@@ -394,9 +389,9 @@ void KeyExpansion(uint8_t * expandedKey)
         // Are we at the start of a multiple of the key size?
         if((i % AES_KEYLENGTH) == 0) 
         {
-            CycleLeft(temp); // Cycle left once.
-            SubBytes(temp, 4); // Substitute each uint8_t.
-            XORBytes(temp, Rcon, 4); // Add constant in GF(2).
+            cycle_left(temp); // Cycle left once.
+            sub_bytes(temp, 4); // Substitute each uint8_t.
+            xor_bytes(temp, Rcon, 4); // Add constant in GF(2).
             *Rcon = (*Rcon << 1) ^ (*Rcon & 0x80 ? AES_BPOLY : 0);
         }
 
@@ -405,157 +400,154 @@ void KeyExpansion(uint8_t * expandedKey)
         // Are we right past a block size?
         else if((i % AES_KEYLENGTH) == AES_BLOCKSIZE) 
         {
-            SubBytes(temp, 4); // Substitute each uint8_t.
+            sub_bytes(temp, 4); // Substitute each uint8_t.
         }
 #endif
 
         // Add uint8_ts in GF(2) one AES_KEYLENGTH away.
-        XORBytes(temp, expandedKey - AES_KEYLENGTH, 4);
+        xor_bytes(temp, expand_key - AES_KEYLENGTH, 4);
 
         // Copy result to current 4 uint8_ts.
-        *(expandedKey++) = temp[ 0 ];
-        *(expandedKey++) = temp[ 1 ];
-        *(expandedKey++) = temp[ 2 ];
-        *(expandedKey++) = temp[ 3 ];
+        *(expand_key++) = temp[ 0 ];
+        *(expand_key++) = temp[ 1 ];
+        *(expand_key++) = temp[ 2 ];
+        *(expand_key++) = temp[ 3 ];
         i += 4; // Next 4 uint8_ts.
     } 
 }
 
 
 
-void InvCipher(uint8_t * block, uint8_t * expandedKey)
+void inv_cipher(uint8_t * block, uint8_t * expand_key)
 {
     uint8_t round = AES_ROUNDS-1;
-    expandedKey += AES_BLOCKSIZE * AES_ROUNDS;
+    expand_key += AES_BLOCKSIZE * AES_ROUNDS;
 
-    XORBytes(block, expandedKey, 16);
-    expandedKey -= AES_BLOCKSIZE;
+    xor_bytes(block, expand_key, 16);
+    expand_key -= AES_BLOCKSIZE;
     do 
     {
-        InvShiftRows(block);
-        InvSubBytesAndXOR(block, expandedKey, 16);
-        expandedKey -= AES_BLOCKSIZE;
-        InvMixColumns(block);
+        inv_shift_rows(block);
+        inv_subbytes_and_xor(block, expand_key, 16);
+        expand_key -= AES_BLOCKSIZE;
+        inv_mix_columns(block);
     } while(--round);
 
-    InvShiftRows(block);
-    InvSubBytesAndXOR(block, expandedKey, 16);
+    inv_shift_rows(block);
+    inv_subbytes_and_xor(block, expand_key, 16);
 }
 
-void Cipher(uint8_t * block, uint8_t * expandedKey)    //完成一个块(16字节，128bit)的加密
+void cipher(uint8_t * block, uint8_t * expand_key)    //完成一个块(16字节，128bit)的加密
 {
     uint8_t round = AES_ROUNDS-1;
 
-    XORBytes(block, expandedKey, 16);
-    expandedKey += AES_BLOCKSIZE;
-
+    xor_bytes(block, expand_key, 16);
+    expand_key += AES_BLOCKSIZE;
     do 
     {
-        SubBytes(block, 16);
-        ShiftRows(block);
-        MixColumns(block);
-        XORBytes(block, expandedKey, 16);
-        expandedKey += AES_BLOCKSIZE;
+        sub_bytes(block, 16);
+        shift_rows(block);
+        mix_columns(block);
+        xor_bytes(block, expand_key, 16);
+        expand_key += AES_BLOCKSIZE;
     } while(--round);
 
-    SubBytes(block, 16);
-    ShiftRows(block);
-    XORBytes(block, expandedKey, 16);
+    sub_bytes(block, 16);
+    shift_rows(block);
+    xor_bytes(block, expand_key, 16);
 }
 
 void aes_init(uint8_t * tempbuf)
 {
     powTbl = block1;
     logTbl = block2;
-    CalcPowLog(powTbl, logTbl);
+    calc_pow_log(powTbl, logTbl);
 
-    sBox = tempbuf;
-    CalcSBox(sBox);
-
-    expandedKey = block1;  //至此block1用来存贮密码表
-    KeyExpansion(expandedKey);
-     
-    sBoxInv = block2; // Must be block2. block2至此开始只用来存贮SBOXINV
-    CalcSBoxInv(sBox, sBoxInv);
+    sbox = tempbuf;
+    calc_sbox(sbox);
+    expand_key = block1;  //至此block1用来存贮密码表
+    key_expansion(expand_key);
+    sbox_inv = block2; // Must be block2. block2至此开始只用来存贮SBOXINV
+    calc_sbox_inv(sbox, sbox_inv);
 } 
 
 
 //对一个16字节块解密,参数buffer是解密密缓存，chainBlock是要解密的块
-void aesDecrypt(uint8_t * buffer, uint8_t * chainBlock)
+void aes_decrypt(uint8_t * buffer, uint8_t * chainBlock)
 {
-    CopyBytes(buffer,chainBlock,AES_BLOCKSIZE);
-    InvCipher(buffer, expandedKey);
-    //XORBytes(buffer, chainBlock, AES_BLOCKSIZE);
-    CopyBytes(chainBlock, buffer, AES_BLOCKSIZE);
+    copy_bytes(buffer,chainBlock,AES_BLOCKSIZE);
+    inv_cipher(buffer, expand_key);
+    //xor_bytes(buffer, chainBlock, AES_BLOCKSIZE);
+    copy_bytes(chainBlock, buffer, AES_BLOCKSIZE);
 }
 
 //对一个16字节块完成加密，参数buffer是加密缓存，chainBlock是要加密的块
-void aesEncrypt(uint8_t * buffer, uint8_t * chainBlock)
+void aes_encrypt(uint8_t * buffer, uint8_t * chainBlock)
 {
-    CopyBytes(buffer, chainBlock, AES_BLOCKSIZE);
-    //XORBytes(buffer, chainBlock, AES_BLOCKSIZE);
-    Cipher(buffer, expandedKey);
-    CopyBytes(chainBlock, buffer, AES_BLOCKSIZE);
+    copy_bytes(buffer, chainBlock, AES_BLOCKSIZE);
+    //xor_bytes(buffer, chainBlock, AES_BLOCKSIZE);
+    cipher(buffer, expand_key);
+    copy_bytes(chainBlock, buffer, AES_BLOCKSIZE);
 }
 
 //加解密函数，参数为加解密标志，要加解密的数据缓存起始指针，要加解密的数据长度（如果解密运算，必须是16的整数倍。）
-uint8_t aesBlockDecrypt(uint8_t Direct,uint8_t *ChiperDataBuf,uint8_t DataLen)
+uint8_t aes_block_decrypt(uint8_t direct,uint8_t *ChiperDataBuf,uint8_t DataLen)
 {
     uint8_t  i;
-    uint8_t  Blocks;
-    uint8_t  sBoxbuf[256];
+    uint8_t  block_cnt;
+    uint8_t  sbox_buf[256];
     uint8_t  tempbuf[16];
-    unsigned long int  OrignLen=0; //未加密数据的原始长度
+    unsigned long int  orign_len=0; //未加密数据的原始长度
 
-    if(Direct==0)
+    if(direct==0)
     {
-        *((uint8_t *)&OrignLen+3)=ChiperDataBuf[0];
-        *((uint8_t *)&OrignLen+2)=ChiperDataBuf[1];
-        *((uint8_t *)&OrignLen+1)=ChiperDataBuf[2];
-        *((uint8_t *)&OrignLen)=ChiperDataBuf[3];
+        *((uint8_t *)&orign_len+3)=ChiperDataBuf[0];
+        *((uint8_t *)&orign_len+2)=ChiperDataBuf[1];
+        *((uint8_t *)&orign_len+1)=ChiperDataBuf[2];
+        *((uint8_t *)&orign_len)=ChiperDataBuf[3];
         DataLen=DataLen-4;
     }
     else
     {
         memmove(ChiperDataBuf+4,ChiperDataBuf,DataLen);
-        OrignLen=DataLen;
-        ChiperDataBuf[0]=OrignLen;
-        ChiperDataBuf[1]=OrignLen>>8;
-        ChiperDataBuf[2]=OrignLen>>16;
-        ChiperDataBuf[3]=OrignLen>>24;
+        orign_len=DataLen;
+        ChiperDataBuf[0]=orign_len;
+        ChiperDataBuf[1]=orign_len>>8;
+        ChiperDataBuf[2]=orign_len>>16;
+        ChiperDataBuf[3]=orign_len>>24;
     }
-    cleardog();
-    aes_init(sBoxbuf);   
-    if(Direct==0)    
+    feed_watchdog();
+    aes_init(sbox_buf);   
+    if(direct==0)    
     {
-        Blocks=DataLen/16;
-        for(i=0;i<Blocks;i++)
+        block_cnt=DataLen/16;
+        for(i=0;i<block_cnt;i++)
         {
-            cleardog();
-            aesDecrypt(tempbuf,ChiperDataBuf+4+16*i);
+            feed_watchdog();
+            aes_decrypt(tempbuf,ChiperDataBuf+4+16*i);
         }
-        memmove(ChiperDataBuf,ChiperDataBuf+4,OrignLen);
-        cleardog();
-        return(OrignLen);
+        memmove(ChiperDataBuf,ChiperDataBuf+4,orign_len);
+        feed_watchdog();
+        return(orign_len);
     }
     else    //加密
     {
         if(DataLen%16!=0)
         {  
-            Blocks=DataLen/16+1;
+            block_cnt=DataLen/16+1;
         }
         else
         {
-            Blocks=DataLen/16;
+            block_cnt=DataLen/16;
         }
 
-        for(i=0;i<Blocks;i++)
+        for(i=0;i<block_cnt;i++)
         {
-            cleardog();
-            aesEncrypt(tempbuf,ChiperDataBuf+4+16*i);
+            feed_watchdog();
+            aes_encrypt(tempbuf,ChiperDataBuf+4+16*i);
         }
-        cleardog();
-        return(Blocks*16+4);
+        feed_watchdog();
+        return(block_cnt*16+4);
     }
 }
 

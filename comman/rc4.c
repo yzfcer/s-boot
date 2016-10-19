@@ -2,7 +2,7 @@
 #include <string.h>
  
 /*初始化函数*/
-void rc4_init(unsigned char*s, unsigned char*key, unsigned long Len)
+void rc4_init(unsigned char *s, unsigned char *key, unsigned long lenth)
 {
     int i = 0, j = 0;
     char k[256] = { 0 };
@@ -10,7 +10,7 @@ void rc4_init(unsigned char*s, unsigned char*key, unsigned long Len)
     for (i = 0; i<256; i++)
     {
         s[i] = i;
-        k[i] = key[i%Len];
+        k[i] = key[i%lenth];
     }
     for (i = 0; i<256; i++)
     {
@@ -21,18 +21,18 @@ void rc4_init(unsigned char*s, unsigned char*key, unsigned long Len)
     }
 }
  
-/*加解密*/
-void rc4_crypt(unsigned char*s, unsigned char*Data, unsigned long Len)
+
+void rc4_crypt(unsigned char*s, unsigned char*Data, unsigned long lenth)
 {
     int i = 0, j = 0, t = 0;
     unsigned long k = 0;
     unsigned char tmp;
-    for (k = 0; k<Len; k++)
+    for (k = 0; k<lenth; k++)
     {
         i = (i + 1) % 256;
         j = (j + s[i]) % 256;
         tmp = s[i];
-        s[i] = s[j];//交换s[x]和s[y]
+        s[i] = s[j];
         s[j] = tmp;
         t = (s[i] + s[j]) % 256;
         Data[k] ^= s[t];
@@ -42,7 +42,7 @@ void rc4_crypt(unsigned char*s, unsigned char*Data, unsigned long Len)
 int rc4_test()
 {
     unsigned char s[256] = { 0 }, s2[256] = { 0 };//S-box
-    char key[256] = { "justfortest" };
+    char key[256] = { "justfortest"};
     char pData[512] = "这是一个用来加密的数据Data";
     unsigned long len = strlen(pData);
     int i;
@@ -54,7 +54,8 @@ int rc4_test()
     for (i = 0; i<256; i++)
     {
         printf("%02X", s[i]);
-        if (i && (i + 1) % 16 == 0)putchar('\n');
+        if (i && (i + 1) % 16 == 0)
+            putchar('\n');
     }
     printf("\n\n");
     for (i = 0; i<256; i++)//用s2[i]暂时保留经过初始化的s[i]，很重要的！！！

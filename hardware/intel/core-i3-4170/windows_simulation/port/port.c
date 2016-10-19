@@ -95,6 +95,7 @@ int32_t encrypt_data(uint8_t *data,int32_t lenth)
 {
     return lenth;
 }
+
 int32_t decrypt_data(uint8_t *data,int32_t lenth)
 {
     return lenth;

@@ -72,7 +72,6 @@ static int32_t is_string_equal(char *str1,char *str2,int32_t len)
 static void download_img_to_rom(void)
 {
     download_img_file(MEM_TYPE_ROM);    
-    
 }
 
 static void download_img_to_ram(void)
@@ -237,7 +236,6 @@ static void set_default_boot_img(void)
                     boot_warn("set boot app error.");
                 }
             }
-                
             break;
         }
     }
