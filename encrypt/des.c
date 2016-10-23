@@ -1,4 +1,3 @@
-<<<<<<< HEAD:comman/des.c
 #include "stdio.h"  
 #include "memory.h"  
 #include "time.h"  
@@ -872,6 +871,3 @@ int DES_Decrypt(uint8_t *data,int datalen)
     return datalen;  
 }  
 
-
-
->>>>>>> develop:encrypt/des.c
