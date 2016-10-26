@@ -11,6 +11,9 @@
     <Filter Include="port">
       <UniqueIdentifier>{ceb10df4-3317-4e7f-b161-bc9a5cc108b7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="encrypt">
+      <UniqueIdentifier>{e3e6e71f-8532-46ab-8082-40f3adf96105}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\port\boot_type.h">
@@ -55,6 +58,9 @@
     <ClInclude Include="..\..\..\..\..\..\src\share_param.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\encrypt\encrypt.h">
+      <Filter>encrypt</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\port\mem_driver.c">
@@ -89,6 +95,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\src\share_param.c">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\encrypt\aes.c">
+      <Filter>encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\encrypt\des.c">
+      <Filter>encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\encrypt\rc4.c">
+      <Filter>encrypt</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

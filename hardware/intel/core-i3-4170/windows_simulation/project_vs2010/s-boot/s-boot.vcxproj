@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\..\encrypt\encrypt.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot_config.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot_debug.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot_framework.h" />
@@ -27,6 +28,9 @@
     <ClInclude Include="..\..\port\port.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\..\encrypt\aes.c" />
+    <ClCompile Include="..\..\..\..\..\..\encrypt\des.c" />
+    <ClCompile Include="..\..\..\..\..\..\encrypt\rc4.c" />
     <ClCompile Include="..\..\..\..\..\..\src\boot_framework.c" />
     <ClCompile Include="..\..\..\..\..\..\src\boot_hw_if.c" />
     <ClCompile Include="..\..\..\..\..\..\src\boot_param.c" />
