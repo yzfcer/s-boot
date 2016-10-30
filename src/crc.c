@@ -31,14 +31,14 @@ void make_table()
 }
 
 
-uint32_t calc_crc32(uint8_t *buff, int32_t len,uint32_t crc)
+uint32_t calc_crc32(uint8_t *data, int32_t len,uint32_t crc)
 {
     int32_t i;
     if(!have_table) 
         make_table();
     crc = ~crc;
     for (i = 0;i < len;i++)
-        crc = (crc >> 8) ^ table[(crc ^ buff[i]) & 0xff];
+        crc = (crc >> 8) ^ table[(crc ^ data[i]) & 0xff];
     return ~crc;
 }
 

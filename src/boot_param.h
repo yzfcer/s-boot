@@ -22,20 +22,12 @@ extern "C" {
 #define BOOT_PARAM_MAGIC 0X2561C5A0
 #define BOOT_VERSION 0x000001
 
-
-typedef struct 
-{
-    uint32_t lenth;
-    uint32_t crc;
-}pro_verify_s;
-
 //存储于flash参数区的数据的整体结构，
 //这部分数据在内存中没有备份，在需要时从flash读出
 typedef struct 
 {
     uint32_t magic;//魔术字，用于参数头部校验
     uint32_t lenth;//本参数结构体的长度
-    uint32_t flush_num;//参数区擦写次数
     
     uint8_t version;    //bootloader`
     uint8_t debug_mode; //调试模式
@@ -45,7 +37,6 @@ typedef struct
     bool_t lock_en;     //芯片锁定使能
     
     mem_map_s mem_map;//系统的空间映射表
-    //uint32_t crc;//CRC校验
 }boot_param_s;
 
 void *get_boot_params(void);

@@ -24,7 +24,6 @@ extern "C" {
 
 
 static char g_bootparam[PARAM_LENTH];
-uint32_t g_param_write_num = 0;
 boot_param_s *g_pbp = NULL;
 
 static void init_reg_name(boot_param_s *bp)
@@ -60,7 +59,6 @@ void *get_boot_params_from_ROM(void)
     map = get_memory_map();
     init_reg_name((boot_param_s *)&g_bootparam);
     g_pbp = (boot_param_s *)&g_bootparam;
-    g_param_write_num = g_pbp->flush_num;
     src = (region_s*)map;
     dest = (region_s*)&g_pbp->mem_map;
     for(i = 0;i < sizeof(g_pbp->mem_map)/sizeof(region_s);i ++)
@@ -84,7 +82,6 @@ void param_init(const mem_map_s *mmap)
     boot_param_s *bp = (boot_param_s*)g_bootparam;
     bp->magic = BOOT_PARAM_MAGIC;
     bp->lenth = sizeof(boot_param_s);
-    bp->flush_num = g_param_write_num;
 
     bp->version = BOOT_VERSION;
     bp->debug_mode = 0;
@@ -178,7 +175,6 @@ int32_t param_read(void)
         boot_warn("read both params failed.");
         return -1;
     }
-    boot_notice(" *** BOOT param program times:%d.",((boot_param_s *)g_bootparam)->flush_num);
     return 0;
     
 }
@@ -192,7 +188,6 @@ int32_t param_flush(void)
     reg[0] = &map->rom.param1_region;
     reg[1] = &map->rom.param2_region;
     
-    bp->flush_num ++;
     bp->mem_map.rom.param1_region.lenth = sizeof(boot_param_s);
     bp->mem_map.rom.param2_region.lenth = sizeof(boot_param_s);    
     upate_bootparam_crc(bp);
