@@ -55,7 +55,7 @@ static void update_share_crc(void)
 static void copy_share_data(char *src,char *dest,int32_t len)
 {
     int32_t i;
-    //boot_notice("copy data from 0x%x to 0x%x,lenth %d",src,dest,len);
+    //sys_notice("copy data from 0x%x to 0x%x,lenth %d",src,dest,len);
     for(i = 0;i < len;i ++)
     {
         dest[i] = src[i];
@@ -70,18 +70,18 @@ static int32_t check_share_param(void)
 
     if(sp->magic != SHARE_PARAM_MAGIC)
     {
-        boot_notice("share param block is invalid.");
+        sys_notice("share param block is invalid.");
         return -1;
     }
     if(sp->lenth != sizeof(share_param_s))
     {
-        boot_warn("share param block lenth is invalid.");
+        sys_warn("share param block lenth is invalid.");
         return -1;
     }
 
     if(sp->crc != calc_crc32((char*)sp,sizeof(share_param_s) - sizeof(sp->crc),0))
     {
-        boot_warn("share param block crc is invalid.");
+        sys_warn("share param block crc is invalid.");
         return -1;
     }
 

@@ -42,7 +42,7 @@ static int32_t make_sure_input(char *info)
     char ch;
     while(1)
     {
-        boot_printf("%s?[y/n]\r\n",info);
+        sys_printf("%s?[y/n]\r\n",info);
         if(0 != read_char_blocking(&ch))
         {
             exit_menu();
@@ -80,7 +80,7 @@ static void download_img_to_ram(void)
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     if(bp->mem_map.run.ram.maxlen <= 0)
     {
-        boot_warn("img can not download to RAM,device NOT support.");
+        sys_warn("img can not download to RAM,device NOT support.");
         return;
     }
     ret = download_img_file(MEM_TYPE_RAM);
@@ -94,7 +94,7 @@ static void download_img_to_ram(void)
 
 static void download_filesystem(void)
 {
-    boot_warn("s-boot can NOT support file system right now.");
+    sys_warn("s-boot can NOT support file system right now.");
 }
 
 static void set_debug_mode(void)
@@ -109,10 +109,10 @@ static void set_debug_mode(void)
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     while(1)
     {
-        boot_printf("set debug mode options:\r\n");
+        sys_printf("set debug mode options:\r\n");
         for(i = 0;i < sizeof(mode)/sizeof(char*);i ++)
         {
-            boot_printf("[%d] %s\r\n",i+1,mode[i]);
+            sys_printf("[%d] %s\r\n",i+1,mode[i]);
         }
         if(0 != read_char_blocking(&ch))
         {
@@ -135,7 +135,7 @@ static void set_debug_mode(void)
 static void show_memmap(void)
 {
     boot_param_s *bp = (boot_param_s *)get_boot_params();
-    boot_printf("current memory map info:\r\n");
+    sys_printf("current memory map info:\r\n");
     print_map_info(&bp->mem_map);
 }
 
@@ -144,7 +144,7 @@ static void lock_mcu(void)
     boot_param_s *bp = (boot_param_s *)get_boot_params();
     if(is_chip_lock())
     {
-        boot_notice("MCU has been locked before.");
+        sys_notice("MCU has been locked before.");
         return;
     }
     set_chip_lock(1);
@@ -156,7 +156,7 @@ static void unlock_mcu(void)
     boot_param_s *bp = (boot_param_s *)get_boot_params();
     if(!is_chip_lock())
     {
-        boot_notice("MCU has NOT been locked before.");
+        sys_notice("MCU has NOT been locked before.");
         return;
     }
     set_chip_lock(0);
@@ -196,7 +196,7 @@ static void clear_boot_param(void)
 {
     if(make_sure_input("Are you sure to unlock MCU"))
         do_clear_flash_data(0);
-    boot_printf("clear boot param complete.\r\n");
+    sys_printf("clear boot param complete.\r\n");
 }
 
 static void set_default_boot_img(void)
@@ -212,10 +212,10 @@ static void set_default_boot_img(void)
     boot_param_s *bp = (boot_param_s *)get_boot_params();
     while(1)
     {
-        boot_printf("choose the following program:\r\n");
+        sys_printf("choose the following program:\r\n");
         for(i = 0;i < sizeof(pro)/sizeof(char*);i ++)
         {
-            boot_printf("[%d] %s\r\n",i+1,pro[i]);
+            sys_printf("[%d] %s\r\n",i+1,pro[i]);
         }
         if(0 != read_char_blocking(&ch))
         {
@@ -229,11 +229,11 @@ static void set_default_boot_img(void)
                 ret = change_boot_app(ch - '1');
                 if(0 == ret)
                 {
-                    boot_notice("set default boot img OK.");
+                    sys_notice("set default boot img OK.");
                 }
                 else
                 {
-                    boot_warn("set boot app error.");
+                    sys_warn("set boot app error.");
                 }
             }
             break;
@@ -249,7 +249,7 @@ static void exit_and_save(void)
     ret = param_flush();
     if(ret != 0)
     {
-        boot_printf("write param fialed.\r\n");
+        sys_printf("write param fialed.\r\n");
     }    //这里是否还需要对参数做进一步的验证
     exit_menu();
 }
@@ -289,12 +289,12 @@ static void exit_menu(void)
 void print32_t_menu_list(void)
 {
     int32_t i;
-    boot_printf("\r\n\r\npress key to choose the following functions:\r\n");
+    sys_printf("\r\n\r\npress key to choose the following functions:\r\n");
     for(i = 0;i < sizeof(g_menu_handleTB)/sizeof(menu_handle_TB);i ++)
     {
         if(!g_menu_handleTB[i].prio)
         {
-            boot_printf("[%c] %s\r\n",g_menu_handleTB[i].key,g_menu_handleTB[i].menu_item);
+            sys_printf("[%c] %s\r\n",g_menu_handleTB[i].key,g_menu_handleTB[i].menu_item);
         }
     }
 }
@@ -357,11 +357,11 @@ void menu_entry(void)
         {
             if(ch == '0')
             {
-                boot_printf("\r\n");
+                sys_printf("\r\n");
                 ret = open_super_prio();
                 if(0 == ret)
                 {
-                    boot_notice("You have opened advanced function.");
+                    sys_notice("You have opened advanced function.");
                 }
             }
         }

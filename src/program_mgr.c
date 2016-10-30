@@ -38,8 +38,8 @@ static uint32_t LE_TO_BE32(uint32_t x)
 static void print32_t_copy_percents(int32_t numerator, int32_t denominator,int32_t del)
 {
     if(del)
-        boot_printf("%c%c%c%c",8,8,8,8);
-    boot_printf("%3d%%",numerator*100/denominator);
+        sys_printf("%c%c%c%c",8,8,8,8);
+    sys_printf("%3d%%",numerator*100/denominator);
         feed_watchdog();
 }
 static char *encty_type[] = 
@@ -52,17 +52,17 @@ static char *encty_type[] =
 
 static void print_img_head(img_head_s *head)
 {
-    boot_printf("img head info:\r\n");
-	//boot_printf("board index:%d\r\n",(uint32_t)(&head->board_name)-(uint32_t)(&head->magic));
-    boot_printf("board name     : %s\r\n",(char*)head->board_name);
-    boot_printf("cpu arch       : %s\r\n",(char*)head->arch_name);
-    boot_printf("CPU model      : %s\r\n",(char*)head->cpu_name);
-    boot_printf("img file name  : %s\r\n",(char*)head->img_name);
-    boot_printf("img file lenth : %d\r\n",head->img_len);
-    boot_printf("soft version   : %s\r\n",head->bin_ver);
+    sys_printf("img head info:\r\n");
+	//sys_printf("board index:%d\r\n",(uint32_t)(&head->board_name)-(uint32_t)(&head->magic));
+    sys_printf("board name     : %s\r\n",(char*)head->board_name);
+    sys_printf("cpu arch       : %s\r\n",(char*)head->arch_name);
+    sys_printf("CPU model      : %s\r\n",(char*)head->cpu_name);
+    sys_printf("img file name  : %s\r\n",(char*)head->img_name);
+    sys_printf("img file lenth : %d\r\n",head->img_len);
+    sys_printf("soft version   : %s\r\n",head->bin_ver);
     if(head->encry_type < 4);
-        boot_printf("encrypt type   : %s\r\n",encty_type[head->encry_type]);
-    boot_printf("\r\n");
+        sys_printf("encrypt type   : %s\r\n",encty_type[head->encry_type]);
+    sys_printf("\r\n");
 }
 
 static int head_endian_convert(img_head_s *head)
@@ -118,17 +118,17 @@ bool_t check_hardware_matched(img_head_s *head)
 {
     if(0 != memory_compare(head->board_name,BOARD_NAME,string_len(BOARD_NAME)))
     {
-        boot_notice("dest board name:%s",BOARD_NAME);
+        sys_notice("dest board name:%s",BOARD_NAME);
         return B_FALSE;
     }
     if(0 != memory_compare(head->arch_name,ARCH_NAME,string_len(ARCH_NAME)))
     {
-        boot_notice("dest arch name:%s",ARCH_NAME);
+        sys_notice("dest arch name:%s",ARCH_NAME);
         return B_FALSE;
     }
     if(0 != memory_compare(head->cpu_name,CPU_NAME,string_len(CPU_NAME)))
     {
-        boot_notice("dest cpu model:%s",CPU_NAME);
+        sys_notice("dest cpu model:%s",CPU_NAME);
         return B_FALSE;
     }
     return B_TRUE;    
@@ -144,23 +144,23 @@ int32_t check_and_decrypt_img(region_s *img)
 	head = (img_head_s*)img->addr;
     if(0 != head_endian_convert(head))
     {
-        boot_warn("img file head endian convert ERROR.");
+        sys_warn("img file head endian convert ERROR.");
         return -1;
     }
     
     cal_crc = calc_crc32((uint8_t*)head,head->head_len - 4,0xffffffff);
     crc = head->head_crc;
     
-    boot_debug("img file head crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
+    sys_debug("img file head crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
     if(cal_crc != crc)
     {
-        boot_warn("img file head crc ERROR.");
+        sys_warn("img file head crc ERROR.");
         return -1;
     }
     print_img_head(head);
     if(!check_hardware_matched(head))
     {
-        boot_warn("hardware is NOT matched.");
+        sys_warn("hardware is NOT matched.");
         return -1;
     }
     
@@ -168,28 +168,28 @@ int32_t check_and_decrypt_img(region_s *img)
 	crc = calc_crc32((uint8_t*)(img->addr+head->head_len),head->img_len - head->head_len,0xffffffff);
     cal_crc = head->bin_crc;
     
-    boot_debug("bin file crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
+    sys_debug("bin file crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
     if(cal_crc != crc)
     {
-        boot_warn("bin file crc ERROR.");
+        sys_warn("bin file crc ERROR.");
         return -1;
     }
     
     feed_watchdog();
-    boot_notice("img file verify OK.");
+    sys_notice("img file verify OK.");
     
     //解密
-    boot_notice("img file decrypt");
-    boot_debug("decrypt_data base:0x%x,lenth:%d",img->addr,img->lenth);
+    sys_notice("img file decrypt");
+    sys_debug("decrypt_data base:0x%x,lenth:%d",img->addr,img->lenth);
     len = decrypt_data((uint8_t *)img->addr,img->lenth);
     if(len < 0)
     {
-        boot_warn("img file Decrypt ERROR.");
+        sys_warn("img file Decrypt ERROR.");
         return -1;
     }
     img->lenth = (uint32_t)len;
     feed_watchdog();
-    boot_notice("img file decrypt OK.");
+    sys_notice("img file decrypt OK.");
     return 0;
 }
 
@@ -199,20 +199,20 @@ int32_t encrypt_code_calc_crc(region_s *code_reg)
     int32_t len;
     
 
-    boot_debug("decrypt_data base:0x%x,lenth:%d",code_reg->addr,code_reg->lenth - 4);
+    sys_debug("decrypt_data base:0x%x,lenth:%d",code_reg->addr,code_reg->lenth - 4);
     len = encrypt_data((uint8_t *)code_reg->addr,code_reg->lenth -4);
     if(len < 0)
     {
-        boot_warn("img file encrypt ERROR.");
+        sys_warn("img file encrypt ERROR.");
         return -1;
     }
     
-    boot_notice("img file encrypt OK.");
+    sys_notice("img file encrypt OK.");
     
     code_reg->crc = calc_crc32((char *)code_reg->addr,code_reg->lenth,0);
     convert_uint32_to_byte((uint8_t *)code_reg->addr,code_reg->lenth - 4,code_reg->crc);
     
-    boot_debug("new file CRC:0x%x.",code_reg->crc);
+    sys_debug("new file CRC:0x%x.",code_reg->crc);
     return 0;
 }
 
@@ -229,17 +229,17 @@ int32_t copy_region_data(region_s *src,region_s *dest)
         return 0;
     if(dest->maxlen < src->lenth)
     {
-        boot_warn("space is NOT enough.");
+        sys_warn("space is NOT enough.");
         return -1;
     }
-    boot_notice("copy data from %s to %s lenth %d.",
+    sys_notice("copy data from %s to %s lenth %d.",
                 src->regname,dest->regname,src->lenth);
-    boot_debug("source type %s,addr 0x%x,lenth %d dest type,%s,addr 0x%x,lenth %d.",
+    sys_debug("source type %s,addr 0x%x,lenth %d dest type,%s,addr 0x%x,lenth %d.",
                 memtype_name(src->type),src->addr,src->lenth,
                 memtype_name(dest->type),dest->addr,dest->maxlen);
     
     blocks = (src->lenth + BLOCK_SIZE - 1) / BLOCK_SIZE;
-    boot_printf("complete:");
+    sys_printf("complete:");
     print32_t_copy_percents(0,1,0);
     for(i = 0;i < blocks;i ++)
     {    
@@ -257,7 +257,7 @@ int32_t copy_region_data(region_s *src,region_s *dest)
         }
         if(times >= 3)
         {
-            boot_warn("read block 0x%x,lenth %d failed.",addr,BLOCK_SIZE);
+            sys_warn("read block 0x%x,lenth %d failed.",addr,BLOCK_SIZE);
             dest->status = MEM_ERROR;
             return -1;
         }
@@ -271,7 +271,7 @@ int32_t copy_region_data(region_s *src,region_s *dest)
         }
         if(times >= 3)
         {
-            boot_warn("read block 0x%x,lenth %d failed.",addr,BLOCK_SIZE);
+            sys_warn("read block 0x%x,lenth %d failed.",addr,BLOCK_SIZE);
             dest->status = MEM_ERROR;
             return -1;
         }
@@ -279,13 +279,13 @@ int32_t copy_region_data(region_s *src,region_s *dest)
         feed_watchdog();
     }
     print32_t_copy_percents(i,blocks,1);
-    boot_printf("\r\n");
+    sys_printf("\r\n");
 
     dest->lenth = src->lenth;
     dest->crc = src->crc;
     dest->status = MEM_NORMAL;
 
-    boot_debug("copy data OK."); 
+    sys_debug("copy data OK."); 
     return 0;    
 }
 
@@ -294,11 +294,11 @@ int32_t flush_code_to_ram(region_s *code_region)
 {
     int32_t ret;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
-    boot_notice("begin to copy code to memory...");
+    sys_notice("begin to copy code to memory...");
     ret = copy_region_data(code_region,&bp->mem_map.run.flash);
     if(0 != ret)
     {
-        boot_warn("copy img to running space failed.");
+        sys_warn("copy img to running space failed.");
         return -1;
     }
     return 0;
@@ -311,13 +311,13 @@ int32_t flush_code_to_rom(region_s *bin)
     int32_t ret;
     region_s *src;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
-    boot_notice("begin to flush code to rom space...");
+    sys_notice("begin to flush code to rom space...");
     //先将原来的程序拷贝到备份空间    
     src = &bp->mem_map.rom.program1_region;
     ret = copy_region_data(src,&bp->mem_map.rom.program2_region);
     if(0 != ret)
     {
-        boot_warn("backup old program failed.");
+        sys_warn("backup old program failed.");
         return -1;
     }
 
@@ -325,7 +325,7 @@ int32_t flush_code_to_rom(region_s *bin)
     ret = copy_region_data(bin,&bp->mem_map.rom.program1_region);
     if(0 != ret)
     {
-        boot_error("write new program failed.");
+        sys_error("write new program failed.");
         return -1;
     }
     bp->mem_map.run.flash.status = MEM_NORMAL;
@@ -348,13 +348,13 @@ int32_t flush_code_data(memtype_e type,region_s *img)
             ret = flush_code_to_rom(img);
             break;
         default:
-            boot_error("unknown memory type:%d",type);
+            sys_error("unknown memory type:%d",type);
             ret = -1;
             break;
     }
     if(0 != ret)
     {
-        boot_warn("flush img data failed.");
+        sys_warn("flush img data failed.");
         (void)get_boot_params_from_ROM();
         return ret;
     }
@@ -371,15 +371,15 @@ int32_t download_img_file(memtype_e type)
 
     if(bp->debug_mode)
     {
-        boot_notice("device can NOT download in debug mode ,set it to normal mode first");
+        sys_notice("device can NOT download in debug mode ,set it to normal mode first");
         return -1;
     }
     img = &bp->mem_map.ram.probuf_region;
-    boot_printf("begin to receive file data,please wait.\r\n");
+    sys_printf("begin to receive file data,please wait.\r\n");
     len = boot_receive_img(img->addr,img->maxlen);
     if(len <= 0)
     {
-        boot_error("receive img data failed.");
+        sys_error("receive img data failed.");
         return -1;
     }
 
@@ -387,16 +387,16 @@ int32_t download_img_file(memtype_e type)
     ret = check_and_decrypt_img(img);
     if(ret != 0)
     {
-        boot_error("check img file ERROR");
+        sys_error("check img file ERROR");
         return -1; 
     }
     ret = flush_code_data(type,img);
     if(0 != ret)
     {
-        boot_warn("flush data to %s failed.",memtype_name(type));
+        sys_warn("flush data to %s failed.",memtype_name(type));
         return -1;
     }
-    boot_notice("img flush OK.");
+    sys_notice("img flush OK.");
     return 0;
 }
 
@@ -406,7 +406,7 @@ int32_t clean_program(void)
     uint32_t i,blocknum;
     region_s *code[5];
     boot_param_s *bp = (boot_param_s*)get_boot_params();
-    boot_printf("clearing program ...\r\n");
+    sys_printf("clearing program ...\r\n");
     code[idx++] = &bp->mem_map.rom.program1_region;
     code[idx++] = &bp->mem_map.rom.program2_region;
     code[idx++] = &bp->mem_map.run.flash;
@@ -415,11 +415,11 @@ int32_t clean_program(void)
     
     for(i = 0;i < 5;i ++)
     {   
-        boot_notice("erase base 0x%x,lenth %d.",code[i]->addr,code[i]->lenth);
+        sys_notice("erase base 0x%x,lenth %d.",code[i]->addr,code[i]->lenth);
         blocknum = (code[i]->lenth + BLOCK_SIZE - 1) / BLOCK_SIZE;
         erase_block(code[i]->type,code[i]->index,code[i]->addr,blocknum);
     }
-    boot_printf("clear program OK.\r\n");
+    sys_printf("clear program OK.\r\n");
     return 0;
 }
 
@@ -432,7 +432,7 @@ int32_t write_encrypt_code_to_run(region_s *src,region_s *run)
     ret = copy_region_data(src,&bp->mem_map.ram.probuf_region);
     if(0 != ret)
     {
-        boot_warn("copy data error.");
+        sys_warn("copy data error.");
         return -1;
     }
     
@@ -442,14 +442,14 @@ int32_t write_encrypt_code_to_run(region_s *src,region_s *run)
     ret = check_and_decrypt_img(&img);
     if(0 != ret)
     {
-        boot_error("check img file ERROR.");
+        sys_error("check img file ERROR.");
         return -1;
     }
     
     ret = copy_region_data(&img,run);
     if(0 != ret)
     {
-        boot_warn("flush data to running space error.");
+        sys_warn("flush data to running space error.");
         return -1;
     }
     return 0;
@@ -476,13 +476,13 @@ int32_t check_rom_program(region_s *code)
     prog.regname = code->regname;
     if(prog.status == MEM_NULL)
     {
-        boot_notice("region %s type %s base 0x%x lenth %d is empty.",
+        sys_notice("region %s type %s base 0x%x lenth %d is empty.",
                     prog.regname,memtype_name(prog.type),prog.addr,prog.lenth);
         return 0;
     }
     if(prog.status != MEM_ERROR)
     {
-        boot_debug("check program base 0x%x,lenth %d",prog.addr,prog.lenth);
+        sys_debug("check program base 0x%x,lenth %d",prog.addr,prog.lenth);
         blocks = (prog.lenth + BLOCK_SIZE - 1) / BLOCK_SIZE;
         for(i = 0;i < blocks;i ++)
         {
@@ -490,7 +490,7 @@ int32_t check_rom_program(region_s *code)
             len = read_block(prog.type,prog.index,base,buff,1);
             if(len <= 0)
             {
-                boot_warn("read %s block base 0x%x,lenth %d failed.",
+                sys_warn("read %s block base 0x%x,lenth %d failed.",
                             memtype_name(prog.type),base,BLOCK_SIZE);
                 return -1;
             }
@@ -509,9 +509,9 @@ int32_t check_rom_program(region_s *code)
     
     if(MEM_ERROR == prog.status || cal_crc != prog.crc)
     {
-        boot_warn("check program CRC in %s base 0x%x,lenth %d failed.",
+        sys_warn("check program CRC in %s base 0x%x,lenth %d failed.",
                     memtype_name(prog.type),prog.addr,prog.lenth);
-        boot_debug("cal_crc:0x%x,crc:0x%x",cal_crc,prog.crc);
+        sys_debug("cal_crc:0x%x,crc:0x%x",cal_crc,prog.crc);
         code->status = MEM_ERROR;
         return -1;
     }
@@ -529,7 +529,7 @@ int32_t check_programs(void)
     code[idx++] = &bp->mem_map.rom.program1_region;
     code[idx++] = &bp->mem_map.rom.program2_region;
     code[idx++] = &bp->mem_map.run.flash;
-    boot_notice("begin to check programs...");
+    sys_notice("begin to check programs...");
     for(i = 0;i < sizeof(code)/sizeof(region_s*);i ++)
     {
         if(MEM_ERROR != code[i]->status)
@@ -542,7 +542,7 @@ int32_t check_programs(void)
         else
         {
             
-            boot_warn("check program CRC in %s base 0x%x,lenth %d failed.",
+            sys_warn("check program CRC in %s base 0x%x,lenth %d failed.",
                         memtype_name(code[i]->type),code[i]->addr,code[i]->lenth);
             ret= 1;
         }
@@ -550,11 +550,11 @@ int32_t check_programs(void)
 
     if(save_flag)
     {
-        boot_error("program space ERROR.");
+        sys_error("program space ERROR.");
         (void)param_flush();
         return -1;
     }
-    boot_notice("check programs OK.");
+    sys_notice("check programs OK.");
     return ret;
     
 }

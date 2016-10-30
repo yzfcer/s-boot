@@ -19,7 +19,7 @@ extern "C" {
 #endif
 void boot_delay(uint32_t ms);
 
-int boot_printf(const char *fmt,...);
+int sys_printf(const char *fmt,...);
 
 int32_t read_char_blocking(char *ch);
 int32_t read_line_blockig(char *buff,int32_t len);

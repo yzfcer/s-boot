@@ -41,7 +41,7 @@ int32_t wait_for_key_input(int32_t to_sec,char *ch,int32_t print_flag)
     second = to_sec > 99?99:to_sec;
     tick = boot_get_sys_ms();
     if(print_flag)
-        boot_printf("\r\nwaiting:%ds",second);
+        sys_printf("\r\nwaiting:%ds",second);
     while(1)
     {
         feed_watchdog();
@@ -61,17 +61,17 @@ int32_t wait_for_key_input(int32_t to_sec,char *ch,int32_t print_flag)
             }
             if(print_flag)
             {
-                boot_printf("%c%c%c",8,8,8);
-                boot_printf("%2ds",second);
+                sys_printf("%c%c%c",8,8,8);
+                sys_printf("%2ds",second);
             }
         }
     }
-    boot_printf("\r\n");
+    sys_printf("\r\n");
     return ret;
 }
 
 
-int boot_printf(const char *fmt,...)
+int sys_printf(const char *fmt,...)
 {
     int cnt;
     va_list argptr;
@@ -89,7 +89,7 @@ int32_t read_char_blocking(char *ch)
 {
     if(0 == wait_for_key_input(60,ch,0))
         return 0;
-    boot_printf("you have NOT input any key in a 60 seconds,boot exit the menu list.\r\n");
+    sys_printf("you have NOT input any key in a 60 seconds,boot exit the menu list.\r\n");
     if(0 == wait_for_key_input(30,ch,1))
         return 0;
     return -1;
@@ -181,7 +181,7 @@ int32_t boot_receive_img(uint32_t addr,uint32_t maxlen)
                 }
                 else
                 {
-                    boot_notice("wait for file data time out.");
+                    sys_notice("wait for file data time out.");
                     return -1;
                 }
                 break;
@@ -192,18 +192,18 @@ int32_t boot_receive_img(uint32_t addr,uint32_t maxlen)
                     g_recvstat.idx ++;
                     if(g_recvstat.idx >= maxlen)
                     {
-                        boot_warn("img file is too long.");
+                        sys_warn("img file is too long.");
                                               wait_file_send_compete();
                                               return -1;
                     }
                     g_recvstat.mstick = boot_get_sys_ms();
                     if((g_recvstat.idx & 0x1ff) == 0)
                     {
-                        boot_printf("#");
+                        sys_printf("#");
                     }
                     if((g_recvstat.idx & 0x7fff) == 0)
                     {
-                        boot_printf("\r\n");
+                        sys_printf("\r\n");
                     }
                 }
                 else
@@ -216,7 +216,7 @@ int32_t boot_receive_img(uint32_t addr,uint32_t maxlen)
                 feed_watchdog();
                 break;
             case RECV_END:
-                boot_printf("\r\n");
+                sys_printf("\r\n");
                 end = (g_recvstat.idx + BLOCK_SIZE - 1)/BLOCK_SIZE*BLOCK_SIZE;
                 for(i = g_recvstat.idx;i < end; i ++)
                     buf[i] = 0;
@@ -272,7 +272,7 @@ uint8_t *get_block_buffer(void)
 int32_t read_block(uint8_t memtype,uint32_t memidx,uint32_t addr,uint8_t *buf,int32_t blkcount)
 {
     int len;
-    //boot_notice("read block base:0x%x",addr);
+    //sys_notice("read block base:0x%x",addr);
     switch(memtype)
     {
         case MEM_TYPE_RAM:
@@ -294,7 +294,7 @@ int32_t read_block(uint8_t memtype,uint32_t memidx,uint32_t addr,uint8_t *buf,in
 int32_t write_block(uint8_t memtype,uint32_t memidx,uint32_t addr,uint8_t *buf,int32_t blkcount)
 {
     int len; 
-    //boot_notice("write block base:0x%x",addr);
+    //sys_notice("write block base:0x%x",addr);
     switch(memtype)
     {
         case MEM_TYPE_RAM:

@@ -23,8 +23,8 @@ extern "C" {
 #endif
 
 
-static char g_bootparam[PARAM_LENTH];
 boot_param_s *g_pbp = NULL;
+static char g_bootparam[PARAM_LENTH];
 
 static void init_reg_name(boot_param_s *bp)
 {
@@ -35,6 +35,12 @@ static void init_reg_name(boot_param_s *bp)
     {
         mp[i].regname = region_name(i);
     }
+}
+
+static void upate_bootparam_crc(uint8_t *prmbuf)
+{
+    uint32_t *crc = (uint32_t*)&prmbuf[sizeof(boot_param_s)];
+    *crc = calc_crc32((char*)prmbuf,sizeof(boot_param_s),0);
 }
 
 void *get_boot_params(void)
@@ -52,7 +58,7 @@ void *get_boot_params_from_ROM(void)
     ret = param_read();
     if(0 != ret)
     {
-        boot_warn("get boot params failed.");
+        sys_warn("get boot params failed.");
         g_pbp = NULL;
         return NULL;
     }
@@ -68,13 +74,7 @@ void *get_boot_params_from_ROM(void)
     return (void*)g_pbp;
 }
 
-void upate_bootparam_crc(uint8_t *prmbuf)
-{
-    uint32_t *crc = (uint32_t*)&prmbuf[sizeof(boot_param_s)];
-    *crc = calc_crc32((char*)prmbuf,sizeof(boot_param_s),0);
-}
 
-//在bootloader首次运行时调用，烧入默认的参数
 void param_init(const mem_map_s *mmap)
 {
     int32_t i;
@@ -97,7 +97,7 @@ void param_init(const mem_map_s *mmap)
         dest[i] = src[i];
     }
     init_map_info(&bp->mem_map);
-    boot_notice("init boot param OK.");
+    sys_notice("init boot param OK.");
 }
 
 
@@ -108,26 +108,27 @@ int32_t param_check_valid(uint8_t *prmbuf)
     uint32_t *crc = (uint32_t*)&prmbuf[sizeof(boot_param_s)];
     if(bp->magic != BOOT_PARAM_MAGIC)
     {
-        boot_warn("param block is invalid.");
+        sys_warn("param block is invalid.");
         return -1;
     }
     if(bp->lenth!= sizeof(boot_param_s))
     {
-        boot_warn("param block lenth is invalid.");
+        sys_warn("param block lenth is invalid.");
         return -1;
     }
     if(*crc != calc_crc32((char*)bp,sizeof(boot_param_s),0))
     {
-        boot_warn("param block crc is invalid.");
+        sys_warn("param block crc is invalid.");
         return -1;
     }
     if(bp->version > BOOT_VERSION)
     {
-        boot_warn("param block version is not matched.");
+        sys_warn("param block version is not matched.");
         return -1;
     }
     return 0;
 }
+
 void param_clear_buffer(void)
 {
     int32_t i;
@@ -137,8 +138,6 @@ void param_clear_buffer(void)
     }
     g_pbp = NULL;
 }
-
-
 
 int32_t param_read(void)
 {
@@ -166,13 +165,13 @@ int32_t param_read(void)
         }
         else
         {
-            boot_warn("read param %d fail.",i + 1);
+            sys_warn("read param %d fail.",i + 1);
             err ++;
         }
     }
     if(err >= 2)
     {
-        boot_warn("read both params failed.");
+        sys_warn("read both params failed.");
         return -1;
     }
     return 0;
@@ -204,17 +203,17 @@ int32_t param_flush(void)
         if(j >= 3)
         {
             
-            boot_warn("write param %d fail.",i + 1);
+            sys_warn("write param %d fail.",i + 1);
             err ++;
         }
-        boot_debug("write param %d OK.",i + 1);
+        sys_debug("write param %d OK.",i + 1);
     }
     if(err >= 2)
     {
-        boot_warn("write both params failed.");
+        sys_warn("write both params failed.");
         return -1;
     }
-    boot_notice("write boot param complete.");
+    sys_notice("write boot param complete.");
     return 0;
 }
 

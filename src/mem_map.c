@@ -176,7 +176,7 @@ static int32_t check_rom_conflict(rom_map_s *rom)
         {
             if(check_region_conflict(&reg[i],&reg[j]))
             {
-                boot_warn("map %d region \"%s\" and \"%s\" conflict.",i+1,reg[i].regname,reg[j].regname);
+                sys_warn("map %d region \"%s\" and \"%s\" conflict.",i+1,reg[i].regname,reg[j].regname);
                 ret = -1;
             }
         }
@@ -228,7 +228,7 @@ static int32_t check_ram_conflict(ram_map_s *ram)
         {
             if(check_region_conflict(&reg[i],&reg[j]))
             {
-                boot_warn("map %d region \"%s\" and \"%s\" conflict.",i+1,reg[i].regname,reg[j].regname);
+                sys_warn("map %d region \"%s\" and \"%s\" conflict.",i+1,reg[i].regname,reg[j].regname);
                 return -1;
             }
         }
@@ -258,39 +258,39 @@ int32_t check_probuf_and_running(region_s *probuf,region_s *run)
 int32_t check_map_valid(void)
 {
     mem_map_s *map;
-    boot_notice("begin to check momery map params...");
+    sys_notice("begin to check momery map params...");
     map = &g_memmap;
     if(check_rom_conflict(&map->rom))
     {
-        boot_warn("check rom conflict error.");
+        sys_warn("check rom conflict error.");
         return -1;
     }
     if(check_ram_conflict(&map->ram))
     {
-        boot_warn("check ram conflict error.");
+        sys_warn("check ram conflict error.");
         return -1;
     }
     if(check_rom_type(&map->rom))
     {
-        boot_warn("check rom type error.");
+        sys_warn("check rom type error.");
         return -1;
     }
     if(check_ram_type(&map->ram))
     {
-        boot_warn("check ram type error.");
+        sys_warn("check ram type error.");
         return -1;
     }
     if(check_run_type(&map->run))
     {
-        boot_warn("check running space type error.");
+        sys_warn("check running space type error.");
         return -1;
     }
     if(check_probuf_and_running(&map->ram.probuf_region,&map->run.flash))
     {
-        boot_warn("program buffer and running space conflict.");
+        sys_warn("program buffer and running space conflict.");
         return -1;
     }
-    boot_notice("check momery map params OK.");
+    sys_notice("check momery map params OK.");
     return 0;   
 }
 
@@ -301,24 +301,24 @@ void print_map_info(mem_map_s *map)
 #define REGION_PARAM(reg) (reg)->regname,(reg)->index,(reg)->addr,(reg)->maxlen,memtype_name((reg)->type)
     int32_t i;
     region_s *reg;
-    boot_printf("memory map as following:\r\n");
-    boot_printf("%-15s%-8s%-14s%-14s%-12s\r\n","region","memidx","addr","maxlen","type");
+    sys_printf("memory map as following:\r\n");
+    sys_printf("%-15s%-8s%-14s%-14s%-12s\r\n","region","memidx","addr","maxlen","type");
     reg = (region_s*)&map->rom;
     for(i = 0;i < sizeof(map->rom)/sizeof(region_s);i ++)
     {
-        boot_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
+        sys_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
     }
-    boot_printf("\r\n");
+    sys_printf("\r\n");
     reg = (region_s*)&map->ram;
     for(i = 0;i < sizeof(map->ram)/sizeof(region_s);i ++)
     {
-        boot_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
+        sys_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
     }
-    boot_printf("\r\n");
+    sys_printf("\r\n");
     reg = (region_s*)&map->run;
     for(i = 0;i < sizeof(map->run)/sizeof(region_s);i ++)
     {
-        boot_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
+        sys_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
     }
 }
 
@@ -327,10 +327,10 @@ void print_program_space(mem_map_s *map)
 #define REGION_FORMAT1 "%-15s%-8d0x%-10x0x%-9x0x%-9x%-9s%4d%%\r\n" 
 #define REGION_PARAM1(reg) (reg)->regname,(reg)->index,(reg)->addr,(reg)->maxlen,\
                         (reg)->lenth,memtype_name((reg)->type),(reg)->maxlen?((reg)->lenth*100)/(reg)->maxlen:0
-        boot_printf("%-15s%-8s%-12s%-11s%-11s%-9s%-8s\r\n","region","memidx","addr","maxlen","lenth","type","usage");
-        boot_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.program1_region));
-        boot_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.program2_region));
-        boot_printf(REGION_FORMAT1,REGION_PARAM1(&map->run.flash));
+        sys_printf("%-15s%-8s%-12s%-11s%-11s%-9s%-8s\r\n","region","memidx","addr","maxlen","lenth","type","usage");
+        sys_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.program1_region));
+        sys_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.program2_region));
+        sys_printf(REGION_FORMAT1,REGION_PARAM1(&map->run.flash));
 }
 
 void copy_region_info(region_s *src,region_s *dest)

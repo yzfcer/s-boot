@@ -100,11 +100,11 @@ void test_upgrade(void)
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     extern mem_status_s g_memstatus;
     img = &bp->mem_map.ram.probuf_region;
-    boot_printf("begin to receive file data,please wait.\r\n");
+    sys_printf("begin to receive file data,please wait.\r\n");
     img->lenth = boot_receive_img(img->addr,img->maxlen);
     if(img->lenth <= 0)
     {
-        boot_error("receive img data failed.");
+        sys_error("receive img data failed.");
         return;
     }
 
@@ -138,10 +138,10 @@ boot_test_s g_boottest[] =
 void print32_t_boottest(void)
 {
     int32_t i;
-    boot_printf("choose test items:\r\n");
+    sys_printf("choose test items:\r\n");
     for(i = 0;i < sizeof(g_boottest)/sizeof(boot_test_s);i ++)
     {
-        boot_printf("[%c] %s\r\n",g_boottest[i].key,g_boottest[i].item_desc);
+        sys_printf("[%c] %s\r\n",g_boottest[i].key,g_boottest[i].item_desc);
     }
 }
 
