@@ -50,7 +50,7 @@ void *get_boot_params_from_ROM(void)
     int32_t i,ret;
     mem_map_s *map;
     region_s *src,*dest;
-    ret = read_param();
+    ret = param_read();
     if(0 != ret)
     {
         boot_warn("get boot params failed.");
@@ -72,13 +72,12 @@ void *get_boot_params_from_ROM(void)
 
 void upate_bootparam_crc(uint8_t *prmbuf)
 {
-    //btprm->crc = calc_crc32((char*)btprm,sizeof(boot_param_s) - sizeof(btprm->crc),0);
     uint32_t *crc = (uint32_t*)&prmbuf[sizeof(boot_param_s)];
     *crc = calc_crc32((char*)prmbuf,sizeof(boot_param_s),0);
 }
 
 //在bootloader首次运行时调用，烧入默认的参数
-void init_boot_param(const mem_map_s *mmap)
+void param_init(const mem_map_s *mmap)
 {
     int32_t i;
     char *src,*dest;
@@ -106,7 +105,7 @@ void init_boot_param(const mem_map_s *mmap)
 
 
 //检查参数是否有效，有效返回1，无效返回0
-int32_t check_boot_param(uint8_t *prmbuf)
+int32_t param_check_valid(uint8_t *prmbuf)
 {
     boot_param_s *bp = (boot_param_s *)prmbuf;
     uint32_t *crc = (uint32_t*)&prmbuf[sizeof(boot_param_s)];
@@ -132,7 +131,7 @@ int32_t check_boot_param(uint8_t *prmbuf)
     }
     return 0;
 }
-void clear_boot_param_buffer(void)
+void param_clear_buffer(void)
 {
     int32_t i;
     for(i = 0;i < sizeof(g_bootparam);i ++)
@@ -144,7 +143,7 @@ void clear_boot_param_buffer(void)
 
 
 
-int32_t read_param(void)
+int32_t param_read(void)
 {
     uint32_t err = 0;
     int32_t i,j,len,ret;
@@ -163,7 +162,7 @@ int32_t read_param(void)
                 break;
             }
         }
-        ret = check_boot_param(g_bootparam);
+        ret = param_check_valid(g_bootparam);
         if(0 == ret)
         {
             break;
@@ -184,7 +183,7 @@ int32_t read_param(void)
     
 }
 
-int32_t write_param(void)
+int32_t param_flush(void)
 {
     int32_t i,j,len,err = 0;
     region_s *reg[2];
@@ -224,7 +223,7 @@ int32_t write_param(void)
     return 0;
 }
 
-int32_t check_app_debug_mode(void)
+int32_t param_check_debug_mode(void)
 {
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     if(NULL == bp)

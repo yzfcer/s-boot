@@ -371,7 +371,7 @@ int32_t flush_code_data(memtype_e type,region_s *img)
         return ret;
     }
     if(MEM_TYPE_ROM == type)
-        (void)write_param();
+        (void)param_flush();
     return ret;
 }
 
@@ -528,7 +528,7 @@ int32_t change_boot_app(int32_t index)
     {
         boot_error("change boot program failed.");
     }
-    (void)write_param();
+    (void)param_flush();
     return ret;    
 }
 
@@ -622,7 +622,7 @@ int32_t check_programs(void)
     if(save_flag)
     {
         boot_error("program space ERROR.");
-        (void)write_param();
+        (void)param_flush();
         return -1;
     }
     boot_notice("check programs OK.");

@@ -51,12 +51,12 @@ typedef struct
 void *get_boot_params(void);
 void *get_boot_params_from_ROM(void);
 
-void init_boot_param(const mem_map_s *mmap);
-int32_t check_boot_param(boot_param_s *btprm);
-int32_t check_app_debug_mode(void);
-void clear_boot_param_buffer(void);
-int32_t read_param(void);
-int32_t write_param(void);
+void param_init(const mem_map_s *mmap);
+int32_t param_check_valid(boot_param_s *btprm);
+int32_t param_check_debug_mode(void);
+void    param_clear_buffer(void);
+int32_t param_read(void);
+int32_t param_flush(void);
 
 #ifdef __cplusplus
 }

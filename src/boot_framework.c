@@ -48,7 +48,7 @@ static int32_t boot_init(void)
 {
     print_boot_info();
 	mem_region_init();
-    clear_boot_param_buffer();
+    param_clear_buffer();
     go_to_next_step();
     boot_notice("bootloader init OK.");
     return 0;
@@ -56,7 +56,7 @@ static int32_t boot_init(void)
 
 static int32_t boot_app_debug_check(void)
 {
-    int32_t dbg_mode = check_app_debug_mode();
+    int32_t dbg_mode = param_check_debug_mode();
     if(dbg_mode)
     {
         boot_warn("bootloader mode:DEBUG");
@@ -90,8 +90,8 @@ static int32_t boot_first_check(void)
     boot_notice("NO valid boot params found.");
     map = get_memory_map();
     print_map_info(map);
-    init_boot_param(map);
-    ret = write_param();
+    param_init(map);
+    ret = param_flush();
     if(0 != ret)
     {
         boot_error("write boot params failed.");
@@ -198,7 +198,7 @@ static int32_t repair_program(boot_param_s *bp)
         if(0 != repair_rom_space(&bp->mem_map.rom.program1_region,&bp->mem_map.rom.program2_region))
             ret = -1;
     }
-    (void)write_param();
+    (void)param_flush();
     return ret;
 }
 static int32_t boot_self_check(void)
@@ -291,7 +291,7 @@ static int32_t  boot_upgrade_check(void)
         return -1;
     }
     
-    ret = write_param();
+    ret = param_flush();
     if(0 != ret)
     {
         boot_error("update params failed.");

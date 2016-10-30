@@ -184,10 +184,10 @@ static void do_clear_flash_data(uint8_t unlock)
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     clean_program();
     
-    init_boot_param(&bp->mem_map);
-    (void)write_param();
+    param_init(&bp->mem_map);
+    (void)param_flush();
     
-    clear_boot_param_buffer();
+    param_clear_buffer();
     if(unlock)
         set_chip_lock(0);
 }
@@ -246,7 +246,7 @@ static void exit_and_save(void)
 {
     int32_t ret;
     
-    ret = write_param();
+    ret = param_flush();
     if(ret != 0)
     {
         boot_printf("write param fialed.\r\n");
