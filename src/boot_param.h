@@ -45,7 +45,7 @@ typedef struct
     bool_t lock_en;     //芯片锁定使能
     
     mem_map_s mem_map;//系统的空间映射表
-    uint32_t crc;//CRC校验
+    //uint32_t crc;//CRC校验
 }boot_param_s;
 
 void *get_boot_params(void);

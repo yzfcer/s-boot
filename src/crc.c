@@ -31,12 +31,11 @@ void make_table()
 }
 
 
-uint32_t calc_crc32(char *buff, int32_t len,uint32_t crc)
+uint32_t calc_crc32(uint8_t *buff, int32_t len,uint32_t crc)
 {
     int32_t i;
     if(!have_table) 
         make_table();
-    //boot_debug("calculate CRC base 0x%x,len %d",buff,len);
     crc = ~crc;
     for (i = 0;i < len;i++)
         crc = (crc >> 8) ^ table[(crc ^ buff[i]) & 0xff];

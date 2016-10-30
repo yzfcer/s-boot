@@ -17,7 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-uint32_t calc_crc32(char *buff, int32_t len,uint32_t crc);
+uint32_t calc_crc32(uint8_t *buff, int32_t len,uint32_t crc);
 
 #ifdef __cplusplus
 }

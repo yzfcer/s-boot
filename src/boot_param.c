@@ -70,9 +70,11 @@ void *get_boot_params_from_ROM(void)
     return (void*)g_pbp;
 }
 
-void upate_bootparam_crc(boot_param_s *btprm)
+void upate_bootparam_crc(uint8_t *prmbuf)
 {
-    btprm->crc = calc_crc32((char*)btprm,sizeof(boot_param_s) - sizeof(btprm->crc),0);
+    //btprm->crc = calc_crc32((char*)btprm,sizeof(boot_param_s) - sizeof(btprm->crc),0);
+    uint32_t *crc = (uint32_t*)&prmbuf[sizeof(boot_param_s)];
+    *crc = calc_crc32((char*)prmbuf,sizeof(boot_param_s),0);
 }
 
 //在bootloader首次运行时调用，烧入默认的参数
@@ -104,9 +106,10 @@ void init_boot_param(const mem_map_s *mmap)
 
 
 //检查参数是否有效，有效返回1，无效返回0
-int32_t check_boot_param(boot_param_s *btprm)
+int32_t check_boot_param(uint8_t *prmbuf)
 {
-    boot_param_s *bp = btprm;
+    boot_param_s *bp = (boot_param_s *)prmbuf;
+    uint32_t *crc = (uint32_t*)&prmbuf[sizeof(boot_param_s)];
     if(bp->magic != BOOT_PARAM_MAGIC)
     {
         boot_warn("param block is invalid.");
@@ -117,7 +120,7 @@ int32_t check_boot_param(boot_param_s *btprm)
         boot_warn("param block lenth is invalid.");
         return -1;
     }
-    if(bp->crc != calc_crc32((char*)bp,sizeof(boot_param_s) - sizeof(bp->crc),0))
+    if(*crc != calc_crc32((char*)bp,sizeof(boot_param_s),0))
     {
         boot_warn("param block crc is invalid.");
         return -1;
@@ -160,7 +163,7 @@ int32_t read_param(void)
                 break;
             }
         }
-        ret = check_boot_param((boot_param_s *)g_bootparam);
+        ret = check_boot_param(g_bootparam);
         if(0 == ret)
         {
             break;
