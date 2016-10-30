@@ -466,70 +466,10 @@ int32_t write_encrypt_code_to_run(region_s *src,region_s *run)
     return 0;
     
 }
+
 int32_t change_boot_app(int32_t index)
 {
-    int32_t ret;
-    region_s src;
-    boot_param_s *bp = (boot_param_s *)get_boot_params();
-    boot_notice("begin to change boot App:%d.",index);
-    switch(index)
-    {
-        case APP_IDX_PRO1:
-            copy_region_info(&bp->mem_map.rom.program2_region,&src);
-            break;
-        case APP_IDX_PROBAK:
-            copy_region_info(&bp->mem_map.rom.program2_region,&src);
-            break;
-        default:
-            boot_warn("undefined index:%d.",index);
-            return -1;
-    }
-    
-    if(src.addr == bp->mem_map.run.flash.addr)
-    {
-        boot_notice("need NOT to write program.");
-        return 0;        
-    }
-    
-    if(src.lenth <= 0)
-    {
-        boot_warn("program is NOT existing.");
-        return -1;
-    }
-    
-    if(MEM_TYPE_ROM == src.type)
-    {
-        ret = copy_region_data(&src,&bp->mem_map.run.flash);
-        if(MEM_TYPE_ROM == bp->mem_map.rom.program1_region.type)
-        {
-            if(0 == ret)
-            {
-                bp->mem_map.rom.program1_region.lenth = src.lenth;
-                bp->mem_map.rom.program1_region.crc = src.crc;
-                bp->mem_map.rom.program1_region.status = MEM_NORMAL;
-            }
-            else
-            {
-                bp->mem_map.rom.program1_region.status = MEM_ERROR;
-            }
-        }
-    }
-    else if(MEM_TYPE_ROM == src.type)
-    {
-        ret = write_encrypt_code_to_run(&src,&bp->mem_map.run.flash);
-    }
-    else
-    {
-        boot_warn("invalid memory type:%d.",src.type);
-        ret = -1;
-    }
-    
-    if(0 != ret)
-    {
-        boot_error("change boot program failed.");
-    }
-    (void)param_flush();
-    return ret;    
+    return 0;    
 }
 
 

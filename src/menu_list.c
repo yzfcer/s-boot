@@ -268,7 +268,6 @@ static menu_handle_TB g_menu_handleTB[] =
 #if BOOT_TEST_ENABLE
     {'t',0,0,"set bootloader test",set_bootloader_error_test},
 #endif
-    {'s',1,1,"set default boot img",set_default_boot_img},
     {'u',2,2,"unlock MCU chip",unlock_mcu},
     
     {'x',1,1,"exit menu and save",exit_and_save},

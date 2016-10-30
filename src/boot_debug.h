@@ -16,8 +16,6 @@
 #include "boot_type.h"
 #include "mem_map.h"
 #include "boot_hw_if.h"
-//#include "hw_device.h"
-//#include "port.h"
 
 #ifdef __cplusplus
 extern "C" {

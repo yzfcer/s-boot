@@ -326,18 +326,7 @@ static int32_t  boot_rollback_check(void)
         return 0;
     }
     sp_set_app_rollback(0);
-    ret = change_boot_app(APP_IDX_PROBAK);
-    if(0 != ret)
-    {
-        boot_error("app roll back failed.");
-        set_boot_status(BOOT_ERROR);
-    }
-    else
-    {
-        boot_notice("check app roll back OK.");
-        go_to_next_step();
-    }
-    return ret;
+    return 0;
 }
 
 

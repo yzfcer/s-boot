@@ -20,17 +20,6 @@
 extern "C" {
 #endif
 
-//img文件保留长度，这部分一般存储文件的一些相关信息
-//同时还在0x2000位置保留了文件版本信息
-#define RESERVE_FILE_LENTH 0x3000
-typedef enum
-{
-    APP_IDX_PRO1,
-    APP_IDX_PROBAK,
-}app_idx_e;
-
-#define STRUCT_MBR_IDX(type,member) (uint32_t)(&(type*)0->member)
-
 typedef struct __img_head_s img_head_s;
 struct __img_head_s
 {

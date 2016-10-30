@@ -92,8 +92,6 @@ uint32_t get_share_addr(void);
 char *memtype_name(uint32_t type);
 char *region_name(uint32_t regidx);
 mem_map_s *get_memory_map(void);
-int32_t set_default_map(int32_t index);
-void choose_default_map(void);
 
 void copy_region_info(region_s *src,region_s *dest);
 
