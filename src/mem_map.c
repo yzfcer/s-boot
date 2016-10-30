@@ -14,7 +14,7 @@
 #include "mem_map.h"
 #include "port.h"
 #include "share_param.h"
-#include "boot_debug.h"
+#include "sys_debug.h"
 #include "boot_param.h"
 #include "mem_driver.h"
 #ifdef __cplusplus

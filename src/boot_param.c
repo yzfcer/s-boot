@@ -14,7 +14,7 @@
 #include "boot_config.h" 
 #include "boot_param.h"
 #include "port.h"
-#include "boot_debug.h"
+#include "sys_debug.h"
 #include "crc.h"
 #include "mem_driver.h"
 

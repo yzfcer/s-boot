@@ -13,7 +13,7 @@
 **********************************************************************************/
 #include "share_param.h"
 #include "port.h"
-#include "boot_debug.h"
+#include "sys_debug.h"
 #include "crc.h"
 
 #ifdef __cplusplus

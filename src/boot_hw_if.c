@@ -12,7 +12,7 @@
        Modification:
 **********************************************************************************/
 #include "port.h"
-#include "boot_debug.h"
+#include "sys_debug.h"
 #include "boot_hw_if.h"
 #include "boot_param.h"
 #include "mem_driver.h"

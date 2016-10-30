@@ -13,10 +13,10 @@
 **********************************************************************************/
 #include "menu_list.h"
 #include "port.h"
-#include "boot_debug.h"
+#include "sys_debug.h"
 #include "boot_param.h"
 #include "boot_framework.h"
-#include "boot_debug.h"
+#include "sys_debug.h"
 
 #include "crc.h"
 #include "share_param.h"

@@ -17,7 +17,7 @@
 #include "menu_list.h"
 #include "port.h"
 #include "share_param.h"
-#include "boot_debug.h"
+#include "sys_debug.h"
 #include "crc.h"
 #include "program_mgr.h"
 #include "boot_hw_if.h"

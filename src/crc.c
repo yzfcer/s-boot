@@ -12,7 +12,7 @@
        Modification:
 **********************************************************************************/
 #include "crc.h"
-#include "boot_debug.h"
+#include "sys_debug.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
