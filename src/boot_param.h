@@ -43,7 +43,7 @@ void *get_boot_params(void);
 void *get_boot_params_from_ROM(void);
 
 void param_init(const mem_map_s *mmap);
-int32_t param_check_valid(boot_param_s *btprm);
+int32_t param_check_valid(uint8_t *prmbuf);
 int32_t param_check_debug_mode(void);
 void    param_clear_buffer(void);
 int32_t param_read(void);

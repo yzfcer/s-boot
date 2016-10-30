@@ -83,18 +83,6 @@ static int head_endian_convert(img_head_s *head)
     return -1;        
 }
 
-
-uint32_t convert_byte_to_uint32(uint8_t *str,int32_t index)
-{
-    uint32_t i,tmp,va = 0;
-    for(i = 0;i < 4;i ++)
-    {
-        tmp = str[index+i];
-        va += (tmp << (i*8));
-    }
-    return va;
-}
-
 void convert_uint32_to_byte(uint8_t *buf,int32_t index,uint32_t va)
 {
     int32_t i;
@@ -412,7 +400,7 @@ int32_t download_img_file(memtype_e type)
     return 0;
 }
 
-void clean_program(void)
+int32_t clean_program(void)
 {
     int idx = 0;
     uint32_t i,blocknum;
@@ -432,6 +420,7 @@ void clean_program(void)
         erase_block(code[i]->type,code[i]->index,code[i]->addr,blocknum);
     }
     boot_printf("clear program OK.\r\n");
+    return 0;
 }
 
 int32_t write_encrypt_code_to_run(region_s *src,region_s *run)

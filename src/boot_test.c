@@ -25,8 +25,6 @@ extern "C" {
 #endif
 #if BOOT_TEST_ENABLE
 extern upgrade_region_s g_upgrade_status;
-extern uint32_t get_ram_addr(uint32_t memidx,uint32_t addr);
-extern uint32_t convert_byte_to_uint32(uint8_t *str,int32_t index);
 boot_stub_s boot_stub = {0,0,0};
 void clear_errors(void)
 {
