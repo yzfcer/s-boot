@@ -28,9 +28,6 @@
     <ClInclude Include="..\..\..\..\..\..\src\boot_config.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\boot_debug.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\src\boot_framework.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -60,6 +57,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\encrypt\encrypt.h">
       <Filter>encrypt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\src\sys_debug.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

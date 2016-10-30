@@ -13,7 +13,6 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\..\encrypt\encrypt.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot_config.h" />
-    <ClInclude Include="..\..\..\..\..\..\src\boot_debug.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot_framework.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot_hw_if.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot_param.h" />
@@ -23,6 +22,7 @@
     <ClInclude Include="..\..\..\..\..\..\src\menu_list.h" />
     <ClInclude Include="..\..\..\..\..\..\src\program_mgr.h" />
     <ClInclude Include="..\..\..\..\..\..\src\share_param.h" />
+    <ClInclude Include="..\..\..\..\..\..\src\sys_debug.h" />
     <ClInclude Include="..\..\port\boot_type.h" />
     <ClInclude Include="..\..\port\mem_driver.h" />
     <ClInclude Include="..\..\port\port.h" />
