@@ -108,11 +108,11 @@ static int32_t boot_chip_lock_check(void)
 {
     if(!is_chip_lock())
     {
-        sys_warn("MCU chip is locked.");
+        sys_notice("MCU chip is locked.");
     }
     else
     {
-        sys_notice("MCU chip is unlocked.");
+        sys_warn("MCU chip is unlocked.");
     }
     go_to_next_step();
     return 0;

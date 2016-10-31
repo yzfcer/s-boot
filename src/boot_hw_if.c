@@ -226,17 +226,17 @@ int32_t boot_receive_img(uint32_t addr,uint32_t maxlen)
 }
 #endif
 
-static int read_ram(uint32_t memidx,uint32_t realaddr,uint8_t *buf,int32_t lenth)
+static int read_ram(uint32_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth)
 {
     int i;
     uint8_t *src;
     uint32_t base;
     uint32_t size;
 
-    src = (uint8_t*)realaddr;
+    src = (uint8_t*)addr;
     base = get_ram_base(memidx);
     size = get_ram_lenth(memidx);
-    if(realaddr - base + lenth >= size)
+    if(addr - base + lenth >= size)
         return -1;
     for(i = 0;i < lenth;i ++)
     {
@@ -245,17 +245,17 @@ static int read_ram(uint32_t memidx,uint32_t realaddr,uint8_t *buf,int32_t lenth
     return lenth;
 }
 
-static int write_ram(uint32_t memidx,uint32_t realaddr,uint8_t *buf,int32_t lenth)
+static int write_ram(uint32_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth)
 {
     int i;
     uint8_t *dest;
     uint32_t base;
     uint32_t size;
 
-    dest = (uint8_t*)realaddr;
+    dest = (uint8_t*)addr;
     base = get_ram_base(memidx);
     size = get_ram_lenth(memidx);
-    if(realaddr - base + lenth >= size)
+    if(addr - base + lenth >= size)
         return -1;
 
     for(i = 0;i < lenth;i ++)
