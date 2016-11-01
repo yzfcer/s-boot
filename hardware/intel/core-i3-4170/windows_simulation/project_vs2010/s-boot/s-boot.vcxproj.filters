@@ -25,9 +25,6 @@
     <ClInclude Include="..\..\port\port.h">
       <Filter>port</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\boot_config.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\src\boot_framework.h">
       <Filter>src</Filter>
     </ClInclude>

@@ -12,7 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\..\encrypt\encrypt.h" />
-    <ClInclude Include="..\..\..\..\..\..\src\boot_config.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot_framework.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot_hw_if.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot_param.h" />

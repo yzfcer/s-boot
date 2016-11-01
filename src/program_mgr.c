@@ -11,7 +11,7 @@
        Author:
        Modification:
 **********************************************************************************/
-#include "boot_config.h"
+#include "config.h"
 #include "menu_list.h"
 #include "port.h"
 #include "sys_debug.h"

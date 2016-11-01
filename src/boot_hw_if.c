@@ -17,7 +17,7 @@
 #include "boot_param.h"
 #include "mem_driver.h"
 #include <stdarg.h>
-#include "boot_config.h"
+#include "config.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

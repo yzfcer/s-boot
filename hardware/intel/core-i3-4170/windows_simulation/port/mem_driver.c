@@ -14,20 +14,47 @@
 #include "mem_driver.h"
 #include <string.h>
 #include <stdio.h>
-//存储系统总体空间定义
-#define RAM1_LENTH 0x40000
-#define RAM2_LENTH 0x100000
 
-#define ROM1_BASE 0x00000000
-#define ROM2_BASE 0xA0000000
+uint8_t g_ram1[RAM1_SIZE];
+uint8_t g_ram2[RAM2_SIZE];
+uint8_t g_rom1[ROM1_SIZE];
+uint8_t g_rom2[ROM2_SIZE];
 
-#define ROM1_LENTH 0x100000
-#define ROM2_LENTH 0x400000
+typedef struct
+{
+    uint32_t base;
+    uint32_t size;
+}MEM_SPACE_S;
 
-uint8_t g_ram1[RAM1_LENTH];
-uint8_t g_ram2[RAM2_LENTH];
-uint8_t g_rom1[ROM1_LENTH];
-uint8_t g_rom2[ROM2_LENTH];
+MEM_SPACE_S g_rom[] = 
+{
+    {ROM1_BASE,ROM1_SIZE},
+    {ROM2_BASE,ROM2_SIZE},
+};
+
+MEM_SPACE_S g_ram[] = 
+{
+    {RAM1_BASE,RAM1_SIZE},
+    {RAM2_BASE,RAM2_SIZE},
+};
+
+
+
+uint32_t get_rom_base(int32_t idx)
+{
+    int count = sizeof(g_rom)/sizeof(MEM_SPACE_S);
+    if(idx >= count)
+        return MEM_BASE_INVALID;
+    return g_rom[idx].base;
+}
+
+uint32_t get_rom_lenth(int32_t idx)
+{
+    int count = sizeof(g_rom)/sizeof(MEM_SPACE_S);
+    if(idx >= count)
+        return MEM_BASE_INVALID;
+    return g_rom[idx].size;
+}
 
 uint32_t get_ram_base(int32_t idx)
 {
@@ -42,44 +69,14 @@ uint32_t get_ram_base(int32_t idx)
     }
 }
 
-uint32_t get_rom_base(int32_t idx)
-{
-    switch(idx)
-    {
-        case 0:
-            return ROM1_BASE;
-        case 1:
-            return ROM2_BASE;
-        default:
-            return MEM_BASE_INVALID;
-    }
-}
-
 uint32_t get_ram_lenth(int32_t idx)
 {
-    switch(idx)
-    {
-        case 0:
-            return RAM1_LENTH;
-        case 1:
-            return RAM2_LENTH;
-        default:
-            return 0;
-    }
+    int count = sizeof(g_ram)/sizeof(MEM_SPACE_S);
+    if(idx >= count)
+        return MEM_BASE_INVALID;
+    return g_ram[idx].size;
 }
 
-uint32_t get_rom_lenth(int32_t idx)
-{
-    switch(idx)
-    {
-        case 0:
-            return ROM1_LENTH;
-        case 1:
-            return ROM2_LENTH;
-        default:
-            return 0;
-    }
-}
 
 
 
@@ -88,7 +85,7 @@ static void flush_rom_file(uint8_t memidx)
     FILE *fil;
     char filename[16];
     uint32_t len;
-    uint8_t *buf;// = (uint8_t*)get_rom_base(memidx);
+    uint8_t *buf;
     switch(memidx)
     {
     case 0:

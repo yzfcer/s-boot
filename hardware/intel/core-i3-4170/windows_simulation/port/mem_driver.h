@@ -15,11 +15,23 @@
 #define MEM_DRIVER_H__
 #include "boot_type.h"
 #include "mem_map.h"
-
+//硬件RAM和ROM的数量
 #define RAM_COUNT 2
 #define ROM_COUNT 2
 
+//硬件RAM和ROM的基地址和空间大小
+#define RAM1_BASE 0x20000000
+#define RAM2_BASE 0x60000000
+#define RAM1_SIZE 0x40000
+#define RAM2_SIZE 0x100000
+
+#define ROM1_BASE 0x00000000
+#define ROM2_BASE 0xA0000000
+#define ROM1_SIZE 0x100000
+#define ROM2_SIZE 0x400000
+
 #define MEM_BASE_INVALID 0xffffffff
+
 
 
 #define BOOTLOADER_IDX 0
