@@ -97,7 +97,7 @@ static void flush_rom_file(uint8_t memidx)
     case 1:
         buf = (uint8_t *)(g_rom2);
     default:
-        return -1;
+        return ;
     }
     len = get_rom_lenth(memidx);
     sprintf(filename,"rom%d.bin",memidx);
@@ -120,7 +120,7 @@ static void read_rom_file(uint8_t memidx)
     case 1:
         buf = (uint8_t *)(g_rom2);
     default:
-        return -1;
+        return ;
     }
     len = get_rom_lenth(memidx);
     sprintf(filename,"rom%d.bin",memidx);

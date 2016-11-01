@@ -372,7 +372,7 @@ int DES_DecryptBlock(uint8_t cipherBlock[8], uint8_t subKeys[16][48],uint8_t pla
 
 static uint8_t keyStr[] = ENCRYPT_KEY;
 //加密文件  
-int DES_Encrypt(uint8_t *data,int datalen)
+int DES_encrypt(uint8_t *data,int datalen)
 {  
     int i,idx;
     int blocks;
@@ -401,7 +401,7 @@ int DES_Encrypt(uint8_t *data,int datalen)
 }  
 
 //解密文件  
-int DES_Decrypt(uint8_t *data,int datalen)
+int DES_decrypt(uint8_t *data,int datalen)
 {  
     int i,idx;
     int blocks;

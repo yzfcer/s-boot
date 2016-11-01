@@ -1,3 +1,4 @@
+//#include <string.h>
 #include "encrypt.h"
 #include "boot_type.h"
 
