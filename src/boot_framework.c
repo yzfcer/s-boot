@@ -213,7 +213,7 @@ static int32_t boot_self_check(void)
         return -1;        
     }
         
-    ret = check_programs();
+    ret = check_rom_programs();
     if(0 != ret)
     {
         ret = repair_program(bp);
@@ -267,13 +267,13 @@ static int32_t  boot_upgrade_check(void)
     img.lenth = g_upgrade_status.lenth;
     img.type = (memtype_e)g_upgrade_status.mem_type;
 
-    ret = check_and_decrypt_img(&img);
+    ret = check_img_valid(&img);
     if(0 != ret)
     {
         sys_error("check img file ERROR");
         return -1;
     }
-    
+    decrypt_img_data(&img);
     if(MEM_TYPE_ROM == bp->mem_map.rom.program1_region.type)
     {
         ret = flush_code_to_rom(&img);
@@ -347,7 +347,7 @@ static int32_t boot_wait_key_press(void)
 
 static int32_t boot_menu_list(void)
 {
-    menu_entry();
+    run_menu();
     if(get_menu_go_direction())
         go_to_next_step();
     else

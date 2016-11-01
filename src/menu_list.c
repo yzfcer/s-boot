@@ -170,7 +170,7 @@ static void show_program_status(void)
 }
 
 #if BOOT_TEST_ENABLE
-static void set_bootloader_error_test(void)
+void bootloader_test(void)
 {
     if(0 != test_entry())
     {
@@ -199,49 +199,6 @@ static void clear_boot_param(void)
     sys_printf("clear boot param complete.\r\n");
 }
 
-static void set_default_boot_img(void)
-{
-    char ch;
-    int32_t i,ret;
-    char *pro[] = 
-    {
-        "program1",
-        "program2",
-        "cancel"
-    };
-    boot_param_s *bp = (boot_param_s *)get_boot_params();
-    while(1)
-    {
-        sys_printf("choose the following program:\r\n");
-        for(i = 0;i < sizeof(pro)/sizeof(char*);i ++)
-        {
-            sys_printf("[%d] %s\r\n",i+1,pro[i]);
-        }
-        if(0 != read_char_blocking(&ch))
-        {
-            exit_menu();
-            return;
-        }
-        if(ch >= '1' && ch <= '0' + sizeof(pro)/sizeof(char*))
-        {
-            if(ch != '0' + sizeof(pro)/sizeof(char*))
-            {
-                ret = change_boot_app(ch - '1');
-                if(0 == ret)
-                {
-                    sys_notice("set default boot img OK.");
-                }
-                else
-                {
-                    sys_warn("set boot app error.");
-                }
-            }
-            break;
-        }
-    }
-}
-
-
 static void exit_and_save(void)
 {
     int32_t ret;
@@ -260,13 +217,13 @@ static menu_handle_TB g_menu_handleTB[] =
     {'1',0,0,"download img file to ROM",download_img_to_rom},
     {'2',0,0,"download img file to RAM",download_img_to_ram},
     {'3',0,0,"download file system",download_filesystem},
+    {'4',0,0,"show memory map",show_memmap},
+    {'5',0,0,"show program status",show_program_status},
     {'b',2,2,"set debug mode",set_debug_mode},
-    {'d',0,0,"show memory map",show_memmap},
     {'k',0,0,"lock MCU chip",lock_mcu},
-    {'p',0,0,"show program status",show_program_status},
     {'r',2,2,"clear boot params",clear_boot_param},
 #if BOOT_TEST_ENABLE
-    {'t',0,0,"set bootloader test",set_bootloader_error_test},
+    {'t',0,0,"bootloader test",bootloader_test},
 #endif
     {'u',2,2,"unlock MCU chip",unlock_mcu},
     
@@ -286,6 +243,7 @@ static void exit_menu(void)
         }
     }
 }
+
 void print32_t_menu_list(void)
 {
     int32_t i;
@@ -330,7 +288,7 @@ int32_t open_super_prio(void)
     return 0;
 }
 
-void menu_entry(void)
+void run_menu(void)
 {
     char ch;
     int32_t i,ret;

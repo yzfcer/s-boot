@@ -23,12 +23,14 @@
     <ClInclude Include="..\..\..\..\..\..\src\share_param.h" />
     <ClInclude Include="..\..\..\..\..\..\src\sys_debug.h" />
     <ClInclude Include="..\..\port\boot_type.h" />
+    <ClInclude Include="..\..\port\config.h" />
     <ClInclude Include="..\..\port\mem_driver.h" />
     <ClInclude Include="..\..\port\port.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\..\..\encrypt\aes.c" />
     <ClCompile Include="..\..\..\..\..\..\encrypt\des.c" />
+    <ClCompile Include="..\..\..\..\..\..\encrypt\encrypt.c" />
     <ClCompile Include="..\..\..\..\..\..\encrypt\rc4.c" />
     <ClCompile Include="..\..\..\..\..\..\src\boot_framework.c" />
     <ClCompile Include="..\..\..\..\..\..\src\boot_hw_if.c" />

@@ -29,7 +29,7 @@ struct __img_head_s
     uint32_t head_ver;
     uint8_t  bin_ver[16];
     uint32_t bin_crc;
-    uint32_t encry_type;
+    int32_t encry_type;
     uint32_t endian_test;
     uint8_t  reserve[16];
     uint8_t  img_name[64];
@@ -43,10 +43,11 @@ struct __img_head_s
 int32_t download_img_file(memtype_e type);
 int32_t change_boot_app(int32_t index);
 int32_t copy_region_data(region_s *src,region_s *dest);
-int32_t clean_program(void);
-int32_t check_programs(void);
 int32_t write_encrypt_code_to_run(region_s *src,region_s *run);
-int32_t check_and_decrypt_img(region_s *img);
+int32_t check_img_valid(region_s *img);
+
+int32_t clean_program(void);
+int32_t check_rom_programs(void);
 
 #ifdef __cplusplus
 }

@@ -20,6 +20,7 @@ uint8_t g_ram2[RAM2_SIZE];
 uint8_t g_rom1[ROM1_SIZE];
 uint8_t g_rom2[ROM2_SIZE];
 
+#if 0
 typedef struct
 {
     uint32_t base;
@@ -37,23 +38,33 @@ MEM_SPACE_S g_ram[] =
     {RAM1_BASE,RAM1_SIZE},
     {RAM2_BASE,RAM2_SIZE},
 };
-
+#endif
 
 
 uint32_t get_rom_base(int32_t idx)
 {
-    int count = sizeof(g_rom)/sizeof(MEM_SPACE_S);
-    if(idx >= count)
-        return MEM_BASE_INVALID;
-    return g_rom[idx].base;
+    switch(idx)
+    {
+        case 0:
+            return (uint32_t)&g_rom1;
+        case 1:
+            return (uint32_t)&g_rom2;
+        default:
+            return MEM_BASE_INVALID;
+    }
 }
 
 uint32_t get_rom_lenth(int32_t idx)
 {
-    int count = sizeof(g_rom)/sizeof(MEM_SPACE_S);
-    if(idx >= count)
-        return MEM_BASE_INVALID;
-    return g_rom[idx].size;
+    switch(idx)
+    {
+        case 0:
+            return ROM1_SIZE;
+        case 1:
+            return ROM2_SIZE;
+        default:
+            return MEM_BASE_INVALID;
+    }
 }
 
 uint32_t get_ram_base(int32_t idx)
@@ -71,10 +82,15 @@ uint32_t get_ram_base(int32_t idx)
 
 uint32_t get_ram_lenth(int32_t idx)
 {
-    int count = sizeof(g_ram)/sizeof(MEM_SPACE_S);
-    if(idx >= count)
-        return MEM_BASE_INVALID;
-    return g_ram[idx].size;
+    switch(idx)
+    {
+        case 0:
+            return RAM1_SIZE;
+        case 1:
+            return RAM2_SIZE;
+        default:
+            return MEM_BASE_INVALID;
+    }
 }
 
 

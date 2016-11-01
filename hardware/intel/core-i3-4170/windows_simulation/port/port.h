@@ -34,6 +34,5 @@ void boot_jump_to_app(void);
 void feed_watchdog(void);
 uint8_t is_chip_lock();
 void set_chip_lock(uint8_t lock_enable);
-int32_t encrypt_data(uint8_t *data,int32_t lenth);
-int32_t decrypt_data(uint8_t *data,int32_t lenth);
+
 #endif

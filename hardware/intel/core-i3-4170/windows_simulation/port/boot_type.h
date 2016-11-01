@@ -34,6 +34,9 @@ typedef enum
     B_FALSE=0,
     B_TRUE,
 }bool_t;
+#ifndef NULL
+#define NULL (void*)0
+#endif
 
 #ifdef __cplusplus
 }

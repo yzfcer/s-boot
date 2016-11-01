@@ -91,15 +91,7 @@ void set_chip_lock(uint8_t lock_enable)
 
 }
 
-int32_t encrypt_data(uint8_t *data,int32_t lenth)
-{
-    return lenth;
-}
 
-int32_t decrypt_data(uint8_t *data,int32_t lenth)
-{
-    return lenth;
-}
 
 
 

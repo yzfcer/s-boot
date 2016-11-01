@@ -14,6 +14,9 @@
     <Filter Include="encrypt">
       <UniqueIdentifier>{e3e6e71f-8532-46ab-8082-40f3adf96105}</UniqueIdentifier>
     </Filter>
+    <Filter Include="NewFilter1">
+      <UniqueIdentifier>{8af4b4ff-1cb4-4547-9528-0902e817e92b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\port\boot_type.h">
@@ -58,6 +61,9 @@
     <ClInclude Include="..\..\..\..\..\..\src\sys_debug.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\port\config.h">
+      <Filter>port</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\port\mem_driver.c">
@@ -100,6 +106,9 @@
       <Filter>encrypt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\encrypt\rc4.c">
+      <Filter>encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\encrypt\encrypt.c">
       <Filter>encrypt</Filter>
     </ClCompile>
   </ItemGroup>
