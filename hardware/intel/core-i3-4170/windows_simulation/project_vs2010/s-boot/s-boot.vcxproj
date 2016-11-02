@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\..\encrypt\encrypt.h" />
+    <ClInclude Include="..\..\..\..\..\..\src\boot_check.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot_framework.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot_hw_if.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot_param.h" />
@@ -32,6 +33,7 @@
     <ClCompile Include="..\..\..\..\..\..\encrypt\des.c" />
     <ClCompile Include="..\..\..\..\..\..\encrypt\encrypt.c" />
     <ClCompile Include="..\..\..\..\..\..\encrypt\rc4.c" />
+    <ClCompile Include="..\..\..\..\..\..\src\boot_check.c" />
     <ClCompile Include="..\..\..\..\..\..\src\boot_framework.c" />
     <ClCompile Include="..\..\..\..\..\..\src\boot_hw_if.c" />
     <ClCompile Include="..\..\..\..\..\..\src\boot_param.c" />

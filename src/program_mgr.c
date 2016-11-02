@@ -83,6 +83,15 @@ static int head_endian_convert(img_head_s *head)
     return -1;        
 }
 
+static uint32_t calc_img_crc(region_s *img)
+{
+    img_head_s *head;
+	head = (img_head_s*)img->addr;
+    return calc_crc32((uint8_t *)(img->addr+head->head_len),
+                        img->lenth-head->head_len,0xffffffff);
+}
+
+
 void convert_uint32_to_byte(uint8_t *buf,int32_t index,uint32_t va)
 {
     int32_t i;
@@ -143,10 +152,11 @@ int decrypt_img_data(region_s *img)
 	head = (img_head_s*)img->addr;
     sys_notice("img file decrypt");
     sys_debug("decrypt_data base:0x%x,lenth:%d",img->addr,img->lenth);
-	len = decrypt_data(head->encry_type,(uint8_t *)img->addr,img->lenth);
+	len = decrypt_data(head->encry_type,(uint8_t *)(img->addr+head->head_len),
+                        img->lenth-head->head_len);
     if(len < 0)
     {
-        sys_warn("img file Decrypt ERROR.");
+        sys_warn("img file decrypt ERROR.");
         return -1;
     }
     img->lenth = (uint32_t)len;
@@ -154,6 +164,27 @@ int decrypt_img_data(region_s *img)
     sys_notice("img file decrypt OK.");
     return 0;
 }
+
+int encrypt_img_data(region_s *img)
+{
+    int len;
+    img_head_s *head;
+	head = (img_head_s*)img->addr;
+    sys_notice("img file encrypt");
+    sys_debug("encrypt_data base:0x%x,lenth:%d",img->addr,img->lenth);
+	len = encrypt_data(head->encry_type,(uint8_t *)img->addr,img->lenth);
+    if(len < 0)
+    {
+        sys_warn("img file encrypt ERROR.");
+        return -1;
+    }
+    img->lenth = (uint32_t)len;
+    feed_watchdog();
+    sys_notice("img file encrypt OK.");
+    return 0;
+    return 0;
+}
+
 
 
 int32_t check_img_valid(region_s *img)
@@ -203,11 +234,11 @@ int32_t check_img_valid(region_s *img)
 }
 
 
-int32_t encrypt_code_calc_crc(region_s *code_reg)
+int32_t encrypt_code_calc_crc(region_s *img)
 {
     int32_t len;
-    sys_debug("decrypt_data base:0x%x,lenth:%d",code_reg->addr,code_reg->lenth - 4);
-    len = encrypt_data((uint8_t *)code_reg->addr,code_reg->lenth -4);
+    sys_debug("decrypt_data base:0x%x,lenth:%d",img->addr,img->lenth);
+    len = encrypt_data((uint8_t *)img->addr,img->lenth);
     if(len < 0)
     {
         sys_warn("img file encrypt ERROR.");
@@ -216,10 +247,10 @@ int32_t encrypt_code_calc_crc(region_s *code_reg)
     
     sys_notice("img file encrypt OK.");
     
-    code_reg->crc = calc_crc32((char *)code_reg->addr,code_reg->lenth,0);
-    convert_uint32_to_byte((uint8_t *)code_reg->addr,code_reg->lenth - 4,code_reg->crc);
+    img->crc = calc_crc32((char *)img->addr,img->lenth,0xffffffff);
+    convert_uint32_to_byte((uint8_t *)img->addr,img->lenth - 4,img->crc);
     
-    sys_debug("new file CRC:0x%x.",code_reg->crc);
+    sys_debug("new file CRC:0x%x.",img->crc);
     return 0;
 }
 
@@ -307,7 +338,7 @@ int32_t flush_code_to_ram(region_s *img)
     copy_region_info(img,&bin);
     bin.addr = img->addr + head->head_len;
     bin.lenth = img->lenth - head->head_len;
-    bin.crc = calc_crc32((uint8_t *)bin.addr,bin.lenth,0);
+    bin.crc = calc_crc32((uint8_t *)bin.addr,bin.lenth,0xffffffff);
     
     sys_notice("begin to copy code to memory...");
     ret = copy_region_data(&bin,&bp->mem_map.run.ram);
@@ -448,7 +479,6 @@ int32_t write_encrypt_code_to_run(region_s *src,region_s *run)
         return -1;
     }
     return 0;
-    
 }
 
 int32_t clean_program(void)
@@ -474,102 +504,6 @@ int32_t clean_program(void)
     return 0;
 }
 
-
-//检查程序块的CRC的值是否正确，正确返回1，错误返回0
-int32_t check_rom_program(region_s *code)
-{
-    uint32_t cal_crc = 0;
-    int32_t i,blocks,len;
-    uint32_t base;
-    region_s prog;
-    uint8_t *buff = get_block_buffer();
-
-    copy_region_info(code,&prog);
-    prog.regname = code->regname;
-    if(prog.status == MEM_NULL)
-    {
-        sys_notice("region %s type %s base 0x%x lenth %d is empty.",
-                    prog.regname,memtype_name(prog.type),prog.addr,prog.lenth);
-        return 0;
-    }
-    if(prog.status != MEM_ERROR)
-    {
-        sys_debug("check program base 0x%x,lenth %d",prog.addr,prog.lenth);
-        blocks = (prog.lenth + BLOCK_SIZE - 1) / BLOCK_SIZE;
-        for(i = 0;i < blocks;i ++)
-        {
-            base = prog.addr + i * BLOCK_SIZE;
-            len = read_block(prog.type,prog.index,base,buff,1);
-            if(len <= 0)
-            {
-                sys_warn("read %s block base 0x%x,lenth %d failed.",
-                            memtype_name(prog.type),base,BLOCK_SIZE);
-                return -1;
-            }
-            
-            if(i == blocks - 1)
-            {
-                len = prog.lenth - i * BLOCK_SIZE;
-            }
-            else
-            {
-                len = BLOCK_SIZE;
-            }
-            cal_crc = calc_crc32(buff,len,cal_crc);
-        }
-    }
-    
-    if(MEM_ERROR == prog.status || cal_crc != prog.crc)
-    {
-        sys_warn("check program CRC in %s base 0x%x,lenth %d failed.",
-                    memtype_name(prog.type),prog.addr,prog.lenth);
-        sys_debug("cal_crc:0x%x,crc:0x%x",cal_crc,prog.crc);
-        code->status = MEM_ERROR;
-        return -1;
-    }
-    return 0;
-}
-
-int32_t check_rom_programs(void)
-{
-	int idx = 0;
-    int32_t ret = 0;
-    region_s *code[3];
-    int32_t save_flag = 0,i;
-    boot_param_s *bp = (boot_param_s *)get_boot_params();
-    
-    code[idx++] = &bp->mem_map.rom.program1_region;
-    code[idx++] = &bp->mem_map.rom.program2_region;
-    code[idx++] = &bp->mem_map.run.flash;
-    sys_notice("begin to check programs...");
-    for(i = 0;i < sizeof(code)/sizeof(region_s*);i ++)
-    {
-        if(MEM_ERROR != code[i]->status)
-        {
-            if(check_rom_program(code[i]))
-            {
-                save_flag = 1;
-            }
-        }
-        else
-        {
-            
-            sys_warn("check program CRC in %s base 0x%x,lenth %d failed.",
-                        memtype_name(code[i]->type),code[i]->addr,code[i]->lenth);
-            ret= 1;
-        }
-    }
-
-    if(save_flag)
-    {
-        sys_error("program space ERROR.");
-        (void)param_flush();
-        return -1;
-    }
-    sys_notice("check programs OK.");
-    return ret;
-    
-}
 
 #ifdef __cplusplus
 }

@@ -49,7 +49,7 @@ typedef struct
 static void update_share_crc(void)
 {
     share_param_s *sp = (share_param_s *)(void*)get_share_addr();
-    sp->crc = calc_crc32((char*)sp,sizeof(share_param_s) - sizeof(sp->crc),0);
+    sp->crc = calc_crc32((char*)sp,sizeof(share_param_s) - sizeof(sp->crc),0xffffffff);
 }
 
 static void copy_share_data(char *src,char *dest,int32_t len)
@@ -79,7 +79,7 @@ static int32_t check_share_param(void)
         return -1;
     }
 
-    if(sp->crc != calc_crc32((char*)sp,sizeof(share_param_s) - sizeof(sp->crc),0))
+    if(sp->crc != calc_crc32((char*)sp,sizeof(share_param_s) - sizeof(sp->crc),0xffffffff))
     {
         sys_warn("share param block crc is invalid.");
         return -1;

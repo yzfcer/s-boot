@@ -144,14 +144,7 @@ namespace boot_img
             //encryptcomboBox.SelectedIndex = 0;
         }
 
-        void set_path(int idx)
-        {
-        }
-
-        
-
-
-
+  
         private void viewbutton_Click(object sender, EventArgs e)
         {
              OpenFileDialog ofd = new OpenFileDialog();

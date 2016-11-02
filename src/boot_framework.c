@@ -22,7 +22,7 @@
 #include "program_mgr.h"
 #include "boot_hw_if.h"
 #include "mem_driver.h"
-
+#include "boot_check.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -118,89 +118,8 @@ static int32_t boot_chip_lock_check(void)
     return 0;
 }
 
-int32_t repair_rom_space(region_s *src,region_s *dest)
-{
-    int32_t ret;
-    
-    if(MEM_NORMAL != src->status)
-    {
-        sys_error("can NOT find available source to repir program1.");
-        src = NULL;
-        return -1;
-    }
-    
-    sys_notice("repair program from %s to %s",src->regname,dest->regname);
-    if(dest->type == src->type)
-        ret = copy_region_data(src,dest);
-    else if(MEM_TYPE_ROM == src->type || MEM_TYPE_ROM == dest->type)
-        ret = write_encrypt_code_to_run(src,dest);
-    else
-    {
-        sys_warn("can not repair space.");
-        ret = -1;
-    }
-    
-    if(0 != ret)
-    {
-        sys_error("repir space %s base 0x%x,lenth %d failed.",
-                    memtype_name(dest->type),dest->addr,dest->maxlen);
-        return -1;
-    }
-    return 0;
-}
 
 
-int32_t repair_running_space(boot_param_s *bp)
-{
-    int32_t ret;
-    region_s *src,*dest;
-    
-    dest = &bp->mem_map.run.flash;
-    if(MEM_NORMAL == bp->mem_map.rom.program1_region.status)
-        src = &bp->mem_map.rom.program1_region;
-    else if(MEM_NORMAL == bp->mem_map.rom.program2_region.status)
-        src = &bp->mem_map.rom.program2_region;
-    else
-        src = NULL;
-    
-    if(NULL == src)
-    {
-        sys_warn("can not find an available source for repairing.");
-        ret = -1;
-    }
-    else
-    {
-        sys_notice("repair program from %s to %s",src->regname,dest->regname);
-        ret = repair_rom_space(src,dest);
-    }
-    return ret;
-}
-
-
-
-
-static int32_t repair_program(boot_param_s *bp)
-{
-    int32_t ret = 0;
-    sys_notice("programs has errors,try to repair ...");
-    if(MEM_ERROR == bp->mem_map.run.flash.status)
-    {
-        if(0 != repair_running_space(bp))
-            ret = -1;
-    }
-    if(MEM_ERROR == bp->mem_map.rom.program1_region.status)
-    {
-        if(0 != repair_rom_space(&bp->mem_map.rom.program2_region,&bp->mem_map.rom.program1_region))
-            ret = -1;
-    }
-    if(MEM_ERROR == bp->mem_map.rom.program2_region.status)
-    {
-        if(0 != repair_rom_space(&bp->mem_map.rom.program1_region,&bp->mem_map.rom.program2_region))
-            ret = -1;
-    }
-    (void)param_flush();
-    return ret;
-}
 static int32_t boot_self_check(void)
 {
     int32_t ret;
@@ -212,20 +131,9 @@ static int32_t boot_self_check(void)
         set_boot_status(BOOT_ERROR);
         return -1;        
     }
-        
     ret = check_rom_programs();
-    if(0 != ret)
-    {
-        ret = repair_program(bp);
-        if(0 != ret)
-        {
-            sys_error("repairing program failed");
-            go_to_next_step();
-            return -1;
-        }
-    }
     go_to_next_step();
-    return 0;
+    return ret;
 }
 
 

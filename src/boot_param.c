@@ -40,7 +40,7 @@ static void init_reg_name(boot_param_s *bp)
 static void upate_bootparam_crc(uint8_t *prmbuf)
 {
     uint32_t *crc = (uint32_t*)&prmbuf[sizeof(boot_param_s)];
-    *crc = calc_crc32((char*)prmbuf,sizeof(boot_param_s),0);
+    *crc = calc_crc32((char*)prmbuf,sizeof(boot_param_s),0xffffffff);
 }
 
 void *get_boot_params(void)
@@ -116,7 +116,7 @@ int32_t param_check_valid(uint8_t *prmbuf)
         sys_warn("param block lenth is invalid.");
         return -1;
     }
-    if(*crc != calc_crc32((char*)bp,sizeof(boot_param_s),0))
+    if(*crc != calc_crc32((char*)bp,sizeof(boot_param_s),0xffffffff))
     {
         sys_warn("param block crc is invalid.");
         return -1;

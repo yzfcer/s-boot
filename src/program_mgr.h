@@ -47,7 +47,6 @@ int32_t write_encrypt_code_to_run(region_s *src,region_s *run);
 int32_t check_img_valid(region_s *img);
 
 int32_t clean_program(void);
-int32_t check_rom_programs(void);
 
 #ifdef __cplusplus
 }

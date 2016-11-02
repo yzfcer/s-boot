@@ -64,6 +64,9 @@
     <ClInclude Include="..\..\port\config.h">
       <Filter>port</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\src\boot_check.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\port\mem_driver.c">
@@ -110,6 +113,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\encrypt\encrypt.c">
       <Filter>encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\src\boot_check.c">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
