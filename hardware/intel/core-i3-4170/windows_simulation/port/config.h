@@ -32,7 +32,7 @@ extern "C" {
 #define MCU_LOCK_ENABLE 0
 
 //等待键盘输入时间秒数
-#define WAIT_KEY_SEC 3
+#define WAIT_KEY_SEC 5
 
 //运行位置
 #define RUN_IN_RAM 1

@@ -238,8 +238,9 @@ static int32_t  boot_rollback_check(void)
 static int32_t boot_wait_key_press(void)
 {
     char ch = 0;
+    boot_param_s *bp = (boot_param_s *)get_boot_params();
     sys_printf("press any key to enter menu list:");
-    if(0 == wait_for_key_input(3,&ch,1))
+    if(0 == wait_for_key_input(bp->wait_sec,&ch,1))
     {
         go_to_next_step();
         sys_printf("\r\n");
