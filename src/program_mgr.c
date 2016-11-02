@@ -146,22 +146,21 @@ bool_t check_hardware_matched(img_head_s *head)
 int decrypt_img_data(region_s *img)
 {
     int len;
-    
     img_head_s *head;
 
 	head = (img_head_s*)img->addr;
-    sys_notice("img file decrypt");
+    sys_notice("decrypt img file...");
     sys_debug("decrypt_data base:0x%x,lenth:%d",img->addr,img->lenth);
 	len = decrypt_data(head->encry_type,(uint8_t *)(img->addr+head->head_len),
                         img->lenth-head->head_len);
     if(len < 0)
     {
-        sys_warn("img file decrypt ERROR.");
+        sys_warn("decrypt img file failed.");
         return -1;
     }
     img->lenth = (uint32_t)len;
     feed_watchdog();
-    sys_notice("img file decrypt OK.");
+    sys_notice("decrypt img file OK.");
     return 0;
 }
 
@@ -335,6 +334,7 @@ int32_t flush_code_to_ram(region_s *img)
     img_head_s *head = (img_head_s*)img->addr;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     
+    decrypt_img_data(img);
     copy_region_info(img,&bin);
     bin.addr = img->addr + head->head_len;
     bin.lenth = img->lenth - head->head_len;
@@ -350,12 +350,24 @@ int32_t flush_code_to_ram(region_s *img)
     return 0;
 }
 
+static bool_t region_equal(region_s *src,region_s *dest)
+{
+    if(src->type != dest->type)
+        return B_FALSE;
+    if(src->index != dest->index)
+        return B_FALSE;
+    if(src->addr != dest->addr)
+        return B_FALSE;
+    return B_TRUE;
+}
 
 //先备份原来的程序，再烧录新程序到运行区
-int32_t flush_code_to_rom(region_s *bin)
+int32_t flush_code_to_rom(region_s *img)
 {
     int32_t ret;
-    region_s *src;
+    region_s *src,*dest;
+    img_head_s *head;
+    bool_t run_in_pro1;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     sys_notice("begin to flush code to rom space...");
     
@@ -367,18 +379,41 @@ int32_t flush_code_to_rom(region_s *bin)
         sys_warn("backup old program failed.");
         return -1;
     }
+    src = &bp->mem_map.rom.program1_region;
+    dest = &bp->mem_map.run.flash;
+
+    run_in_pro1 = region_equal(src,dest);
+    if((bp->run_type == RUN_IN_RAM) || !run_in_pro1)
+    {
+        ret = copy_region_data(img,&bp->mem_map.rom.program1_region);
+        if(0 != ret)
+        {
+            sys_warn("flush new program failed.");
+            return -1;
+        }
+    }
 
     //将新程序烧到运行空间
-    ret = copy_region_data(bin,&bp->mem_map.rom.program1_region);
+    head = (img_head_s*)img->addr;
+    decrypt_img_data(img);
+    img->addr += head->head_len;
+    img->lenth -= head->head_len;
+    img->crc = calc_crc32(img->addr,img->lenth,0xffffffff);
+    ret = copy_region_data(img,&bp->mem_map.rom.program1_region);
     if(0 != ret)
     {
         sys_error("write new program failed.");
         return -1;
     }
     bp->mem_map.run.flash.status = MEM_NORMAL;
-    
-    bp->mem_map.run.flash.crc = bin->crc;
-    bp->mem_map.run.flash.lenth= bin->lenth;    
+    bp->mem_map.run.flash.crc = img->crc;
+    bp->mem_map.run.flash.lenth= img->lenth;  
+    if(run_in_pro1)
+    {
+        bp->mem_map.rom.program1_region.status = MEM_NORMAL;
+        bp->mem_map.rom.program1_region.crc = img->crc;
+        bp->mem_map.rom.program1_region.lenth= img->lenth;  
+    }
     return 0;
 }
 
@@ -437,7 +472,6 @@ int32_t download_img_file(memtype_e type)
         sys_error("check img file ERROR");
         return -1; 
     }
-    decrypt_img_data(img);
     ret = flush_code_data(type,img);
     if(0 != ret)
     {

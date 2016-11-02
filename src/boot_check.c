@@ -15,7 +15,8 @@
 #include "boot_check.h"
 #include "boot_param.h"
 #include "sys_debug.h"
-
+#include "crc.h"
+#include "program_mgr.h"
 int32_t repair_running_space(boot_param_s *bp)
 {
     int32_t ret;
@@ -107,6 +108,7 @@ int32_t check_rom_program(region_s *code)
     int32_t i,blocks,len;
     uint32_t base;
     region_s prog;
+    img_head_s *head;
     uint8_t *buff = get_block_buffer();
 
     copy_region_info(code,&prog);
@@ -117,6 +119,7 @@ int32_t check_rom_program(region_s *code)
                     prog.regname,memtype_name(prog.type),prog.addr,prog.lenth);
         return 0;
     }
+    
     if(prog.status != MEM_ERROR)
     {
         sys_debug("check program base 0x%x,lenth %d",prog.addr,prog.lenth);
@@ -131,16 +134,21 @@ int32_t check_rom_program(region_s *code)
                             memtype_name(prog.type),base,BLOCK_SIZE);
                 return -1;
             }
-            
-            if(i == blocks - 1)
+            len = (i == blocks - 1)?prog.lenth - i * BLOCK_SIZE:BLOCK_SIZE;
+            if(i == 0)
             {
-                len = prog.lenth - i * BLOCK_SIZE;
+                head = (img_head_s*)buff;
+				if(head->head_len > BLOCK_SIZE)
+                {
+                    cal_crc = calc_crc32(buff,len,0xffffffff);
+                }            
+                else if(head->head_crc == calc_crc32(buff,head->head_len-4,0xffffffff))
+                    cal_crc = calc_crc32(&buff[head->head_len],BLOCK_SIZE-head->head_len,0xffffffff);
+                else
+                    cal_crc = calc_crc32(buff,len,cal_crc);
             }
             else
-            {
-                len = BLOCK_SIZE;
-            }
-            cal_crc = calc_crc32(buff,len,cal_crc);
+                cal_crc = calc_crc32(buff,len,cal_crc);
         }
     }
     

@@ -8,11 +8,11 @@ encryptkey=bjbjhgbkhhhfdb
 #偏移位置从0x200开始,0x200之前的空间用于保存img描述信息
 sourcefile=0x200,J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test1.txt
 
-sourcefile=0x2800,J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test2.txt
+sourcefile=0x1200,J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test2.txt
 
-sourcefile=0x4000,J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test3.txt
+sourcefile=0x2200,J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test3.txt
 
-sourcefile=0x6000,J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test4.txt
+sourcefile=0x3200,J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test4.txt
 
 outputfile=J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\imgfile.none.img
 

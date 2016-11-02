@@ -179,7 +179,7 @@ static int32_t  boot_upgrade_check(void)
         sys_error("check img file ERROR");
         return -1;
     }
-    decrypt_img_data(&img);
+    
     if(MEM_TYPE_ROM == bp->mem_map.rom.program1_region.type)
     {
         ret = flush_code_to_rom(&img);
@@ -204,7 +204,6 @@ static int32_t  boot_upgrade_check(void)
         set_boot_status(BOOT_ERROR);
         return -1;
     }
-    
     go_to_next_step();
     return 0;
     
