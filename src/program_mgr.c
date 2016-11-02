@@ -269,7 +269,7 @@ int32_t copy_region_data(region_s *src,region_s *dest)
         sys_warn("space is NOT enough.");
         return -1;
     }
-    sys_notice("copy data from %s to %s lenth %d.",
+    sys_notice("copy data from \"%s\" to \"%s\" lenth %d.",
                 src->regname,dest->regname,src->lenth);
     sys_debug("source type %s,addr 0x%x,lenth %d dest type,%s,addr 0x%x,lenth %d.",
                 memtype_name(src->type),src->addr,src->lenth,
@@ -372,20 +372,20 @@ int32_t flush_code_to_rom(region_s *img)
     sys_notice("begin to flush code to rom space...");
     
     //先将原来的程序拷贝到备份空间    
-    src = &bp->mem_map.rom.program1_region;
-    ret = copy_region_data(src,&bp->mem_map.rom.program2_region);
+    src = &bp->mem_map.rom.sys_program1;
+    ret = copy_region_data(src,&bp->mem_map.rom.sys_program2);
     if(0 != ret)
     {
         sys_warn("backup old program failed.");
         return -1;
     }
-    src = &bp->mem_map.rom.program1_region;
+    src = &bp->mem_map.rom.sys_program1;
     dest = &bp->mem_map.run.flash;
 
     run_in_pro1 = region_equal(src,dest);
     if((bp->run_type == RUN_IN_RAM) || !run_in_pro1)
     {
-        ret = copy_region_data(img,&bp->mem_map.rom.program1_region);
+        ret = copy_region_data(img,&bp->mem_map.rom.sys_program1);
         if(0 != ret)
         {
             sys_warn("flush new program failed.");
@@ -399,7 +399,7 @@ int32_t flush_code_to_rom(region_s *img)
     img->addr += head->head_len;
     img->lenth -= head->head_len;
     img->crc = calc_crc32(img->addr,img->lenth,0xffffffff);
-    ret = copy_region_data(img,&bp->mem_map.rom.program1_region);
+    ret = copy_region_data(img,&bp->mem_map.rom.sys_program1);
     if(0 != ret)
     {
         sys_error("write new program failed.");
@@ -410,9 +410,9 @@ int32_t flush_code_to_rom(region_s *img)
     bp->mem_map.run.flash.lenth= img->lenth;  
     if(run_in_pro1)
     {
-        bp->mem_map.rom.program1_region.status = MEM_NORMAL;
-        bp->mem_map.rom.program1_region.crc = img->crc;
-        bp->mem_map.rom.program1_region.lenth= img->lenth;  
+        bp->mem_map.rom.sys_program1.status = MEM_NORMAL;
+        bp->mem_map.rom.sys_program1.crc = img->crc;
+        bp->mem_map.rom.sys_program1.lenth= img->lenth;  
     }
     return 0;
 }
@@ -456,7 +456,7 @@ int32_t download_img_file(memtype_e type)
         sys_notice("device can NOT download in debug mode ,set it to normal mode first");
         return -1;
     }
-    img = &bp->mem_map.ram.probuf_region;
+    img = &bp->mem_map.ram.upgrade_buffer;
     sys_printf("begin to receive file data,please wait.\r\n");
     len = boot_receive_img(img->addr,img->maxlen);
     if(len <= 0)
@@ -489,14 +489,14 @@ int32_t write_encrypt_code_to_run(region_s *src,region_s *run)
     region_s img;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
 
-    ret = copy_region_data(src,&bp->mem_map.ram.probuf_region);
+    ret = copy_region_data(src,&bp->mem_map.ram.upgrade_buffer);
     if(0 != ret)
     {
         sys_warn("copy data error.");
         return -1;
     }
     
-    copy_region_info(&bp->mem_map.ram.probuf_region,&img);
+    copy_region_info(&bp->mem_map.ram.upgrade_buffer,&img);
     img.lenth = src->lenth;
 
     ret = check_img_valid(&img);
@@ -522,11 +522,11 @@ int32_t clean_program(void)
     region_s *code[5];
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     sys_printf("clearing program ...\r\n");
-    code[idx++] = &bp->mem_map.rom.program1_region;
-    code[idx++] = &bp->mem_map.rom.program2_region;
+    code[idx++] = &bp->mem_map.rom.sys_program1;
+    code[idx++] = &bp->mem_map.rom.sys_program2;
     code[idx++] = &bp->mem_map.run.flash;
-    code[idx++] = &bp->mem_map.rom.param1_region;
-    code[idx++] = &bp->mem_map.rom.param2_region;
+    code[idx++] = &bp->mem_map.rom.boot_param1;
+    code[idx++] = &bp->mem_map.rom.boot_param2;
     
     for(i = 0;i < 5;i ++)
     {   

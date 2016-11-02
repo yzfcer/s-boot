@@ -71,12 +71,12 @@ void destroy_code_space(region_s *code)
 void test_pro1_error(void)
 {
     boot_param_s *bp = (boot_param_s*)get_boot_params();
-    destroy_code_space(&bp->mem_map.rom.program1_region);
+    destroy_code_space(&bp->mem_map.rom.sys_program1);
 }
 void test_probak_error(void)
 {
     boot_param_s *bp = (boot_param_s*)get_boot_params();
-    destroy_code_space(&bp->mem_map.rom.program2_region);
+    destroy_code_space(&bp->mem_map.rom.sys_program2);
 }
 
 
@@ -99,7 +99,7 @@ void test_upgrade(void)
 
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     extern mem_status_s g_memstatus;
-    img = &bp->mem_map.ram.probuf_region;
+    img = &bp->mem_map.ram.upgrade_buffer;
     sys_printf("begin to receive file data,please wait.\r\n");
     img->lenth = boot_receive_img(img->addr,img->maxlen);
     if(img->lenth <= 0)

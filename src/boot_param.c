@@ -145,8 +145,8 @@ int32_t param_read(void)
     int32_t i,j,len,ret;
     region_s *reg[2];
     mem_map_s *map = get_memory_map();
-    reg[0] = &map->rom.param1_region;
-    reg[1] = &map->rom.param2_region;
+    reg[0] = &map->rom.boot_param1;
+    reg[1] = &map->rom.boot_param2;
     
     for(i = 0;i < 2;i ++)
     {
@@ -184,11 +184,11 @@ int32_t param_flush(void)
     region_s *reg[2];
     boot_param_s *bp = (boot_param_s *)g_bootparam;
     mem_map_s *map = get_memory_map();
-    reg[0] = &map->rom.param1_region;
-    reg[1] = &map->rom.param2_region;
+    reg[0] = &map->rom.boot_param1;
+    reg[1] = &map->rom.boot_param2;
     
-    bp->mem_map.rom.param1_region.lenth = sizeof(boot_param_s);
-    bp->mem_map.rom.param2_region.lenth = sizeof(boot_param_s);    
+    bp->mem_map.rom.boot_param1.lenth = sizeof(boot_param_s);
+    bp->mem_map.rom.boot_param2.lenth = sizeof(boot_param_s);    
     upate_bootparam_crc(bp);
     for(i = 0;i < 2;i ++)
     {

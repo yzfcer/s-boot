@@ -37,7 +37,7 @@ extern "C" {
 //运行位置
 #define RUN_IN_RAM 1
 #define RUN_IN_ROM 2
-#define RUN_SPACE_TYPE RUN_IN_ROM
+#define RUN_SPACE_TYPE RUN_IN_RAM
 
 //读写ROM时的基本块大小
 #define BLOCK_SIZE 4096

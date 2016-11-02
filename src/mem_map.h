@@ -52,25 +52,25 @@ typedef struct __region
 
 typedef struct __ROM_map_s
 {
-    region_s boot_region;//bootloader的程序代码区
-    region_s param1_region;//第一份参数代码区
-    region_s param2_region;//第二份参数代码区
-    region_s program1_region;//第一份程序代码区
-    region_s program2_region;//第二份程序代码区
-    region_s reserve_region;//保留区
+    region_s boot_program;//bootloader的程序代码区
+    region_s boot_param1;//第一份参数代码区
+    region_s boot_param2;//第二份参数代码区
+    region_s sys_program1;//第一份程序代码区
+    region_s sys_program2;//第二份程序代码区
+    region_s sys_param;//为加载的系统保留的参数区
 }rom_map_s;
 
 typedef struct __RAM_map_s
 {
-    region_s app_region;//bootloader运行使用的内存区
-    region_s probuf_region;//程序下载的内存区
-    region_s share_region;//bootloader与应用程序的交换区
+    region_s boot_ram;//bootloader运行使用的内存区
+    region_s upgrade_buffer;//程序下载的内存区
+    region_s share_param;//bootloader与应用程序的参数交换区
 }ram_map_s;
 
 typedef struct __RUN_map_s
 {
-    region_s flash;//bootloader运行使用的内存区
-    region_s ram;//程序下载的内存区
+    region_s flash;//bootloader的flash运行
+    region_s ram;//bootloader的ram运行
 }run_map_s;
 
 

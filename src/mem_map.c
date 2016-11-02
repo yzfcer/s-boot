@@ -24,40 +24,38 @@ extern "C" {
 mem_map_s g_memmap = 
 {
     {
-        {"boot_rom",MEM_TYPE_ROM,BOOTLOADER_IDX,0,0,0,0,0},
+        {"boot_program",MEM_TYPE_ROM,BOOTLOADER_IDX,0,0,0,0,0},
         {"boot_param1",MEM_TYPE_ROM,PARAM1_IDX,0,0,0,0,0},
         {"boot_param2",MEM_TYPE_ROM,PARAM2_IDX,0,0,0,0,0},
-        {"app_program1",MEM_TYPE_ROM,PROGRAM1_IDX,0,0,0,0,0},
-        {"app_program2",MEM_TYPE_ROM,PROGRAM2_IDX,0,0,0,0,0},
-        {"reserved",MEM_TYPE_ROM,RESERVED_IDX,0,0,0,0,0}
+        {"sys_program1",MEM_TYPE_ROM,PROGRAM1_IDX,0,0,0,0,0},
+        {"sys_program2",MEM_TYPE_ROM,PROGRAM2_IDX,0,0,0,0,0},
+        {"sys_param",MEM_TYPE_ROM,RESERVED_IDX,0,0,0,0,0}
     },
     {
         {"boot_ram",MEM_TYPE_RAM,0,0,0,0,0,0},
-        {"code_buffer",MEM_TYPE_RAM,0,0,0,0,0,0},
-        {"Share_ram",MEM_TYPE_RAM,0,0,0,0,0}
+        {"upgrade_buffer",MEM_TYPE_RAM,0,0,0,0,0,0},
+        {"share_param",MEM_TYPE_RAM,0,0,0,0,0}
     },
     {
-        {"Run_iflash",MEM_TYPE_ROM,0,0,0,0,0,0},
-        {"Run_iram",MEM_TYPE_RAM,0,0,0,0,0,0},
+        {"run_iflash",MEM_TYPE_ROM,0,0,0,0,0,0},
+        {"run_iram",MEM_TYPE_RAM,0,0,0,0,0,0},
     }
 };
 
 char *g_reg_name[] = 
 {
-    "boot_rom",
+    "boot_program",
     "boot_param1",
     "boot_param2",
-    "app_program1",
-    "app_program2",
-    "reserved",
+    "sys_program1",
+    "sys_program2",
+    "sys_param",
     "boot_ram",
-    "code_buffer",
-    "Share_ram",
-    "Run_ifalsh",
-    "Run_iram",
-    "Run_xram"
+    "upgrade_buffer",
+    "share_param",
+    "run_ifalsh",
+    "run_iram",
 };
-//mem_map_s *g_default_map = (mem_map_s *)NULL;
 
 char *g_memtype_name[] = 
 {
@@ -68,7 +66,7 @@ char *g_memtype_name[] =
 uint32_t get_share_addr (void)
 {
     mem_map_s *map = get_memory_map();
-	return map->ram.share_region.addr;
+	return map->ram.share_param.addr;
 }
 
 char *memtype_name(uint32_t type)
@@ -148,18 +146,18 @@ int32_t mem_region_init(void)
         rombase[i] = get_rom_base(i);
     }
 
-	alloc_region(&map->rom.boot_region,rombase,BOOTLOADER_LENTH);    
-	alloc_region(&map->rom.param1_region,rombase,PARAM_LENTH);
-	alloc_region(&map->rom.param2_region,rombase,PARAM_LENTH);
-	alloc_region(&map->rom.program1_region,rombase,PROGRAM_LENTH);
-	alloc_region(&map->rom.program2_region,rombase,PROGRAM_LENTH);
-	alloc_region(&map->rom.reserve_region,rombase,RESERVED_LENTH);   
+	alloc_region(&map->rom.boot_program,rombase,BOOTLOADER_LENTH);    
+	alloc_region(&map->rom.boot_param1,rombase,PARAM_LENTH);
+	alloc_region(&map->rom.boot_param2,rombase,PARAM_LENTH);
+	alloc_region(&map->rom.sys_program1,rombase,PROGRAM_LENTH);
+	alloc_region(&map->rom.sys_program2,rombase,PROGRAM_LENTH);
+	alloc_region(&map->rom.sys_param,rombase,RESERVED_LENTH);   
     
-	alloc_region(&map->ram.app_region,rambase,BOOTRAM_LENTH);
-	alloc_region(&map->ram.probuf_region,rambase,PROGRAMBUF_LENTH);
-	alloc_region(&map->ram.share_region,rambase,SHARE_PARAM_LENTH);
-    copy_region_info(&map->rom.program1_region,&map->run.flash);
-    map->run.flash.maxlen = map->rom.program1_region.maxlen;
+	alloc_region(&map->ram.boot_ram,rambase,BOOTRAM_LENTH);
+	alloc_region(&map->ram.upgrade_buffer,rambase,PROGRAMBUF_LENTH);
+	alloc_region(&map->ram.share_param,rambase,SHARE_PARAM_LENTH);
+    copy_region_info(&map->rom.sys_program1,&map->run.flash);
+    map->run.flash.maxlen = map->rom.sys_program1.maxlen;
 	return 0;
 }
 
@@ -285,7 +283,7 @@ int32_t check_map_valid(void)
         sys_warn("check running space type error.");
         return -1;
     }
-    if(check_probuf_and_running(&map->ram.probuf_region,&map->run.flash))
+    if(check_probuf_and_running(&map->ram.upgrade_buffer,&map->run.flash))
     {
         sys_warn("program buffer and running space conflict.");
         return -1;
@@ -328,8 +326,8 @@ void print_program_space(mem_map_s *map)
 #define REGION_PARAM1(reg) (reg)->regname,(reg)->index,(reg)->addr,(reg)->maxlen,\
                         (reg)->lenth,memtype_name((reg)->type),(reg)->maxlen?((reg)->lenth*100)/(reg)->maxlen:0
         sys_printf("%-15s%-8s%-12s%-11s%-11s%-9s%-8s\r\n","region","memidx","addr","maxlen","lenth","type","usage");
-        sys_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.program1_region));
-        sys_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.program2_region));
+        sys_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.sys_program1));
+        sys_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.sys_program2));
         sys_printf(REGION_FORMAT1,REGION_PARAM1(&map->run.flash));
 }
 

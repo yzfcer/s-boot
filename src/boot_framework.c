@@ -167,8 +167,8 @@ static int32_t  boot_upgrade_check(void)
     
     sys_notice("handling upgrade event,please wait...");
     
-    img.regname = bp->mem_map.ram.probuf_region.regname;
-    img.maxlen = bp->mem_map.ram.probuf_region.maxlen;
+    img.regname = bp->mem_map.ram.upgrade_buffer.regname;
+    img.maxlen = bp->mem_map.ram.upgrade_buffer.maxlen;
     img.addr = g_upgrade_status.addr;
     img.lenth = g_upgrade_status.lenth;
     img.type = (memtype_e)g_upgrade_status.mem_type;
@@ -180,7 +180,7 @@ static int32_t  boot_upgrade_check(void)
         return -1;
     }
     
-    if(MEM_TYPE_ROM == bp->mem_map.rom.program1_region.type)
+    if(MEM_TYPE_ROM == bp->mem_map.rom.sys_program1.type)
     {
         ret = flush_code_to_rom(&img);
     }
@@ -283,7 +283,7 @@ static int32_t boot_load_app(void)
         go_to_next_step();
         return 0;
     }
-    if(bp->mem_map.rom.program1_region.lenth <= 0)
+    if(bp->mem_map.rom.sys_program1.lenth <= 0)
     {
         sys_notice("program is NOT existing.");
         set_boot_status(BOOT_MENU_LIST);
@@ -299,7 +299,7 @@ static int32_t boot_load_app(void)
     }
     else 
     {
-        if(MEM_NORMAL == bp->mem_map.rom.program1_region.status)
+        if(MEM_NORMAL == bp->mem_map.rom.sys_program1.status)
         {
             mem_stat = MEM_NORMAL;
         }
@@ -334,20 +334,20 @@ static int32_t boot_set_app_param(void)
     
     sp_set_app_rollback(1);
     
-    g_upgrade_status.addr = bp->mem_map.ram.probuf_region.addr;
+    g_upgrade_status.addr = bp->mem_map.ram.upgrade_buffer.addr;
     g_upgrade_status.crc = 0xffffffff;
     g_upgrade_status.flag = 0;
-    g_upgrade_status.lenth = bp->mem_map.ram.probuf_region.maxlen;
-    g_upgrade_status.mem_type = bp->mem_map.ram.probuf_region.type;
+    g_upgrade_status.lenth = bp->mem_map.ram.upgrade_buffer.maxlen;
+    g_upgrade_status.mem_type = bp->mem_map.ram.upgrade_buffer.type;
     sp_set_upgrade_param(&g_upgrade_status);
     sp_get_upgrade_param(&g_upgrade_status);
     sys_printf("set upgrade params:\r\n");
     sys_printf("addr:0x%x\r\n",g_upgrade_status.addr);
     sys_printf("lenth:0x%x\r\n",g_upgrade_status.lenth);
 
-    g_reserve_reg.addr = bp->mem_map.rom.reserve_region.addr;
-    g_reserve_reg.lenth = bp->mem_map.rom.reserve_region.maxlen;
-    g_reserve_reg.mem_type = bp->mem_map.rom.reserve_region.type;
+    g_reserve_reg.addr = bp->mem_map.rom.sys_param.addr;
+    g_reserve_reg.lenth = bp->mem_map.rom.sys_param.maxlen;
+    g_reserve_reg.mem_type = bp->mem_map.rom.sys_param.type;
     sys_printf("set reserve region params:\r\n");
     sys_printf("addr:0x%x\r\n",g_reserve_reg.addr);
     sys_printf("lenth:0x%x\r\n",g_reserve_reg.lenth);
@@ -373,7 +373,7 @@ static int32_t boot_error_handle(void)
 static int32_t boot_run_system(void)
 {
 	sys_notice("begin to jump to App space...");
-	sys_printf("(^_^)\r\n\r\n\r\n");
+	sys_printf("\r\n\r\n\r\n");
 	boot_jump_to_app();
 	return 0;
 }
@@ -394,7 +394,7 @@ boot_handle_TB g_status_handTB[] =
     {BOOT_MENU_LIST,"menu_list",boot_menu_list},
     {BOOT_LOAD_APP,"load_app",boot_load_app},
     {BOOT_SET_APP_PARAM,"set_app_param",boot_set_app_param},
-    {BOOT_JUMP_TO_APP,"jump_to_app",boot_run_system},
+    {BOOT_JUMP_TO_APP,"run_system",boot_run_system},
     {BOOT_ERROR,"error",boot_error_handle},
 };
 

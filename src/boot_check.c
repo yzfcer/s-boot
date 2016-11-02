@@ -23,10 +23,10 @@ int32_t repair_running_space(boot_param_s *bp)
     region_s *src,*dest;
     
     dest = &bp->mem_map.run.flash;
-    if(MEM_NORMAL == bp->mem_map.rom.program1_region.status)
-        src = &bp->mem_map.rom.program1_region;
-    else if(MEM_NORMAL == bp->mem_map.rom.program2_region.status)
-        src = &bp->mem_map.rom.program2_region;
+    if(MEM_NORMAL == bp->mem_map.rom.sys_program1.status)
+        src = &bp->mem_map.rom.sys_program1;
+    else if(MEM_NORMAL == bp->mem_map.rom.sys_program2.status)
+        src = &bp->mem_map.rom.sys_program2;
     else
         src = NULL;
     
@@ -37,7 +37,7 @@ int32_t repair_running_space(boot_param_s *bp)
     }
     else
     {
-        sys_notice("repair program from %s to %s",src->regname,dest->regname);
+        sys_notice("repair program from \"%s\" to \"%s\"",src->regname,dest->regname);
         ret = repair_rom_space(src,dest);
     }
     return ret;
@@ -56,7 +56,7 @@ int32_t repair_rom_space(region_s *src,region_s *dest)
         return -1;
     }
     
-    sys_notice("repair program from %s to %s",src->regname,dest->regname);
+    sys_notice("repair program from \"%s\" to \"%s\"",src->regname,dest->regname);
     if(dest->type == src->type)
         ret = copy_region_data(src,dest);
     else if(MEM_TYPE_ROM == src->type || MEM_TYPE_ROM == dest->type)
@@ -85,14 +85,14 @@ static int32_t repair_program(boot_param_s *bp)
         if(0 != repair_running_space(bp))
             ret = -1;
     }
-    if(MEM_ERROR == bp->mem_map.rom.program1_region.status)
+    if(MEM_ERROR == bp->mem_map.rom.sys_program1.status)
     {
-        if(0 != repair_rom_space(&bp->mem_map.rom.program2_region,&bp->mem_map.rom.program1_region))
+        if(0 != repair_rom_space(&bp->mem_map.rom.sys_program2,&bp->mem_map.rom.sys_program1))
             ret = -1;
     }
-    if(MEM_ERROR == bp->mem_map.rom.program2_region.status)
+    if(MEM_ERROR == bp->mem_map.rom.sys_program2.status)
     {
-        if(0 != repair_rom_space(&bp->mem_map.rom.program1_region,&bp->mem_map.rom.program2_region))
+        if(0 != repair_rom_space(&bp->mem_map.rom.sys_program1,&bp->mem_map.rom.sys_program2))
             ret = -1;
     }
     (void)param_flush();
@@ -115,7 +115,7 @@ int32_t check_rom_program(region_s *code)
     prog.regname = code->regname;
     if(prog.status == MEM_NULL)
     {
-        sys_notice("region %s type %s base 0x%x lenth %d is empty.",
+        sys_notice("region \"%s\" type %s base 0x%x lenth %d is empty.",
                     prog.regname,memtype_name(prog.type),prog.addr,prog.lenth);
         return 0;
     }
@@ -171,8 +171,8 @@ int32_t check_rom_programs(void)
     int32_t save_flag = 0,i;
     boot_param_s *bp = (boot_param_s *)get_boot_params();
     
-    code[idx++] = &bp->mem_map.rom.program1_region;
-    code[idx++] = &bp->mem_map.rom.program2_region;
+    code[idx++] = &bp->mem_map.rom.sys_program1;
+    code[idx++] = &bp->mem_map.rom.sys_program2;
     code[idx++] = &bp->mem_map.run.flash;
     sys_notice("begin to check programs...");
     for(i = 0;i < sizeof(code)/sizeof(region_s*);i ++)
