@@ -71,16 +71,14 @@ static int32_t boot_app_debug_check(void)
     return 0;
 }
 
+
 static int32_t boot_first_check(void)
 {
     int32_t ret;
     mem_map_s *map;
-    boot_param_s *bp = (boot_param_s *)get_boot_params();
-    if(NULL == bp)
-    {
-        bp = (boot_param_s *)get_boot_params();
-    }
+    boot_param_s *bp;
     sys_notice("begin to check first running time...");
+    bp = (boot_param_s *)get_boot_params();
     if(NULL != bp)
     {
         go_to_next_step();
@@ -106,7 +104,7 @@ static int32_t boot_first_check(void)
 
 static int32_t boot_chip_lock_check(void)
 {
-    if(!is_chip_lock())
+    if(is_chip_lock())
     {
         sys_notice("MCU chip is locked.");
     }

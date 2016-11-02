@@ -81,9 +81,9 @@ void feed_watchdog(void)
 
 }
 
-uint8_t is_chip_lock()
+bool_t is_chip_lock()
 {
-	return 0;
+	return B_TRUE;
 }
 
 void set_chip_lock(uint8_t lock_enable)

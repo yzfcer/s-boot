@@ -32,7 +32,7 @@ uint32_t boot_get_sys_ms(void);
 void boot_jump_to_app(void);
 
 void feed_watchdog(void);
-uint8_t is_chip_lock();
+bool_t is_chip_lock();
 void set_chip_lock(uint8_t lock_enable);
 
 #endif
