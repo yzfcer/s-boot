@@ -28,7 +28,7 @@
 #define ROM1_BASE 0x00000000
 #define ROM2_BASE 0xA0000000
 #define ROM1_SIZE 0x100000
-#define ROM2_SIZE 0x400000
+#define ROM2_SIZE 0x800000
 
 #define MEM_BASE_INVALID 0xffffffff
 

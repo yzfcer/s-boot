@@ -143,47 +143,28 @@ bool_t check_hardware_matched(img_head_s *head)
     return B_TRUE;    
 }
 
-int decrypt_img_data(region_s *img)
+int decrypt_img_data(region_s *img,region_s *bin)
 {
     int len;
     img_head_s *head;
 
-	head = (img_head_s*)img->addr;
+    copy_region_info(img,bin);
+	head = (img_head_s*)bin->addr;
+    bin->addr += head->head_len;
     sys_notice("decrypt img file...");
-    sys_debug("decrypt_data base:0x%x,lenth:%d",img->addr,img->lenth);
-	len = decrypt_data(head->encry_type,(uint8_t *)(img->addr+head->head_len),
-                        img->lenth-head->head_len);
+    sys_debug("decrypt_data base:0x%x,lenth:%d",bin->addr,bin->lenth);
+	len = decrypt_data(head->encry_type,(uint8_t *)bin->addr,img->lenth);
     if(len < 0)
     {
         sys_warn("decrypt img file failed.");
         return -1;
     }
-    img->lenth = (uint32_t)len;
+    bin->lenth = len;
+    bin->crc = calc_crc32((uint8_t *)bin->addr,bin->lenth,0xffffffff);
     feed_watchdog();
     sys_notice("decrypt img file OK.");
     return 0;
 }
-
-int encrypt_img_data(region_s *img)
-{
-    int len;
-    img_head_s *head;
-	head = (img_head_s*)img->addr;
-    sys_notice("img file encrypt");
-    sys_debug("encrypt_data base:0x%x,lenth:%d",img->addr,img->lenth);
-	len = encrypt_data(head->encry_type,(uint8_t *)img->addr,img->lenth);
-    if(len < 0)
-    {
-        sys_warn("img file encrypt ERROR.");
-        return -1;
-    }
-    img->lenth = (uint32_t)len;
-    feed_watchdog();
-    sys_notice("img file encrypt OK.");
-    return 0;
-    return 0;
-}
-
 
 
 int32_t check_img_valid(region_s *img)
@@ -231,29 +212,6 @@ int32_t check_img_valid(region_s *img)
     sys_notice("img file verify OK.");
     return 0;
 }
-
-
-int32_t encrypt_code_calc_crc(region_s *img)
-{
-    int32_t len;
-    sys_debug("decrypt_data base:0x%x,lenth:%d",img->addr,img->lenth);
-    len = encrypt_data((uint8_t *)img->addr,img->lenth);
-    if(len < 0)
-    {
-        sys_warn("img file encrypt ERROR.");
-        return -1;
-    }
-    
-    sys_notice("img file encrypt OK.");
-    
-    img->crc = calc_crc32((char *)img->addr,img->lenth,0xffffffff);
-    convert_uint32_to_byte((uint8_t *)img->addr,img->lenth - 4,img->crc);
-    
-    sys_debug("new file CRC:0x%x.",img->crc);
-    return 0;
-}
-
-
 
 
 int32_t copy_region_data(region_s *src,region_s *dest)
@@ -327,18 +285,14 @@ int32_t copy_region_data(region_s *src,region_s *dest)
 }
 
 
-int32_t flush_code_to_ram(region_s *img)
+int32_t flush_img_to_ram(region_s *img)
 {
     int32_t ret;
     region_s bin;
-    img_head_s *head = (img_head_s*)img->addr;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
-    
-    decrypt_img_data(img);
-    copy_region_info(img,&bin);
-    bin.addr = img->addr + head->head_len;
-    bin.lenth = img->lenth - head->head_len;
-    bin.crc = calc_crc32((uint8_t *)bin.addr,bin.lenth,0xffffffff);
+    decrypt_img_data(img,&bin);
+    //这里需要修改，不能直接使用img，因为会修改程序缓存的起始地址，
+    //另外需要重新考虑程序运行在RAM中间时，程序因该怎样存储
     
     sys_notice("begin to copy code to memory...");
     ret = copy_region_data(&bin,&bp->mem_map.run.ram);
@@ -361,13 +315,55 @@ static bool_t region_equal(region_s *src,region_s *dest)
     return B_TRUE;
 }
 
-//先备份原来的程序，再烧录新程序到运行区
-int32_t flush_code_to_rom(region_s *img)
+int32_t roll_back_program(void)
 {
     int32_t ret;
     region_s *src,*dest;
     img_head_s *head;
-    bool_t run_in_pro1;
+    region_s bin;
+    bool_t run_in_program1;
+    boot_param_s *bp = (boot_param_s*)get_boot_params();
+    
+    //先将原来的程序拷贝到备份空间    
+    src = &bp->mem_map.rom.sys_program2;
+    ret = copy_region_data(src,&bp->mem_map.rom.sys_program1);
+    if(0 != ret)
+    {
+        sys_warn("roll back program failed.");
+        return -1;
+    }
+    
+    run_in_program1 = region_equal(&bp->mem_map.rom.sys_program1,&bp->mem_map.run.flash);
+    if(run_in_program1)
+    {
+        bp->mem_map.run.flash.status = MEM_NORMAL;
+        bp->mem_map.run.flash.crc = src->crc;
+        bp->mem_map.run.flash.lenth= src->lenth;
+    }
+    else
+    {
+        copy_region_data(src,&bp->mem_map.ram.upgrade_buffer);
+        src = &bp->mem_map.ram.upgrade_buffer;
+        decrypt_img_data(src,&bin);
+        ret = copy_region_data(&bin,&bp->mem_map.run.flash);
+        if(0 != ret)
+        {
+            sys_error("flush program to running space failed.");
+            return -1;
+        }
+    }
+    param_flush();
+    return 0;
+}
+
+//先备份原来的程序，再烧录新程序到sys_program1和运行区
+int32_t flush_img_to_rom(region_s *img)
+{
+    int32_t ret;
+    region_s *src,*dest;
+    region_s bin;
+    img_head_s *head;
+    bool_t run_in_program1;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     sys_notice("begin to flush code to rom space...");
     
@@ -379,11 +375,30 @@ int32_t flush_code_to_rom(region_s *img)
         sys_warn("backup old program failed.");
         return -1;
     }
+    
+
+    head = (img_head_s*)img->addr;
     src = &bp->mem_map.rom.sys_program1;
     dest = &bp->mem_map.run.flash;
-
-    run_in_pro1 = region_equal(src,dest);
-    if((bp->run_type == RUN_IN_RAM) || !run_in_pro1)
+    run_in_program1 = region_equal(src,dest);
+    
+    //烧录到sys_program1，如果同时也是运行空间，则先解密，在烧录
+    if(run_in_program1)
+    {
+        decrypt_img_data(img,&bin);
+        ret = copy_region_data(&bin,&bp->mem_map.rom.sys_program1);
+        if(0 != ret)
+        {
+            sys_warn("flush new program failed.");
+            return -1;
+        }
+        bp->mem_map.run.flash.status = MEM_NORMAL;
+        bp->mem_map.run.flash.crc = bin.crc;
+        bp->mem_map.run.flash.lenth= bin.lenth;
+        param_flush();
+        return 0;
+    }
+    else
     {
         ret = copy_region_data(img,&bp->mem_map.rom.sys_program1);
         if(0 != ret)
@@ -391,29 +406,15 @@ int32_t flush_code_to_rom(region_s *img)
             sys_warn("flush new program failed.");
             return -1;
         }
+        decrypt_img_data(img,&bin);
+        ret = copy_region_data(&bin,&bp->mem_map.run.flash);
+        if(0 != ret)
+        {
+            sys_error("write new program failed.");
+            return -1;
+        }
     }
-
-    //将新程序烧到运行空间
-    head = (img_head_s*)img->addr;
-    decrypt_img_data(img);
-    img->addr += head->head_len;
-    img->lenth -= head->head_len;
-    img->crc = calc_crc32(img->addr,img->lenth,0xffffffff);
-    ret = copy_region_data(img,&bp->mem_map.rom.sys_program1);
-    if(0 != ret)
-    {
-        sys_error("write new program failed.");
-        return -1;
-    }
-    bp->mem_map.run.flash.status = MEM_NORMAL;
-    bp->mem_map.run.flash.crc = img->crc;
-    bp->mem_map.run.flash.lenth= img->lenth;  
-    if(run_in_pro1)
-    {
-        bp->mem_map.rom.sys_program1.status = MEM_NORMAL;
-        bp->mem_map.rom.sys_program1.crc = img->crc;
-        bp->mem_map.rom.sys_program1.lenth= img->lenth;  
-    }
+    param_flush();
     return 0;
 }
 
@@ -424,10 +425,10 @@ int32_t flush_code_data(memtype_e type,region_s *img)
     switch(type)
     {
         case MEM_TYPE_RAM:
-            ret = flush_code_to_ram(img);
+            ret = flush_img_to_ram(img);
             break;
         case MEM_TYPE_ROM:
-            ret = flush_code_to_rom(img);
+            ret = flush_img_to_rom(img);
             break;
         default:
             sys_error("unknown memory type:%d",type);
@@ -466,6 +467,7 @@ int32_t download_img_file(memtype_e type)
     }
 
     img->lenth = (uint32_t)len;
+    sys_notice("img file lenth:%d",img->lenth);
     ret = check_img_valid(img);
     if(ret != 0)
     {
@@ -483,37 +485,6 @@ int32_t download_img_file(memtype_e type)
 }
 
 
-int32_t write_encrypt_code_to_run(region_s *src,region_s *run)
-{
-    int32_t ret;
-    region_s img;
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
-
-    ret = copy_region_data(src,&bp->mem_map.ram.upgrade_buffer);
-    if(0 != ret)
-    {
-        sys_warn("copy data error.");
-        return -1;
-    }
-    
-    copy_region_info(&bp->mem_map.ram.upgrade_buffer,&img);
-    img.lenth = src->lenth;
-
-    ret = check_img_valid(&img);
-    if(0 != ret)
-    {
-        sys_error("check img file ERROR.");
-        return -1;
-    }
-    decrypt_img_data(&img);
-    ret = copy_region_data(&img,run);
-    if(0 != ret)
-    {
-        sys_warn("flush data to running space error.");
-        return -1;
-    }
-    return 0;
-}
 
 int32_t clean_program(void)
 {
@@ -529,7 +500,7 @@ int32_t clean_program(void)
     code[idx++] = &bp->mem_map.rom.boot_param2;
     
     for(i = 0;i < 5;i ++)
-    {   
+    {
         sys_notice("erase base 0x%x,lenth %d.",code[i]->addr,code[i]->lenth);
         blocknum = (code[i]->lenth + BLOCK_SIZE - 1) / BLOCK_SIZE;
         erase_block(code[i]->type,code[i]->index,code[i]->addr,blocknum);

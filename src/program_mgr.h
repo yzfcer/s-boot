@@ -43,8 +43,8 @@ struct __img_head_s
 int32_t download_img_file(memtype_e type);
 int32_t change_boot_app(int32_t index);
 int32_t copy_region_data(region_s *src,region_s *dest);
-int32_t write_encrypt_code_to_run(region_s *src,region_s *run);
 int32_t check_img_valid(region_s *img);
+int32_t roll_back_program(void);
 
 int32_t clean_program(void);
 

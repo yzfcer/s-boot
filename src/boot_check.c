@@ -17,11 +17,13 @@
 #include "sys_debug.h"
 #include "crc.h"
 #include "program_mgr.h"
-int32_t repair_running_space(boot_param_s *bp)
+int32_t repair_running_space(void)
 {
     int32_t ret;
     region_s *src,*dest;
-    
+    img_head_s *head;
+    region_s bin;
+    boot_param_s *bp = get_boot_params();
     dest = &bp->mem_map.run.flash;
     if(MEM_NORMAL == bp->mem_map.rom.sys_program1.status)
         src = &bp->mem_map.rom.sys_program1;
@@ -37,12 +39,27 @@ int32_t repair_running_space(boot_param_s *bp)
     }
     else
     {
+        //如果不是同一块sys_program1与运行区不是同一块，则数据需要先解密
         sys_notice("repair program from \"%s\" to \"%s\"",src->regname,dest->regname);
-        ret = repair_rom_space(src,dest);
+        copy_region_data(src,&bp->mem_map.ram.upgrade_buffer);
+        if((bp->mem_map.rom.sys_program1.type != bp->mem_map.run.flash.type) ||
+            (bp->mem_map.rom.sys_program1.index != bp->mem_map.run.flash.index) ||
+            (bp->mem_map.rom.sys_program1.addr != bp->mem_map.run.flash.addr))
+        {
+            decrypt_img_data(src,&bin);
+        }
+        else
+        {
+            copy_region_info(src,&bin);
+            head = (img_head_s*)bin.addr;
+            bin.crc = head->bin_crc;
+            bin.addr += head->head_len;
+            bin.lenth -= head->head_len;
+        }
+        ret = repair_rom_space(&bin,dest);
     }
     return ret;
 }
-
 
 
 int32_t repair_rom_space(region_s *src,region_s *dest)
@@ -56,18 +73,10 @@ int32_t repair_rom_space(region_s *src,region_s *dest)
         return -1;
     }
     
-    sys_notice("repair program from \"%s\" to \"%s\"",src->regname,dest->regname);
-    if(dest->type == src->type)
-        ret = copy_region_data(src,dest);
-    else if(MEM_TYPE_ROM == src->type || MEM_TYPE_ROM == dest->type)
-        ret = write_encrypt_code_to_run(src,dest);
-    else
-    {
-        sys_warn("can not repair space.");
-        ret = -1;
-    }
-    
-    if(0 != ret)
+    sys_notice("repair program from \"%s\" to \"%s\"",
+                src->regname,dest->regname);
+    ret = copy_region_data(src,dest);
+    if(ret != 0)
     {
         sys_error("repir space %s base 0x%x,lenth %d failed.",
                     memtype_name(dest->type),dest->addr,dest->maxlen);
@@ -82,13 +91,26 @@ static int32_t repair_program(boot_param_s *bp)
     sys_notice("programs has errors,try to repair ...");
     if(MEM_ERROR == bp->mem_map.run.flash.status)
     {
-        if(0 != repair_running_space(bp))
+        if(0 != repair_running_space())
             ret = -1;
     }
     if(MEM_ERROR == bp->mem_map.rom.sys_program1.status)
     {
-        if(0 != repair_rom_space(&bp->mem_map.rom.sys_program2,&bp->mem_map.rom.sys_program1))
-            ret = -1;
+        
+        if((bp->mem_map.rom.sys_program1.type != bp->mem_map.run.flash.type) ||
+            (bp->mem_map.rom.sys_program1.index != bp->mem_map.run.flash.index) ||
+            (bp->mem_map.rom.sys_program1.addr != bp->mem_map.run.flash.addr))
+        {
+            if(0 != repair_rom_space(&bp->mem_map.rom.sys_program2,&bp->mem_map.rom.sys_program1))
+                ret = -1;
+        }
+        else
+        {
+            bp->mem_map.rom.sys_program1.addr = bp->mem_map.run.flash.addr;
+            bp->mem_map.rom.sys_program1.lenth = bp->mem_map.run.flash.lenth;
+            bp->mem_map.rom.sys_program1.crc = bp->mem_map.run.flash.crc;
+            bp->mem_map.rom.sys_program1.status = MEM_NORMAL;
+        }
     }
     if(MEM_ERROR == bp->mem_map.rom.sys_program2.status)
     {

@@ -47,15 +47,6 @@ uint8_t get_error(uint8_t err_type)
     return 0;
 }
 
-void test_xram_error(void)
-{
-    set_error(ERR_XRam,1);
-}
-
-void test_sflash_error(void)
-{
-    set_error(ERR_SFlash,1);
-}
 
 void destroy_code_space(region_s *code)
 {
@@ -125,14 +116,12 @@ void test_rollback(void)
 }
 boot_test_s g_boottest[] = 
 {
-    {'1',"test XRAM error",test_xram_error},
-    {'2',"test MEM_TYPE_ROM error",test_sflash_error},
-    {'3',"test program1 error",test_pro1_error},
-    {'4',"test program bak error",test_probak_error},
-    {'5',"test running program error",test_run_error},
-    {'6',"test upgrade program",test_upgrade},
-    {'6',"test rollback program",test_rollback},
-    {'7',"test app type NOT match",test_app_type_not_match},
+    {'1',"test program1 error",test_pro1_error},
+    {'2',"test program bak error",test_probak_error},
+    {'3',"test running program error",test_run_error},
+    {'4',"test upgrade program",test_upgrade},
+    {'5',"test rollback program",test_rollback},
+    {'6',"test app type NOT match",test_app_type_not_match},
 };
 
 void print32_t_boottest(void)

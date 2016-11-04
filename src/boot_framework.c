@@ -182,7 +182,7 @@ static int32_t  boot_upgrade_check(void)
     
     if(MEM_TYPE_ROM == bp->mem_map.rom.sys_program1.type)
     {
-        ret = flush_code_to_rom(&img);
+        ret = flush_img_to_rom(&img);
     }
     else
     {
@@ -230,14 +230,17 @@ static int32_t  boot_rollback_check(void)
         go_to_next_step();
         return 0;
     }
+    sys_notice("begin to roll back...");
+    ret = roll_back_program();
     sp_set_app_rollback(0);
-    return 0;
+    return ret;
 }
 
 
 static int32_t boot_wait_key_press(void)
 {
     char ch = 0;
+
     boot_param_s *bp = (boot_param_s *)get_boot_params();
     sys_printf("press any key to enter menu list:");
     if(0 == wait_for_key_input(bp->wait_sec,&ch,1))
