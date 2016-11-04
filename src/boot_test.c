@@ -20,6 +20,8 @@
 #include "share_param.h"
 #include "boot_hw_if.h"
 #include "mem_driver.h"
+#include "program_mgr.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -76,17 +78,11 @@ void test_run_error(void)
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     destroy_code_space(&bp->mem_map.run.flash);
 }
-void test_app_type_not_match(void)
-{
-    set_error(ERR_APP_TYPE,1);
-}
-
-
-
 
 void test_upgrade(void)
 {
     region_s *img;
+    img_head_s *head;
 
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     extern mem_status_s g_memstatus;
@@ -98,14 +94,13 @@ void test_upgrade(void)
         sys_error("receive img data failed.");
         return;
     }
-
+    
     sp_init_share_param();
-
+    g_upgrade_status.flag = 1;
     g_upgrade_status.addr = img->addr;
     g_upgrade_status.lenth = img->lenth;
     g_upgrade_status.mem_type = img->type;
     g_upgrade_status.lenth = img->lenth;
-    g_upgrade_status.crc = img->type;
     sp_set_upgrade_param(&g_upgrade_status);
     return;
 }
@@ -121,7 +116,6 @@ boot_test_s g_boottest[] =
     {'3',"test running program error",test_run_error},
     {'4',"test upgrade program",test_upgrade},
     {'5',"test rollback program",test_rollback},
-    {'6',"test app type NOT match",test_app_type_not_match},
 };
 
 void print32_t_boottest(void)

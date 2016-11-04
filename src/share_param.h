@@ -34,8 +34,6 @@ typedef struct
     uint32_t mem_type;//升级程序的介质类型
     uint32_t addr;//升级程序的地址
     uint32_t lenth;// 升级程序的长度
-    uint32_t crc;//升级程序的校验值
-    uint32_t pad;
 }upgrade_region_s;
 
 //保留空间参数区

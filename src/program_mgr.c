@@ -24,6 +24,7 @@
 #include "mem_map.h"
 #include "boot_hw_if.h"
 #include "mem_driver.h"
+#include "encrypt.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -151,6 +152,7 @@ int decrypt_img_data(region_s *img,region_s *bin)
     copy_region_info(img,bin);
 	head = (img_head_s*)bin->addr;
     bin->addr += head->head_len;
+    bin->maxlen = img->maxlen - head->head_len;
     sys_notice("decrypt img file...");
     sys_debug("decrypt_data base:0x%x,lenth:%d",bin->addr,bin->lenth);
 	len = decrypt_data(head->encry_type,(uint8_t *)bin->addr,img->lenth);
@@ -160,6 +162,7 @@ int decrypt_img_data(region_s *img,region_s *bin)
         return -1;
     }
     bin->lenth = len;
+    
     bin->crc = calc_crc32((uint8_t *)bin->addr,bin->lenth,0xffffffff);
     feed_watchdog();
     sys_notice("decrypt img file OK.");
@@ -169,7 +172,6 @@ int decrypt_img_data(region_s *img,region_s *bin)
 
 int32_t check_img_valid(region_s *img)
 {
-    int32_t len;
     uint32_t cal_crc,crc;
     img_head_s *head;
 
@@ -318,8 +320,7 @@ static bool_t region_equal(region_s *src,region_s *dest)
 int32_t roll_back_program(void)
 {
     int32_t ret;
-    region_s *src,*dest;
-    img_head_s *head;
+    region_s *src;
     region_s bin;
     bool_t run_in_program1;
     boot_param_s *bp = (boot_param_s*)get_boot_params();

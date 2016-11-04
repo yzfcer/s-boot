@@ -73,7 +73,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)..\..\..\..\..\..\src;$(ProjectDir)..\..\..\..\..\..\hardware\intel\core-i3-4170\windows_simulation\port;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)..\..\..\..\..\..\src;$(ProjectDir)..\..\..\..\..\..\hardware\intel\core-i3-4170\windows_simulation\port;$(ProjectDir)..\..\..\..\..\..\encrypt;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

@@ -338,7 +338,6 @@ static int32_t boot_set_app_param(void)
     sp_set_app_rollback(1);
     
     g_upgrade_status.addr = bp->mem_map.ram.upgrade_buffer.addr;
-    g_upgrade_status.crc = 0xffffffff;
     g_upgrade_status.flag = 0;
     g_upgrade_status.lenth = bp->mem_map.ram.upgrade_buffer.maxlen;
     g_upgrade_status.mem_type = bp->mem_map.ram.upgrade_buffer.type;

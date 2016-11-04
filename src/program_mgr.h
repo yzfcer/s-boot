@@ -40,6 +40,7 @@ struct __img_head_s
     uint32_t head_crc;
 };
 
+int decrypt_img_data(region_s *img,region_s *bin);
 int32_t download_img_file(memtype_e type);
 int32_t change_boot_app(int32_t index);
 int32_t copy_region_data(region_s *src,region_s *dest);

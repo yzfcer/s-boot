@@ -170,7 +170,6 @@ int write_rom(uint8_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth)
 {
     uint8_t *dest;
     uint32_t base = get_rom_base(memidx);
-    uint8_t *src;
     switch(memidx)
     {
     case 0:

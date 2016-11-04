@@ -3,7 +3,7 @@
   *FileName:  
   *Author:      Zhou Jiangcun
   *Version:     1.0
-  *Date:        2016/11/2
+  *Date:        2016/11/04
   *Description:  
   *Others:  
   *History:  
@@ -17,50 +17,6 @@
 #include "sys_debug.h"
 #include "crc.h"
 #include "program_mgr.h"
-int32_t repair_running_space(void)
-{
-    int32_t ret;
-    region_s *src,*dest;
-    img_head_s *head;
-    region_s bin;
-    boot_param_s *bp = get_boot_params();
-    dest = &bp->mem_map.run.flash;
-    if(MEM_NORMAL == bp->mem_map.rom.sys_program1.status)
-        src = &bp->mem_map.rom.sys_program1;
-    else if(MEM_NORMAL == bp->mem_map.rom.sys_program2.status)
-        src = &bp->mem_map.rom.sys_program2;
-    else
-        src = NULL;
-    
-    if(NULL == src)
-    {
-        sys_warn("can not find an available source for repairing.");
-        ret = -1;
-    }
-    else
-    {
-        //如果不是同一块sys_program1与运行区不是同一块，则数据需要先解密
-        sys_notice("repair program from \"%s\" to \"%s\"",src->regname,dest->regname);
-        copy_region_data(src,&bp->mem_map.ram.upgrade_buffer);
-        if((bp->mem_map.rom.sys_program1.type != bp->mem_map.run.flash.type) ||
-            (bp->mem_map.rom.sys_program1.index != bp->mem_map.run.flash.index) ||
-            (bp->mem_map.rom.sys_program1.addr != bp->mem_map.run.flash.addr))
-        {
-            decrypt_img_data(src,&bin);
-        }
-        else
-        {
-            copy_region_info(src,&bin);
-            head = (img_head_s*)bin.addr;
-            bin.crc = head->bin_crc;
-            bin.addr += head->head_len;
-            bin.lenth -= head->head_len;
-        }
-        ret = repair_rom_space(&bin,dest);
-    }
-    return ret;
-}
-
 
 int32_t repair_rom_space(region_s *src,region_s *dest)
 {
@@ -84,6 +40,49 @@ int32_t repair_rom_space(region_s *src,region_s *dest)
     }
     return 0;
 }
+
+int32_t repair_running_space(void)
+{
+    int32_t ret;
+    region_s *src,*dest;
+    region_s bin;
+    boot_param_s *bp = (boot_param_s *)get_boot_params();
+    dest = &bp->mem_map.run.flash;
+    if(MEM_NORMAL == bp->mem_map.rom.sys_program1.status)
+        src = &bp->mem_map.rom.sys_program1;
+    else if(MEM_NORMAL == bp->mem_map.rom.sys_program2.status)
+        src = &bp->mem_map.rom.sys_program2;
+    else
+        src = NULL;
+    
+    if(NULL == src)
+    {
+        sys_warn("can not find an available source for repairing.");
+        ret = -1;
+    }
+    else
+    {
+        //如果不是同一块sys_program1与运行区不是同一块，则数据需要先解密
+        sys_notice("repair program from \"%s\" to \"%s\"",src->regname,dest->regname);
+        copy_region_data(src,&bp->mem_map.ram.upgrade_buffer);
+        src = &bp->mem_map.ram.upgrade_buffer;
+        if((bp->mem_map.rom.sys_program1.type != bp->mem_map.run.flash.type) ||
+            (bp->mem_map.rom.sys_program1.index != bp->mem_map.run.flash.index) ||
+            (bp->mem_map.rom.sys_program1.addr != bp->mem_map.run.flash.addr))
+        {
+            decrypt_img_data(src,&bin);
+        }
+        else
+        {
+            copy_region_info(src,&bin);
+            bin.maxlen = src->maxlen;
+        }
+        ret = repair_rom_space(&bin,dest);
+    }
+    return ret;
+}
+
+
 
 static int32_t repair_program(boot_param_s *bp)
 {

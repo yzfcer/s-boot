@@ -1,3 +1,16 @@
+/*********************************************************************************
+  *Copyright(C),2016-2018,yzfcer@163.com
+  *FileName:  
+  *Author:      Zhou Jiangcun
+  *Version:     1.0
+  *Date:        2016/11/04
+  *Description:  
+  *Others:  
+  *History:  
+     1.Date:
+       Author:
+       Modification:
+**********************************************************************************/
 #include "boot_type.h"
 #include "encrypt.h"
 static uint8_t rc4_key[16] = ENCRYPT_KEY;

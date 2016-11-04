@@ -41,15 +41,13 @@ typedef struct
         
     //空间状态参数区
     mem_status_s mem_status;
-
-    uint32_t pad;
-    uint32_t crc;
 }share_param_s;
 
 static void update_share_crc(void)
 {
     share_param_s *sp = (share_param_s *)(void*)get_share_addr();
-    sp->crc = calc_crc32((char*)sp,sizeof(share_param_s) - sizeof(sp->crc),0xffffffff);
+    uint32_t *crc = (uint32_t*)(sp+1);
+    *crc = calc_crc32((char*)sp,sizeof(share_param_s),0xffffffff);
 }
 
 static void copy_share_data(char *src,char *dest,int32_t len)
@@ -67,7 +65,7 @@ static int32_t check_share_param(void)
 {
     
     share_param_s *sp = (share_param_s *)(void*)get_share_addr();
-
+    uint32_t *crc = (uint32_t*)(sp+1);
     if(sp->magic != SHARE_PARAM_MAGIC)
     {
         sys_notice("share param block is invalid.");
@@ -79,7 +77,7 @@ static int32_t check_share_param(void)
         return -1;
     }
 
-    if(sp->crc != calc_crc32((char*)sp,sizeof(share_param_s) - sizeof(sp->crc),0xffffffff))
+    if(*crc != calc_crc32((char*)sp,sizeof(share_param_s),0xffffffff))
     {
         sys_warn("share param block crc is invalid.");
         return -1;
