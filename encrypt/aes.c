@@ -14,16 +14,16 @@
 #include "encrypt.h"
 #include "boot_type.h"
 
-#define BPOLY 0x1b 
-#define BLOCKSIZE 16 
+#define AES_BPOLY 0x1b 
+#define AES_BLKSIZE 16 
 
-#define KEYBITS 128 
-#define ROUNDS 10 
-#define KEYLENGTH 16 
+#define AES_KEYBITS 128 
+#define AES_ROUNDS 10 
+#define AES_KEYLEN 16 
 
 
-uint8_t  block1[256]; 
-uint8_t  block2[256]; 
+uint8_t  aes_block1[256]; 
+uint8_t  aes_block2[256]; 
 
 uint8_t  * powTbl; 
 uint8_t  * logTbl; 
@@ -54,7 +54,7 @@ void CalcPowLog(uint8_t * powTbl, uint8_t * logTbl)
         powTbl[i] = t;
         logTbl[t] = i;
         i++;
-        t ^= (t << 1) ^ (t & 0x80 ? BPOLY : 0);
+        t ^= (t << 1) ^ (t & 0x80 ? AES_BPOLY : 0);
     } while(t != 1);
     powTbl[255] = powTbl[0]; 
 }
@@ -127,30 +127,30 @@ void InvMixColumn(uint8_t * column)
     r2 = column[0] ^ column[1] ^ column[3];
     r3 = column[0] ^ column[1] ^ column[2];
 
-    column[0] = (column[0] << 1) ^ (column[0] & 0x80 ? BPOLY : 0);
-    column[1] = (column[1] << 1) ^ (column[1] & 0x80 ? BPOLY : 0);
-    column[2] = (column[2] << 1) ^ (column[2] & 0x80 ? BPOLY : 0);
-    column[3] = (column[3] << 1) ^ (column[3] & 0x80 ? BPOLY : 0);
+    column[0] = (column[0] << 1) ^ (column[0] & 0x80 ? AES_BPOLY : 0);
+    column[1] = (column[1] << 1) ^ (column[1] & 0x80 ? AES_BPOLY : 0);
+    column[2] = (column[2] << 1) ^ (column[2] & 0x80 ? AES_BPOLY : 0);
+    column[3] = (column[3] << 1) ^ (column[3] & 0x80 ? AES_BPOLY : 0);
 
     r0 ^= column[0] ^ column[1];
     r1 ^= column[1] ^ column[2];
     r2 ^= column[2] ^ column[3];
     r3 ^= column[0] ^ column[3];
 
-    column[0] = (column[0] << 1) ^ (column[0] & 0x80 ? BPOLY : 0);
-    column[1] = (column[1] << 1) ^ (column[1] & 0x80 ? BPOLY : 0);
-    column[2] = (column[2] << 1) ^ (column[2] & 0x80 ? BPOLY : 0);
-    column[3] = (column[3] << 1) ^ (column[3] & 0x80 ? BPOLY : 0);
+    column[0] = (column[0] << 1) ^ (column[0] & 0x80 ? AES_BPOLY : 0);
+    column[1] = (column[1] << 1) ^ (column[1] & 0x80 ? AES_BPOLY : 0);
+    column[2] = (column[2] << 1) ^ (column[2] & 0x80 ? AES_BPOLY : 0);
+    column[3] = (column[3] << 1) ^ (column[3] & 0x80 ? AES_BPOLY : 0);
 
     r0 ^= column[0] ^ column[2];
     r1 ^= column[1] ^ column[3];
     r2 ^= column[0] ^ column[2];
     r3 ^= column[1] ^ column[3];
 
-    column[0] = (column[0] << 1) ^ (column[0] & 0x80 ? BPOLY : 0);
-    column[1] = (column[1] << 1) ^ (column[1] & 0x80 ? BPOLY : 0);
-    column[2] = (column[2] << 1) ^ (column[2] & 0x80 ? BPOLY : 0);
-    column[3] = (column[3] << 1) ^ (column[3] & 0x80 ? BPOLY : 0);
+    column[0] = (column[0] << 1) ^ (column[0] & 0x80 ? AES_BPOLY : 0);
+    column[1] = (column[1] << 1) ^ (column[1] & 0x80 ? AES_BPOLY : 0);
+    column[2] = (column[2] << 1) ^ (column[2] & 0x80 ? AES_BPOLY : 0);
+    column[3] = (column[3] << 1) ^ (column[3] & 0x80 ? AES_BPOLY : 0);
 
     column[0] ^= column[1] ^ column[2] ^ column[3];
     r0 ^= column[0];
@@ -176,7 +176,7 @@ uint8_t Multiply(uint8_t num, uint8_t factor)
             result ^= num;
         }
         mask <<= 1;
-        num = (num << 1) ^ (num & 0x80 ? BPOLY : 0);
+        num = (num << 1) ^ (num & 0x80 ? AES_BPOLY : 0);
     }
 
     return result;
@@ -227,7 +227,7 @@ void InvSubBytesAndXOR(uint8_t * uint8_ts, uint8_t * key, uint8_t count)
 {
     do 
     {
-        *uint8_ts = block2[ *uint8_ts ] ^ *key; 
+        *uint8_ts = aes_block2[ *uint8_ts ] ^ *key; 
         uint8_ts++;
         key++;
     } while(--count);
@@ -332,7 +332,7 @@ void KeyExpansion(uint8_t * expandedKey)
      
     uint8_t  *key;
     key = aes_key;
-    i = KEYLENGTH;
+    i = AES_KEYLEN;
     do 
     {
         *expandedKey = *key;
@@ -346,25 +346,25 @@ void KeyExpansion(uint8_t * expandedKey)
     temp[2] = *(expandedKey++);
     temp[3] = *(expandedKey++);
 
-    i = KEYLENGTH;
-    while(i < BLOCKSIZE*(ROUNDS+1)) 
+    i = AES_KEYLEN;
+    while(i < AES_BLKSIZE*(AES_ROUNDS+1)) 
     {
-        if((i % KEYLENGTH) == 0) 
+        if((i % AES_KEYLEN) == 0) 
         {
             CycleLeft(temp); 
             SubBytes(temp, 4); 
             XORBytes(temp, Rcon, 4); 
-            *Rcon = (*Rcon << 1) ^ (*Rcon & 0x80 ? BPOLY : 0);
+            *Rcon = (*Rcon << 1) ^ (*Rcon & 0x80 ? AES_BPOLY : 0);
         }
 
-#if KEYLENGTH > 24
-        else if((i % KEYLENGTH) == BLOCKSIZE) 
+#if AES_KEYLEN > 24
+        else if((i % AES_KEYLEN) == AES_BLKSIZE) 
         {
             SubBytes(temp, 4); // Substitute each uint8_t.
         }
 #endif
 
-        XORBytes(temp, expandedKey - KEYLENGTH, 4);
+        XORBytes(temp, expandedKey - AES_KEYLEN, 4);
 
         *(expandedKey++) = temp[ 0 ];
         *(expandedKey++) = temp[ 1 ];
@@ -378,16 +378,16 @@ void KeyExpansion(uint8_t * expandedKey)
 
 void InvCipher(uint8_t * block, uint8_t * expandedKey)
 {
-    uint8_t round = ROUNDS-1;
-    expandedKey += BLOCKSIZE * ROUNDS;
+    uint8_t round = AES_ROUNDS-1;
+    expandedKey += AES_BLKSIZE * AES_ROUNDS;
 
     XORBytes(block, expandedKey, 16);
-    expandedKey -= BLOCKSIZE;
+    expandedKey -= AES_BLKSIZE;
     do 
     {
         InvShiftRows(block);
         InvSubBytesAndXOR(block, expandedKey, 16);
-        expandedKey -= BLOCKSIZE;
+        expandedKey -= AES_BLKSIZE;
         InvMixColumns(block);
     } while(--round);
 
@@ -398,10 +398,10 @@ void InvCipher(uint8_t * block, uint8_t * expandedKey)
 //完成一个块(16字节，128bit)的加密
 void Cipher(uint8_t * block, uint8_t * expandedKey) 
 {
-    uint8_t round = ROUNDS-1;
+    uint8_t round = AES_ROUNDS-1;
 
     XORBytes(block, expandedKey, 16);
-    expandedKey += BLOCKSIZE;
+    expandedKey += AES_BLKSIZE;
 
     do 
     {
@@ -409,7 +409,7 @@ void Cipher(uint8_t * block, uint8_t * expandedKey)
         ShiftRows(block);
         MixColumns(block);
         XORBytes(block, expandedKey, 16);
-        expandedKey += BLOCKSIZE;
+        expandedKey += AES_BLKSIZE;
     } while(--round);
 
     SubBytes(block, 16);
@@ -419,33 +419,33 @@ void Cipher(uint8_t * block, uint8_t * expandedKey)
 
 void aesInit(uint8_t * tempbuf)
 {
-    powTbl = block1;
-    logTbl = block2;
+    powTbl = aes_block1;
+    logTbl = aes_block2;
     CalcPowLog(powTbl, logTbl);
 
     sBox = tempbuf;
     CalcSBox(sBox);
 
-    expandedKey = block1;  //至此block1用来存贮密码表
+    expandedKey = aes_block1;  //至此block1用来存贮密码表
     KeyExpansion(expandedKey);
      
-    sBoxInv = block2; //block2至此开始只用来存贮SBOXINV
+    sBoxInv = aes_block2; //block2至此开始只用来存贮SBOXINV
     CalcSBoxInv(sBox, sBoxInv);
 } 
 
 
 void aesDecryptBlock(uint8_t * buffer, uint8_t * chainBlock)
 {
-    CopyBytes(buffer,chainBlock,BLOCKSIZE);
+    CopyBytes(buffer,chainBlock,AES_BLKSIZE);
     InvCipher(buffer, expandedKey);
-    CopyBytes(chainBlock, buffer, BLOCKSIZE);
+    CopyBytes(chainBlock, buffer, AES_BLKSIZE);
 }
 
 void aesEncryptBlock(uint8_t * buffer, uint8_t * chainBlock)
 {
-    CopyBytes(buffer, chainBlock, BLOCKSIZE);
+    CopyBytes(buffer, chainBlock, AES_BLKSIZE);
     Cipher(buffer, expandedKey);
-    CopyBytes(chainBlock, buffer, BLOCKSIZE);
+    CopyBytes(chainBlock, buffer, AES_BLKSIZE);
 }
 
 int AES_encrypt(uint8_t *data,int datalen)
