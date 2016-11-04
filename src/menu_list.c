@@ -223,7 +223,7 @@ static menu_handle_TB g_menu_handleTB[] =
     {'k',0,0,"lock MCU chip",lock_mcu},
     {'r',2,2,"clear boot params",clear_boot_param},
 #if BOOT_TEST_ENABLE
-    {'t',0,0,"bootloader test",bootloader_test},
+    {'t',1,1,"bootloader test",bootloader_test},
 #endif
     {'u',2,2,"unlock MCU chip",unlock_mcu},
     
@@ -261,16 +261,17 @@ void print32_t_menu_list(void)
 int32_t open_super_prio(void)
 {
     int32_t i;
-    char cmdbuf[6];
+    int len;
     int32_t prio = 0;
     char *prio1 = "test";
     char *prio2 = "sudo";
-    read_line_blockig(cmdbuf,10);
-    if(is_string_equal(cmdbuf,prio1,4))
+    uint8_t *buff = get_block_buffer();
+    len = read_line_blockig(buff,BLOCK_SIZE);
+    if(is_string_equal(buff,prio1,string_len(prio1)))
     {
         prio = 1;
     }
-    else if(is_string_equal(cmdbuf,prio2,4))
+    else if(is_string_equal(buff,prio2,string_len(prio2)))
     {
         prio = 2;
     }

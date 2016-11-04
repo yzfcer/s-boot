@@ -35,8 +35,11 @@ reserve_region_s g_reserve_reg;
 void print_boot_info(void)
 {
     sys_printf("\r\n");
-    sys_printf("s-boot %d.%d\r\n",(uint8_t)(BOOT_VERSION >> 8),(uint8_t)(BOOT_VERSION));
-    sys_printf("*** To Make ease For developing ***\r\n");
+    sys_printf("+---------------------------------------------+\r\n");
+    sys_printf("               s-boot %d.%d.%d\r\n",(uint8_t)(BOOT_VERSION >> 16),
+                (uint8_t)(BOOT_VERSION >> 8),(uint8_t)(BOOT_VERSION));
+    sys_printf("      *** To Make Ease For Developing ***\r\n");
+    sys_printf("+---------------------------------------------+\r\n");
     sys_printf("Build: %s %s\r\n",__DATE__,__TIME__);
     sys_printf("Borad: %s\r\n",BOARD_NAME);
     sys_printf("Arch : %s\r\n",ARCH_NAME);
