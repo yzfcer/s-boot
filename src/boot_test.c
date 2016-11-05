@@ -85,7 +85,7 @@ void test_upgrade(void)
     img_head_s *head;
 
     boot_param_s *bp = (boot_param_s*)get_boot_params();
-    extern mem_status_s g_memstatus;
+
     img = &bp->mem_map.ram.load_buffer;
     sys_printf("begin to receive file data,please wait.\r\n");
     img->datalen = boot_receive_img(img->addr,img->size);

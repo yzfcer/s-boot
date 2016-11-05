@@ -28,7 +28,7 @@ extern "C" {
 #endif
 
 static volatile int s_boot_status = BOOT_INIT;
-mem_status_s g_memstatus;
+
 upgrade_region_s g_upgrade_status;
 sysparam_region_s g_sysparam_reg;
 
@@ -358,7 +358,6 @@ static int32_t boot_set_app_param(void)
     sys_printf("lenth:0x%x\r\n",g_sysparam_reg.size);
     sp_set_sysparam_param(&g_sysparam_reg);
     
-    sp_set_mem_status(&g_memstatus);
     sys_notice("set App params OK.");
     set_boot_status(BOOT_JUMP_TO_APP);
     return 0;

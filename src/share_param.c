@@ -36,11 +36,9 @@ typedef struct
     //升级参数区
     upgrade_region_s upgrade_reg;
 
-    //保留空间参数区
+    //系统参数区，用于保留应用程序参数
     sysparam_region_s sysparam_reg;
         
-    //空间状态参数区
-    mem_status_s mem_status;
 }share_param_s;
 
 static void update_share_crc(void)
@@ -134,26 +132,6 @@ int32_t sp_get_sysparam_param(sysparam_region_s *sysparam)
     copy_share_data((char*)&sp->sysparam_reg,(char*)sysparam,sizeof(sysparam_region_s));
     return 0;
 }
-
-
-void sp_set_mem_status(mem_status_s * mem_status)
-{
-    share_param_s *sp = (share_param_s *)(void*)get_share_addr();
-    copy_share_data((char*)mem_status,(char*)&sp->mem_status,sizeof(mem_status_s));
-    update_share_crc();
-}
-
-
-int32_t sp_get_mem_status(mem_status_s * mem_status)
-{
-    share_param_s *sp = (share_param_s *)(void*)get_share_addr();
-    if(check_share_param())
-        return -1;
-    copy_share_data((char*)mem_status,(char*)&sp->mem_status,sizeof(mem_status_s));
-    return 0;
-}
-
-
 
 void sp_init_share_param(void)
 {

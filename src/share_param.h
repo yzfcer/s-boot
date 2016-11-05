@@ -46,14 +46,6 @@ typedef struct
     uint32_t pad;
 }sysparam_region_s;
 
-typedef struct 
-{
-    hw_status_s iflash;
-    hw_status_s iram;
-    hw_status_s sflash;
-    hw_status_s xram;
-}mem_status_s;
-
 
 void sp_set_app_rollback(uint8_t is_rollback);
 
@@ -66,10 +58,6 @@ int32_t sp_get_upgrade_param(upgrade_region_s *upreg);
 void sp_set_sysparam_param(sysparam_region_s *sysparam);
 
 int32_t sp_get_sysparam_param(sysparam_region_s *sysparam);
-
-void sp_set_mem_status(mem_status_s * mem_status);
-
-int32_t sp_get_mem_status(mem_status_s * mem_status);
 
 void sp_init_share_param(void);
 
