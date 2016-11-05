@@ -33,7 +33,8 @@ typedef struct
     uint32_t flag;//升级标志
     uint32_t mem_type;//升级程序的介质类型
     uint32_t addr;//升级程序的地址
-    uint32_t datalen;// 升级程序的长度
+    uint32_t size;//升级程序的空间大小
+    uint32_t datalen;//升级程序的数据长度
 }upgrade_region_s;
 
 //保留空间参数区
@@ -43,7 +44,7 @@ typedef struct
     uint32_t size;//保留空间的长度
     uint32_t mem_type;//保留空间的类型
     uint32_t pad;
-}reserve_region_s;
+}sysparam_region_s;
 
 typedef struct 
 {
@@ -62,9 +63,9 @@ void sp_set_upgrade_param(upgrade_region_s *upreg);
 
 int32_t sp_get_upgrade_param(upgrade_region_s *upreg);
 
-void sp_set_reserve_param(reserve_region_s *reserve);
+void sp_set_sysparam_param(sysparam_region_s *sysparam);
 
-int32_t sp_get_reserve_param(reserve_region_s *reserve);
+int32_t sp_get_sysparam_param(sysparam_region_s *sysparam);
 
 void sp_set_mem_status(mem_status_s * mem_status);
 

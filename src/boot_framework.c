@@ -30,7 +30,7 @@ extern "C" {
 static volatile int s_boot_status = BOOT_INIT;
 mem_status_s g_memstatus;
 upgrade_region_s g_upgrade_status;
-reserve_region_s g_reserve_reg;
+sysparam_region_s g_sysparam_reg;
 
 void print_boot_info(void)
 {
@@ -342,7 +342,7 @@ static int32_t boot_set_app_param(void)
     
     g_upgrade_status.addr = bp->mem_map.ram.load_buffer.addr;
     g_upgrade_status.flag = 0;
-    g_upgrade_status.datalen = bp->mem_map.ram.load_buffer.size;
+    g_upgrade_status.size = bp->mem_map.ram.load_buffer.size;
     g_upgrade_status.mem_type = bp->mem_map.ram.load_buffer.type;
     sp_set_upgrade_param(&g_upgrade_status);
     sp_get_upgrade_param(&g_upgrade_status);
@@ -350,13 +350,13 @@ static int32_t boot_set_app_param(void)
     sys_printf("addr:0x%x\r\n",g_upgrade_status.addr);
     sys_printf("lenth:0x%x\r\n",g_upgrade_status.datalen);
 
-    g_reserve_reg.addr = bp->mem_map.rom.sys_param.addr;
-    g_reserve_reg.size = bp->mem_map.rom.sys_param.size;
-    g_reserve_reg.mem_type = bp->mem_map.rom.sys_param.type;
-    sys_printf("set reserve region params:\r\n");
-    sys_printf("addr:0x%x\r\n",g_reserve_reg.addr);
-    sys_printf("lenth:0x%x\r\n",g_reserve_reg.size);
-    sp_set_reserve_param(&g_reserve_reg);
+    g_sysparam_reg.addr = bp->mem_map.rom.sys_param.addr;
+    g_sysparam_reg.size = bp->mem_map.rom.sys_param.size;
+    g_sysparam_reg.mem_type = bp->mem_map.rom.sys_param.type;
+    sys_printf("set sysparam region params:\r\n");
+    sys_printf("addr:0x%x\r\n",g_sysparam_reg.addr);
+    sys_printf("lenth:0x%x\r\n",g_sysparam_reg.size);
+    sp_set_sysparam_param(&g_sysparam_reg);
     
     sp_set_mem_status(&g_memstatus);
     sys_notice("set App params OK.");

@@ -37,7 +37,7 @@ typedef struct
     upgrade_region_s upgrade_reg;
 
     //保留空间参数区
-    reserve_region_s reserve_reg;
+    sysparam_region_s sysparam_reg;
         
     //空间状态参数区
     mem_status_s mem_status;
@@ -119,19 +119,19 @@ int32_t sp_get_upgrade_param(upgrade_region_s *upreg)
     return 0;
 }
 
-void sp_set_reserve_param(reserve_region_s *reserve)
+void sp_set_sysparam_param(sysparam_region_s *sysparam)
 {
     share_param_s *sp = (share_param_s *)(void*)get_share_addr();
-    copy_share_data((char*)reserve,(char*)&sp->reserve_reg,sizeof(reserve_region_s));
+    copy_share_data((char*)sysparam,(char*)&sp->sysparam_reg,sizeof(sysparam_region_s));
     update_share_crc();
 }
 
-int32_t sp_get_reserve_param(reserve_region_s *reserve)
+int32_t sp_get_sysparam_param(sysparam_region_s *sysparam)
 {
     share_param_s *sp = (share_param_s *)(void*)get_share_addr();
     if(check_share_param())
         return -1;
-    copy_share_data((char*)&sp->reserve_reg,(char*)reserve,sizeof(reserve_region_s));
+    copy_share_data((char*)&sp->sysparam_reg,(char*)sysparam,sizeof(sysparam_region_s));
     return 0;
 }
 
