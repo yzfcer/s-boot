@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 #if BOOT_TEST_ENABLE
-extern upgrade_region_s g_upgrade_status;
+extern upgrade_info_s g_upgrade_info;
 boot_stub_s boot_stub = {0,0,0};
 void clear_errors(void)
 {
@@ -96,11 +96,11 @@ void test_upgrade(void)
     }
     
     sp_init_share_param();
-    g_upgrade_status.flag = 1;
-    g_upgrade_status.addr = img->addr;
-    g_upgrade_status.datalen = img->datalen;
-    g_upgrade_status.mem_type = img->type;
-    sp_set_upgrade_param(&g_upgrade_status);
+    g_upgrade_info.flag = 1;
+    g_upgrade_info.addr = img->addr;
+    g_upgrade_info.datalen = img->datalen;
+    g_upgrade_info.mem_type = img->type;
+    sp_set_upgrade_param(&g_upgrade_info);
     return;
 }
 

@@ -20,6 +20,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#define SET_REG(reg,idx,base,title,memtype) do{\
+                    reg.regname = g_reg_name[idx];\
+                    reg.idx = title##_IDX;\
+                    reg.addr = (base[title##_IDX]) + title##_ADDR;\
+                    reg.size = title##_SIZE;\
+                    reg.type = MEM_TYPE_##memtype;\
+                    idx ++;\
+                    }while(0)
 
 mem_map_s g_memmap;
 char *g_reg_name[] = 
@@ -114,14 +122,6 @@ static uint32_t alloc_region(region_s * reg,uint32_t *base,uint32_t size)
 	return size;
 }
 
-#define SET_REG(reg,idx,base,head,memtype) do{\
-                    reg.regname = g_reg_name[idx];\
-                    reg.idx = head##_IDX;\
-                    reg.addr = (base[head##_IDX]) + head##_ADDR;\
-                    reg.size = head##_SIZE;\
-                    reg.type = MEM_TYPE_##memtype;\
-                    idx ++;\
-                    }while(0)
 int32_t mem_region_init(void)
 {
     int i;
@@ -137,7 +137,6 @@ int32_t mem_region_init(void)
     {
         rombase[i] = get_rom_base(i);
     }
-#if 1
 	SET_REG(map->rom.boot_program,index,rombase,BOOT_PROGRAM,ROM);    
 	SET_REG(map->rom.boot_param1,index,rombase,BOOT_PARAM1,ROM);
 	SET_REG(map->rom.boot_param2,index,rombase,BOOT_PARAM2,ROM);
@@ -152,21 +151,6 @@ int32_t mem_region_init(void)
 
     SET_REG(map->run.flash,index,rombase,SYS_ROMRUN,ROM);
 	SET_REG(map->run.ram,index,rambase,SYS_RAMRUN,RAM);
-    
-#else
-    alloc_region(&map->rom.boot_program,rombase,BOOT_PROGRAM_SIZE);    
-    alloc_region(&map->rom.boot_param1,rombase,BOOT_PARAM1_SIZE);
-    alloc_region(&map->rom.boot_param2,rombase,BOOT_PARAM2_SIZE);
-    alloc_region(&map->rom.sys_program1,rombase,SYS_PROGRAM1_SIZE);
-    alloc_region(&map->rom.sys_program2,rombase,SYS_PROGRAM2_SIZE);
-    alloc_region(&map->rom.sys_param,rombase,SYS_SHAREPRM_SIZE);   
-
-    alloc_region(&map->ram.data_ram,rambase,DATA_RAM_SIZE);
-    alloc_region(&map->ram.load_buffer,rambase,SYS_LOADBUF_SIZE);
-    alloc_region(&map->ram.share_param,rambase,SYS_SHAREPRM_SIZE);
-#endif
-    //copy_region_info(&map->rom.sys_program1,&map->run.flash);
-    //map->run.flash.size = map->rom.sys_program1.size;
 	return 0;
 }
 

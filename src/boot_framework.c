@@ -29,7 +29,7 @@ extern "C" {
 
 static volatile int s_boot_status = BOOT_INIT;
 
-upgrade_region_s g_upgrade_status;
+upgrade_info_s g_upgrade_info;
 sysparam_region_s g_sysparam_reg;
 
 void print_boot_info(void)
@@ -43,8 +43,7 @@ void print_boot_info(void)
     sys_printf("Build: %s %s\r\n",__DATE__,__TIME__);
     sys_printf("Borad: %s\r\n",BOARD_NAME);
     sys_printf("Arch : %s\r\n",ARCH_NAME);
-    sys_printf("CPU  : %s\r\n",CPU_NAME);
-    sys_printf("\r\n\r\n");
+    sys_printf("CPU  : %s\r\n\r\n",CPU_NAME);
 }
 
 static int32_t boot_init(void)
@@ -150,7 +149,7 @@ static int32_t  boot_upgrade_check(void)
         sys_warn("get boot params failed.");
         return -1;
     }
-    ret = sp_get_upgrade_param(&g_upgrade_status);
+    ret = sp_get_upgrade_param(&g_upgrade_info);
     if(0 != ret)
     {
         sys_notice("get upgrade params NULL.");
@@ -159,22 +158,22 @@ static int32_t  boot_upgrade_check(void)
         return 0;
     }
     
-    if((!g_upgrade_status.flag))
+    if((!g_upgrade_info.flag))
     {
         sys_notice("upgrade flags is invalid,need NOT upgrade App.");
         go_to_next_step();
         return 0;
     }
-    g_upgrade_status.flag = 0;
-    sp_set_upgrade_param(&g_upgrade_status);
+    g_upgrade_info.flag = 0;
+    sp_set_upgrade_param(&g_upgrade_info);
     
     sys_notice("handling upgrade event,please wait...");
     
     img.regname = bp->mem_map.ram.load_buffer.regname;
     img.size = bp->mem_map.ram.load_buffer.size;
-    img.addr = g_upgrade_status.addr;
-    img.datalen = g_upgrade_status.datalen;
-    img.type = (memtype_e)g_upgrade_status.mem_type;
+    img.addr = g_upgrade_info.addr;
+    img.datalen = g_upgrade_info.datalen;
+    img.type = (memtype_e)g_upgrade_info.mem_type;
 
     ret = check_img_valid(&img);
     if(0 != ret)
@@ -340,22 +339,22 @@ static int32_t boot_set_app_param(void)
     
     sp_set_app_rollback(1);
     
-    g_upgrade_status.addr = bp->mem_map.ram.load_buffer.addr;
-    g_upgrade_status.flag = 0;
-    g_upgrade_status.size = bp->mem_map.ram.load_buffer.size;
-    g_upgrade_status.mem_type = bp->mem_map.ram.load_buffer.type;
-    sp_set_upgrade_param(&g_upgrade_status);
-    sp_get_upgrade_param(&g_upgrade_status);
+    g_upgrade_info.addr = bp->mem_map.ram.load_buffer.addr;
+    g_upgrade_info.flag = 0;
+    g_upgrade_info.size = bp->mem_map.ram.load_buffer.size;
+    g_upgrade_info.mem_type = bp->mem_map.ram.load_buffer.type;
+    sp_set_upgrade_param(&g_upgrade_info);
+    sp_get_upgrade_param(&g_upgrade_info);
     sys_printf("set upgrade params:\r\n");
-    sys_printf("addr:0x%x\r\n",g_upgrade_status.addr);
-    sys_printf("lenth:0x%x\r\n",g_upgrade_status.datalen);
+    sys_printf("buffer addr:0x%x\r\n",g_upgrade_info.addr);
+    sys_printf("buffer lenth:0x%x\r\n",g_upgrade_info.datalen);
 
     g_sysparam_reg.addr = bp->mem_map.rom.sys_param.addr;
     g_sysparam_reg.size = bp->mem_map.rom.sys_param.size;
     g_sysparam_reg.mem_type = bp->mem_map.rom.sys_param.type;
     sys_printf("set sysparam region params:\r\n");
-    sys_printf("addr:0x%x\r\n",g_sysparam_reg.addr);
-    sys_printf("lenth:0x%x\r\n",g_sysparam_reg.size);
+    sys_printf("sysparam addr:0x%x\r\n",g_sysparam_reg.addr);
+    sys_printf("sysparam lenth:0x%x\r\n",g_sysparam_reg.size);
     sp_set_sysparam_param(&g_sysparam_reg);
     
     sys_notice("set App params OK.");

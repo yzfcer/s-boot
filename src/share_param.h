@@ -35,7 +35,7 @@ typedef struct
     uint32_t addr;//升级程序的地址
     uint32_t size;//升级程序的空间大小
     uint32_t datalen;//升级程序的数据长度
-}upgrade_region_s;
+}upgrade_info_s;
 
 //保留空间参数区
 typedef struct
@@ -51,9 +51,9 @@ void sp_set_app_rollback(uint8_t is_rollback);
 
 int32_t sp_get_app_rollback(uint8_t *is_rollback);
 
-void sp_set_upgrade_param(upgrade_region_s *upreg);
+void sp_set_upgrade_param(upgrade_info_s *upreg);
 
-int32_t sp_get_upgrade_param(upgrade_region_s *upreg);
+int32_t sp_get_upgrade_param(upgrade_info_s *upreg);
 
 void sp_set_sysparam_param(sysparam_region_s *sysparam);
 

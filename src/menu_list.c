@@ -247,7 +247,7 @@ static void exit_menu(void)
 void print32_t_menu_list(void)
 {
     int32_t i;
-    sys_printf("\r\n\r\npress key to choose the following functions:\r\n");
+    sys_printf("\r\n\r\nmenu list:\r\n");
     for(i = 0;i < sizeof(g_menu_handleTB)/sizeof(menu_handle_TB);i ++)
     {
         if(!g_menu_handleTB[i].prio)

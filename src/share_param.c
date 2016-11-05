@@ -34,7 +34,7 @@ typedef struct
     uint32_t rollback_flag;//应用程序在异常时设置位1，正常为0
 
     //升级参数区
-    upgrade_region_s upgrade_reg;
+    upgrade_info_s upgrade_reg;
 
     //系统参数区，用于保留应用程序参数
     sysparam_region_s sysparam_reg;
@@ -101,19 +101,19 @@ int32_t sp_get_app_rollback(uint8_t *is_rollback)
 }
 
 
-void sp_set_upgrade_param(upgrade_region_s *upreg)
+void sp_set_upgrade_param(upgrade_info_s *upreg)
 {
     share_param_s *sp = (share_param_s *)(void*)get_share_addr();
-    copy_share_data((char*)upreg,(char*)&sp->upgrade_reg,sizeof(upgrade_region_s));
+    copy_share_data((char*)upreg,(char*)&sp->upgrade_reg,sizeof(upgrade_info_s));
     update_share_crc();
 }
 
-int32_t sp_get_upgrade_param(upgrade_region_s *upreg)
+int32_t sp_get_upgrade_param(upgrade_info_s *upreg)
 {
     share_param_s *sp = (share_param_s *)(void*)get_share_addr();
     if(check_share_param())
         return -1;
-    copy_share_data((char*)&sp->upgrade_reg,(char*)upreg,sizeof(upgrade_region_s));
+    copy_share_data((char*)&sp->upgrade_reg,(char*)upreg,sizeof(upgrade_info_s));
     return 0;
 }
 
