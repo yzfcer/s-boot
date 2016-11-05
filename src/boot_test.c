@@ -82,8 +82,6 @@ void test_run_error(void)
 void test_upgrade(void)
 {
     region_s *img;
-    img_head_s *head;
-
     boot_param_s *bp = (boot_param_s*)get_boot_params();
 
     img = &bp->mem_map.ram.load_buffer;

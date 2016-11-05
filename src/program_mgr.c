@@ -101,6 +101,7 @@ void convert_uint32_to_byte(uint8_t *buf,int32_t index,uint32_t va)
         buf[i + index] = (uint8_t)(va >> (i*8));
     }
 }
+
 int memory_compare(uint8_t *dest,uint8_t *src,int len)
 {
     int i;

@@ -17,6 +17,9 @@
 extern "C" {
 #endif
 
+//使能debug信息打印功能
+#define BOOT_DEBUG_ENABLE 0
+
 //测试功能使能
 #define BOOT_TEST_ENABLE 1
 

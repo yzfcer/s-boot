@@ -16,14 +16,14 @@
 #include "boot_type.h"
 #include "mem_map.h"
 #include "boot_hw_if.h"
+#include "config.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 
-#define BOOT_DEBUG_EN 0
-#if BOOT_DEBUG_EN
+#if BOOT_DEBUG_ENABLE
 #define sys_debug(fmt,...) sys_printf("%s"fmt"  [%s,%d]\r\n","DEBUG: ",##__VA_ARGS__,__FUNCTION__,__LINE__)
 #define sys_notice(fmt,...) sys_printf("%s"fmt"\r\n","NOTICE: ",##__VA_ARGS__)
 #define sys_warn(fmt,...) sys_printf("\r\n%s"fmt" [%s,%d]\r\n\r\n","------WARNING------\r\n",##__VA_ARGS__,__FUNCTION__,__LINE__)

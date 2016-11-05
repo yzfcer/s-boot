@@ -29,7 +29,17 @@ extern "C" {
 #endif
 
 
-
+extern int string_len(const char *str);
+static int32_t is_string_equal(char *str1,char *str2,int32_t len)
+{
+    int32_t i;
+    for(i = 0;i < len;i ++)
+    {
+        if(str1[i] != str2[i])
+            return 0;
+    }
+    return 1;
+}
 //退出菜单标记，如果只为有效，回到菜单时将退出菜单
 static uint8_t exit_menu_flag = 0;
 //高级权限标志，拥有高级权限可以使用更多功能
@@ -58,16 +68,8 @@ int32_t get_menu_go_direction(void)
 {
     return g_go_ahead;
 }
-static int32_t is_string_equal(char *str1,char *str2,int32_t len)
-{
-    int32_t i;
-    for(i = 0;i < len;i ++)
-    {
-        if(str1[i] != str2[i])
-            return 0;
-    }
-    return 1;
-}
+
+
 
 static void download_img_to_rom(void)
 {
@@ -266,12 +268,12 @@ int32_t open_super_prio(void)
     char *prio1 = "test";
     char *prio2 = "sudo";
     uint8_t *buff = get_block_buffer();
-    len = read_line_blockig(buff,BLOCK_SIZE);
-    if(is_string_equal(buff,prio1,string_len(prio1)))
+    len = read_line_blockig((char*)buff,BLOCK_SIZE);
+    if(is_string_equal((char*)buff,prio1,string_len(prio1)))
     {
         prio = 1;
     }
-    else if(is_string_equal(buff,prio2,string_len(prio2)))
+    else if(is_string_equal((char*)buff,prio2,string_len(prio2)))
     {
         prio = 2;
     }
