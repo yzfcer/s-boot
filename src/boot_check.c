@@ -75,7 +75,6 @@ int32_t repair_running_space(void)
         else
         {
             copy_region_info(src,&bin);
-            bin.size = src->size;
         }
         ret = repair_rom_space(&bin,dest);
     }
@@ -133,7 +132,6 @@ int32_t check_rom_program(region_s *code)
     uint8_t *buff = get_block_buffer();
 
     copy_region_info(code,&prog);
-    prog.regname = code->regname;
     if(prog.status == MEM_NULL)
     {
         sys_notice("region \"%s\" type %s base 0x%x lenth %d is empty.",

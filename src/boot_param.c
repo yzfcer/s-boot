@@ -63,14 +63,16 @@ void *get_boot_params_from_ROM(void)
         return NULL;
     }
     map = get_memory_map();
-    init_reg_name((boot_param_s *)&g_bootparam);
+    //init_reg_name((boot_param_s *)&g_bootparam);
     g_pbp = (boot_param_s *)&g_bootparam;
     src = (region_s*)map;
     dest = (region_s*)&g_pbp->mem_map;
     for(i = 0;i < sizeof(g_pbp->mem_map)/sizeof(region_s);i ++)
     {
+        dest[i].regname = src[i].regname;
         dest[i].addr = src[i].addr;
     }
+    
     return (void*)g_pbp;
 }
 

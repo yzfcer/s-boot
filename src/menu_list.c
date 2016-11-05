@@ -223,7 +223,7 @@ static menu_handle_TB g_menu_handleTB[] =
     {'k',0,0,"lock MCU chip",lock_mcu},
     {'r',2,2,"clear boot params",clear_boot_param},
 #if BOOT_TEST_ENABLE
-    {'t',1,1,"bootloader test",bootloader_test},
+    {'t',0,0,"bootloader test",bootloader_test},
 #endif
     {'u',2,2,"unlock MCU chip",unlock_mcu},
     

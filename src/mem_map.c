@@ -21,28 +21,7 @@
 extern "C" {
 #endif
 
-mem_map_s g_memmap = 
-{
-    {
-        {"boot_program",MEM_TYPE_ROM,BOOT_PROGRAM_IDX,BOOT_PROGRAM_ADDR,BOOT_PROGRAM_SIZE,0,0,0},
-        {"boot_param1",MEM_TYPE_ROM,BOOT_PARAM1_IDX,BOOT_PARAM1_ADDR,BOOT_PARAM1_SIZE,0,0,0},
-        {"boot_param2",MEM_TYPE_ROM,BOOT_PARAM2_IDX,BOOT_PARAM2_ADDR,BOOT_PARAM2_SIZE,0,0,0},
-        {"sys_program1",MEM_TYPE_ROM,SYS_PROGRAM1_IDX,SYS_PROGRAM1_ADDR,SYS_PROGRAM1_SIZE,0,0,0},
-        {"sys_program2",MEM_TYPE_ROM,SYS_PROGRAM2_IDX,0,0,0,0,0},
-        {"sys_param",MEM_TYPE_ROM,SYS_PARAM_IDX,0,0,0,0,0},
-        {"sys_romfs",MEM_TYPE_ROM,SYS_ROMFS_IDX,0,0,0,0,0}
-    },
-    {
-        {"data_ram",MEM_TYPE_RAM,DATA_RAM_IDX,0,0,0,0,0},
-        {"load_buffer",MEM_TYPE_RAM,SYS_LOADBUF_IDX,0,0,0,0,0},
-        {"share_param",MEM_TYPE_RAM,SYS_SHAREPRM_IDX,0,0,0,0},        
-    },
-    {
-        {"run_iflash",MEM_TYPE_ROM,0,0,0,0,0,0},
-        {"run_iram",MEM_TYPE_RAM,0,0,0,0,0,0},
-    }
-};
-
+mem_map_s g_memmap;
 char *g_reg_name[] = 
 {
     "boot_program",
@@ -135,11 +114,12 @@ static uint32_t alloc_region(region_s * reg,uint32_t *base,uint32_t size)
 	return size;
 }
 
-#define SET_REG(reg,idx,base,head) do{\
+#define SET_REG(reg,idx,base,head,memtype) do{\
                     reg.regname = g_reg_name[idx];\
                     reg.idx = head##_IDX;\
                     reg.addr = (base[head##_IDX]) + head##_ADDR;\
                     reg.size = head##_SIZE;\
+                    reg.type = MEM_TYPE_##memtype;\
                     idx ++;\
                     }while(0)
 int32_t mem_region_init(void)
@@ -158,20 +138,20 @@ int32_t mem_region_init(void)
         rombase[i] = get_rom_base(i);
     }
 #if 1
-	SET_REG(map->rom.boot_program,index,rombase,BOOT_PROGRAM);    
-	SET_REG(map->rom.boot_param1,index,rombase,BOOT_PARAM1);
-	SET_REG(map->rom.boot_param2,index,rombase,BOOT_PARAM2);
-	SET_REG(map->rom.sys_program1,index,rombase,SYS_PROGRAM1);
-	SET_REG(map->rom.sys_program2,index,rombase,SYS_PROGRAM2);
-	SET_REG(map->rom.sys_param,index,rombase,SYS_PARAM);   
-	SET_REG(map->rom.rom_fs,index,rombase,SYS_ROMFS);   
+	SET_REG(map->rom.boot_program,index,rombase,BOOT_PROGRAM,ROM);    
+	SET_REG(map->rom.boot_param1,index,rombase,BOOT_PARAM1,ROM);
+	SET_REG(map->rom.boot_param2,index,rombase,BOOT_PARAM2,ROM);
+	SET_REG(map->rom.sys_program1,index,rombase,SYS_PROGRAM1,ROM);
+	SET_REG(map->rom.sys_program2,index,rombase,SYS_PROGRAM2,ROM);
+	SET_REG(map->rom.sys_param,index,rombase,SYS_PARAM,ROM);   
+	SET_REG(map->rom.rom_fs,index,rombase,SYS_ROMFS,ROM);   
     
-	SET_REG(map->ram.data_ram,index,rambase,DATA_RAM);
-	SET_REG(map->ram.load_buffer,index,rambase,SYS_LOADBUF);
-	SET_REG(map->ram.share_param,index,rambase,SYS_SHAREPRM);
+	SET_REG(map->ram.data_ram,index,rambase,DATA_RAM,RAM);
+	SET_REG(map->ram.load_buffer,index,rambase,SYS_LOADBUF,RAM);
+	SET_REG(map->ram.share_param,index,rambase,SYS_SHAREPRM,RAM);
 
-    SET_REG(map->run.flash,index,rombase,SYS_ROMRUN);
-	SET_REG(map->run.ram,index,rambase,SYS_RAMRUN);
+    SET_REG(map->run.flash,index,rombase,SYS_ROMRUN,ROM);
+	SET_REG(map->run.ram,index,rambase,SYS_RAMRUN,RAM);
     
 #else
     alloc_region(&map->rom.boot_program,rombase,BOOT_PROGRAM_SIZE);    
@@ -185,8 +165,8 @@ int32_t mem_region_init(void)
     alloc_region(&map->ram.load_buffer,rambase,SYS_LOADBUF_SIZE);
     alloc_region(&map->ram.share_param,rambase,SYS_SHAREPRM_SIZE);
 #endif
-    copy_region_info(&map->rom.sys_program1,&map->run.flash);
-    map->run.flash.size = map->rom.sys_program1.size;
+    //copy_region_info(&map->rom.sys_program1,&map->run.flash);
+    //map->run.flash.size = map->rom.sys_program1.size;
 	return 0;
 }
 
@@ -366,6 +346,7 @@ void copy_region_info(region_s *src,region_s *dest)
     dest->type = src->type;
     dest->index = src->index;
     dest->addr = src->addr;
+    dest->size = src->size;
     dest->datalen = src->datalen;
     dest->crc = src->crc;
     dest->status = src->status;
