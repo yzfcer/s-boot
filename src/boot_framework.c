@@ -170,10 +170,10 @@ static int32_t  boot_upgrade_check(void)
     
     sys_notice("handling upgrade event,please wait...");
     
-    img.regname = bp->mem_map.ram.upgrade_buffer.regname;
-    img.maxlen = bp->mem_map.ram.upgrade_buffer.maxlen;
+    img.regname = bp->mem_map.ram.load_buffer.regname;
+    img.size = bp->mem_map.ram.load_buffer.size;
     img.addr = g_upgrade_status.addr;
-    img.lenth = g_upgrade_status.lenth;
+    img.datalen = g_upgrade_status.datalen;
     img.type = (memtype_e)g_upgrade_status.mem_type;
 
     ret = check_img_valid(&img);
@@ -289,7 +289,7 @@ static int32_t boot_load_app(void)
         go_to_next_step();
         return 0;
     }
-    if(bp->mem_map.rom.sys_program1.lenth <= 0)
+    if(bp->mem_map.rom.sys_program1.datalen <= 0)
     {
         sys_notice("program is NOT existing.");
         set_boot_status(BOOT_MENU_LIST);
@@ -340,22 +340,22 @@ static int32_t boot_set_app_param(void)
     
     sp_set_app_rollback(1);
     
-    g_upgrade_status.addr = bp->mem_map.ram.upgrade_buffer.addr;
+    g_upgrade_status.addr = bp->mem_map.ram.load_buffer.addr;
     g_upgrade_status.flag = 0;
-    g_upgrade_status.lenth = bp->mem_map.ram.upgrade_buffer.maxlen;
-    g_upgrade_status.mem_type = bp->mem_map.ram.upgrade_buffer.type;
+    g_upgrade_status.datalen = bp->mem_map.ram.load_buffer.size;
+    g_upgrade_status.mem_type = bp->mem_map.ram.load_buffer.type;
     sp_set_upgrade_param(&g_upgrade_status);
     sp_get_upgrade_param(&g_upgrade_status);
     sys_printf("set upgrade params:\r\n");
     sys_printf("addr:0x%x\r\n",g_upgrade_status.addr);
-    sys_printf("lenth:0x%x\r\n",g_upgrade_status.lenth);
+    sys_printf("lenth:0x%x\r\n",g_upgrade_status.datalen);
 
     g_reserve_reg.addr = bp->mem_map.rom.sys_param.addr;
-    g_reserve_reg.lenth = bp->mem_map.rom.sys_param.maxlen;
+    g_reserve_reg.size = bp->mem_map.rom.sys_param.size;
     g_reserve_reg.mem_type = bp->mem_map.rom.sys_param.type;
     sys_printf("set reserve region params:\r\n");
     sys_printf("addr:0x%x\r\n",g_reserve_reg.addr);
-    sys_printf("lenth:0x%x\r\n",g_reserve_reg.lenth);
+    sys_printf("lenth:0x%x\r\n",g_reserve_reg.size);
     sp_set_reserve_param(&g_reserve_reg);
     
     sp_set_mem_status(&g_memstatus);

@@ -24,17 +24,18 @@ extern "C" {
 mem_map_s g_memmap = 
 {
     {
-        {"boot_program",MEM_TYPE_ROM,BOOTLOADER_IDX,0,0,0,0,0},
-        {"boot_param1",MEM_TYPE_ROM,PARAM1_IDX,0,0,0,0,0},
-        {"boot_param2",MEM_TYPE_ROM,PARAM2_IDX,0,0,0,0,0},
-        {"sys_program1",MEM_TYPE_ROM,PROGRAM1_IDX,0,0,0,0,0},
-        {"sys_program2",MEM_TYPE_ROM,PROGRAM2_IDX,0,0,0,0,0},
-        {"sys_param",MEM_TYPE_ROM,RESERVED_IDX,0,0,0,0,0}
+        {"boot_program",MEM_TYPE_ROM,BOOT_PROGRAM_IDX,BOOT_PROGRAM_ADDR,BOOT_PROGRAM_SIZE,0,0,0},
+        {"boot_param1",MEM_TYPE_ROM,BOOT_PARAM1_IDX,BOOT_PARAM1_ADDR,BOOT_PARAM1_SIZE,0,0,0},
+        {"boot_param2",MEM_TYPE_ROM,BOOT_PARAM2_IDX,BOOT_PARAM2_ADDR,BOOT_PARAM2_SIZE,0,0,0},
+        {"sys_program1",MEM_TYPE_ROM,SYS_PROGRAM1_IDX,SYS_PROGRAM1_ADDR,SYS_PROGRAM1_SIZE,0,0,0},
+        {"sys_program2",MEM_TYPE_ROM,SYS_PROGRAM2_IDX,0,0,0,0,0},
+        {"sys_param",MEM_TYPE_ROM,SYS_PARAM_IDX,0,0,0,0,0},
+        {"sys_romfs",MEM_TYPE_ROM,SYS_ROMFS_IDX,0,0,0,0,0}
     },
     {
-        {"boot_ram",MEM_TYPE_RAM,0,0,0,0,0,0},
-        {"upgrade_buffer",MEM_TYPE_RAM,0,0,0,0,0,0},
-        {"share_param",MEM_TYPE_RAM,0,0,0,0,0}
+        {"data_ram",MEM_TYPE_RAM,DATA_RAM_IDX,0,0,0,0,0},
+        {"load_buffer",MEM_TYPE_RAM,SYS_LOADBUF_IDX,0,0,0,0,0},
+        {"share_param",MEM_TYPE_RAM,SYS_SHAREPRM_IDX,0,0,0,0},        
     },
     {
         {"run_iflash",MEM_TYPE_ROM,0,0,0,0,0,0},
@@ -50,9 +51,12 @@ char *g_reg_name[] =
     "sys_program1",
     "sys_program2",
     "sys_param",
-    "boot_ram",
-    "upgrade_buffer",
+    "sys_romfs",
+    
+    "data_ram",
+    "load_buffer",
     "share_param",
+    
     "run_ifalsh",
     "run_iram",
 };
@@ -95,14 +99,14 @@ static int32_t check_region_conflict(region_s *reg1,region_s *reg2)
     }
     else if(reg1->addr < reg2->addr)
     {
-        if(reg1->addr + reg1->maxlen > reg2->addr)
+        if(reg1->addr + reg1->size > reg2->addr)
         {
             return -1;
         }
     }
     else if(reg2->addr < reg1->addr)
     {
-        if(reg2->addr + reg2->maxlen > reg1->addr)
+        if(reg2->addr + reg2->size > reg1->addr)
         {
             return -1;
         }
@@ -110,14 +114,6 @@ static int32_t check_region_conflict(region_s *reg1,region_s *reg2)
     return 0;
 }
 
-static uint32_t alloc_region(region_s * reg,uint32_t *base,uint32_t size)
-{
-    uint32_t idx = reg->index;
-	reg->addr = base[idx];
-	reg->maxlen = size;
-    base[idx] += size;
-	return size;
-}
 
 void init_map_info(mem_map_s *map)
 {
@@ -126,14 +122,30 @@ void init_map_info(mem_map_s *map)
     for(i = 0;i < sizeof(mem_map_s)/sizeof(region_s);i ++)
     {
         rg[i].crc = 0xffffff;
-        rg[i].lenth = 0;
+        rg[i].datalen = 0;
         rg[i].status = MEM_NULL;
     }
 }
 
+static uint32_t alloc_region(region_s * reg,uint32_t *base,uint32_t size)
+{
+    uint32_t idx = reg->index;
+	reg->addr = base[idx]+reg->addr;
+	reg->size = size;
+	return size;
+}
+
+#define SET_REG(reg,idx,base,head) do{\
+                    reg.regname = g_reg_name[idx];\
+                    reg.idx = head##_IDX;\
+                    reg.addr = (base[head##_IDX]) + head##_ADDR;\
+                    reg.size = head##_SIZE;\
+                    idx ++;\
+                    }while(0)
 int32_t mem_region_init(void)
 {
     int i;
+    int index = 0;
     uint32_t rambase[RAM_COUNT];
     uint32_t rombase[ROM_COUNT];
 	mem_map_s *map = &g_memmap;
@@ -145,19 +157,36 @@ int32_t mem_region_init(void)
     {
         rombase[i] = get_rom_base(i);
     }
-
-	alloc_region(&map->rom.boot_program,rombase,BOOTLOADER_LENTH);    
-	alloc_region(&map->rom.boot_param1,rombase,PARAM_LENTH);
-	alloc_region(&map->rom.boot_param2,rombase,PARAM_LENTH);
-	alloc_region(&map->rom.sys_program1,rombase,PROGRAM_LENTH);
-	alloc_region(&map->rom.sys_program2,rombase,PROGRAM_LENTH);
-	alloc_region(&map->rom.sys_param,rombase,RESERVED_LENTH);   
+#if 1
+	SET_REG(map->rom.boot_program,index,rombase,BOOT_PROGRAM);    
+	SET_REG(map->rom.boot_param1,index,rombase,BOOT_PARAM1);
+	SET_REG(map->rom.boot_param2,index,rombase,BOOT_PARAM2);
+	SET_REG(map->rom.sys_program1,index,rombase,SYS_PROGRAM1);
+	SET_REG(map->rom.sys_program2,index,rombase,SYS_PROGRAM2);
+	SET_REG(map->rom.sys_param,index,rombase,SYS_PARAM);   
+	SET_REG(map->rom.rom_fs,index,rombase,SYS_ROMFS);   
     
-	alloc_region(&map->ram.boot_ram,rambase,BOOTRAM_LENTH);
-	alloc_region(&map->ram.upgrade_buffer,rambase,PROGRAMBUF_LENTH);
-	alloc_region(&map->ram.share_param,rambase,SHARE_PARAM_LENTH);
+	SET_REG(map->ram.data_ram,index,rambase,DATA_RAM);
+	SET_REG(map->ram.load_buffer,index,rambase,SYS_LOADBUF);
+	SET_REG(map->ram.share_param,index,rambase,SYS_SHAREPRM);
+
+    SET_REG(map->run.flash,index,rombase,SYS_ROMRUN);
+	SET_REG(map->run.ram,index,rambase,SYS_RAMRUN);
+    
+#else
+    alloc_region(&map->rom.boot_program,rombase,BOOT_PROGRAM_SIZE);    
+    alloc_region(&map->rom.boot_param1,rombase,BOOT_PARAM1_SIZE);
+    alloc_region(&map->rom.boot_param2,rombase,BOOT_PARAM2_SIZE);
+    alloc_region(&map->rom.sys_program1,rombase,SYS_PROGRAM1_SIZE);
+    alloc_region(&map->rom.sys_program2,rombase,SYS_PROGRAM2_SIZE);
+    alloc_region(&map->rom.sys_param,rombase,SYS_SHAREPRM_SIZE);   
+
+    alloc_region(&map->ram.data_ram,rambase,DATA_RAM_SIZE);
+    alloc_region(&map->ram.load_buffer,rambase,SYS_LOADBUF_SIZE);
+    alloc_region(&map->ram.share_param,rambase,SYS_SHAREPRM_SIZE);
+#endif
     copy_region_info(&map->rom.sys_program1,&map->run.flash);
-    map->run.flash.maxlen = map->rom.sys_program1.maxlen;
+    map->run.flash.size = map->rom.sys_program1.size;
 	return 0;
 }
 
@@ -283,7 +312,7 @@ int32_t check_map_valid(void)
         sys_warn("check running space type error.");
         return -1;
     }
-    if(check_probuf_and_running(&map->ram.upgrade_buffer,&map->run.flash))
+    if(check_probuf_and_running(&map->ram.load_buffer,&map->run.flash))
     {
         sys_warn("program buffer and running space conflict.");
         return -1;
@@ -296,11 +325,11 @@ int32_t check_map_valid(void)
 void print_map_info(mem_map_s *map)
 {
 #define REGION_FORMAT "%-15s%-8d0x%-12x0x%-12x%s\r\n" 
-#define REGION_PARAM(reg) (reg)->regname,(reg)->index,(reg)->addr,(reg)->maxlen,memtype_name((reg)->type)
+#define REGION_PARAM(reg) (reg)->regname,(reg)->index,(reg)->addr,(reg)->size,memtype_name((reg)->type)
     int32_t i;
     region_s *reg;
     sys_printf("memory map as following:\r\n");
-    sys_printf("%-15s%-8s%-14s%-14s%-12s\r\n","region","memidx","addr","maxlen","type");
+    sys_printf("%-15s%-8s%-14s%-14s%-12s\r\n","region","memidx","addr","size","type");
     reg = (region_s*)&map->rom;
     for(i = 0;i < sizeof(map->rom)/sizeof(region_s);i ++)
     {
@@ -323,9 +352,9 @@ void print_map_info(mem_map_s *map)
 void print_program_space(mem_map_s *map)
 {
 #define REGION_FORMAT1 "%-15s%-8d0x%-10x0x%-9x0x%-9x%-9s%4d%%\r\n" 
-#define REGION_PARAM1(reg) (reg)->regname,(reg)->index,(reg)->addr,(reg)->maxlen,\
-                        (reg)->lenth,memtype_name((reg)->type),(reg)->maxlen?((reg)->lenth*100)/(reg)->maxlen:0
-        sys_printf("%-15s%-8s%-12s%-11s%-11s%-9s%-8s\r\n","region","memidx","addr","maxlen","lenth","type","usage");
+#define REGION_PARAM1(reg) (reg)->regname,(reg)->index,(reg)->addr,(reg)->size,\
+                        (reg)->datalen,memtype_name((reg)->type),(reg)->size?((reg)->datalen*100)/(reg)->size:0
+        sys_printf("%-15s%-8s%-12s%-11s%-11s%-9s%-8s\r\n","region","memidx","addr","size","datalen","type","usage");
         sys_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.sys_program1));
         sys_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.sys_program2));
         sys_printf(REGION_FORMAT1,REGION_PARAM1(&map->run.flash));
@@ -337,7 +366,7 @@ void copy_region_info(region_s *src,region_s *dest)
     dest->type = src->type;
     dest->index = src->index;
     dest->addr = src->addr;
-    dest->lenth = src->lenth;
+    dest->datalen = src->datalen;
     dest->crc = src->crc;
     dest->status = src->status;
 }

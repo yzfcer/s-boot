@@ -78,7 +78,7 @@ static void download_img_to_ram(void)
 {
     int32_t ret;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
-    if(bp->mem_map.run.ram.maxlen <= 0)
+    if(bp->mem_map.run.ram.size <= 0)
     {
         sys_warn("img can not download to RAM,device NOT support.");
         return;

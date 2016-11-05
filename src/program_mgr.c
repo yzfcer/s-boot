@@ -89,7 +89,7 @@ static uint32_t calc_img_crc(region_s *img)
     img_head_s *head;
 	head = (img_head_s*)img->addr;
     return calc_crc32((uint8_t *)(img->addr+head->head_len),
-                        img->lenth-head->head_len,0xffffffff);
+                        img->datalen-head->head_len,0xffffffff);
 }
 
 
@@ -152,18 +152,18 @@ int decrypt_img_data(region_s *img,region_s *bin)
     copy_region_info(img,bin);
 	head = (img_head_s*)bin->addr;
     bin->addr += head->head_len;
-    bin->maxlen = img->maxlen - head->head_len;
+    bin->size = img->size - head->head_len;
     sys_notice("decrypt img file...");
-    sys_debug("decrypt_data base:0x%x,lenth:%d",bin->addr,bin->lenth);
-	len = decrypt_data(head->encry_type,(uint8_t *)bin->addr,img->lenth);
+    sys_debug("decrypt_data base:0x%x,lenth:%d",bin->addr,bin->datalen);
+	len = decrypt_data(head->encry_type,(uint8_t *)bin->addr,img->datalen);
     if(len < 0)
     {
         sys_warn("decrypt img file failed.");
         return -1;
     }
-    bin->lenth = len;
+    bin->datalen = len;
     
-    bin->crc = calc_crc32((uint8_t *)bin->addr,bin->lenth,0xffffffff);
+    bin->crc = calc_crc32((uint8_t *)bin->addr,bin->datalen,0xffffffff);
     feed_watchdog();
     sys_notice("decrypt img file OK.");
     return 0;
@@ -222,20 +222,20 @@ int32_t copy_region_data(region_s *src,region_s *dest)
     uint32_t addr;
     uint8_t *buff = get_block_buffer();
 
-    if(0 >= src->lenth)
+    if(0 >= src->datalen)
         return 0;
-    if(dest->maxlen < src->lenth)
+    if(dest->size < src->datalen)
     {
         sys_warn("space is NOT enough.");
         return -1;
     }
     sys_notice("copy data from \"%s\" to \"%s\" lenth %d.",
-                src->regname,dest->regname,src->lenth);
+                src->regname,dest->regname,src->datalen);
     sys_debug("source type %s,addr 0x%x,lenth %d dest type,%s,addr 0x%x,lenth %d.",
-                memtype_name(src->type),src->addr,src->lenth,
-                memtype_name(dest->type),dest->addr,dest->maxlen);
+                memtype_name(src->type),src->addr,src->datalen,
+                memtype_name(dest->type),dest->addr,dest->size);
     
-    blocks = (src->lenth + BLOCK_SIZE - 1) / BLOCK_SIZE;
+    blocks = (src->datalen + BLOCK_SIZE - 1) / BLOCK_SIZE;
     sys_printf("complete:");
     print32_t_copy_percents(0,1,0);
     for(i = 0;i < blocks;i ++)
@@ -278,7 +278,7 @@ int32_t copy_region_data(region_s *src,region_s *dest)
     print32_t_copy_percents(i,blocks,1);
     sys_printf("\r\n");
 
-    dest->lenth = src->lenth;
+    dest->datalen = src->datalen;
     dest->crc = src->crc;
     dest->status = MEM_NORMAL;
 
@@ -339,12 +339,12 @@ int32_t roll_back_program(void)
     {
         bp->mem_map.run.flash.status = MEM_NORMAL;
         bp->mem_map.run.flash.crc = src->crc;
-        bp->mem_map.run.flash.lenth= src->lenth;
+        bp->mem_map.run.flash.datalen= src->datalen;
     }
     else
     {
-        copy_region_data(src,&bp->mem_map.ram.upgrade_buffer);
-        src = &bp->mem_map.ram.upgrade_buffer;
+        copy_region_data(src,&bp->mem_map.ram.load_buffer);
+        src = &bp->mem_map.ram.load_buffer;
         decrypt_img_data(src,&bin);
         ret = copy_region_data(&bin,&bp->mem_map.run.flash);
         if(0 != ret)
@@ -395,7 +395,7 @@ int32_t flush_img_to_rom(region_s *img)
         }
         bp->mem_map.run.flash.status = MEM_NORMAL;
         bp->mem_map.run.flash.crc = bin.crc;
-        bp->mem_map.run.flash.lenth= bin.lenth;
+        bp->mem_map.run.flash.datalen= bin.datalen;
         param_flush();
         return 0;
     }
@@ -458,17 +458,17 @@ int32_t download_img_file(memtype_e type)
         sys_notice("device can NOT download in debug mode ,set it to normal mode first");
         return -1;
     }
-    img = &bp->mem_map.ram.upgrade_buffer;
+    img = &bp->mem_map.ram.load_buffer;
     sys_printf("begin to receive file data,please wait.\r\n");
-    len = boot_receive_img(img->addr,img->maxlen);
+    len = boot_receive_img(img->addr,img->size);
     if(len <= 0)
     {
         sys_error("receive img data failed.");
         return -1;
     }
 
-    img->lenth = (uint32_t)len;
-    sys_notice("img file lenth:%d",img->lenth);
+    img->datalen = (uint32_t)len;
+    sys_notice("img file lenth:%d",img->datalen);
     ret = check_img_valid(img);
     if(ret != 0)
     {
@@ -502,8 +502,8 @@ int32_t clean_program(void)
     
     for(i = 0;i < 5;i ++)
     {
-        sys_notice("erase base 0x%x,lenth %d.",code[i]->addr,code[i]->lenth);
-        blocknum = (code[i]->lenth + BLOCK_SIZE - 1) / BLOCK_SIZE;
+        sys_notice("erase base 0x%x,lenth %d.",code[i]->addr,code[i]->datalen);
+        blocknum = (code[i]->datalen + BLOCK_SIZE - 1) / BLOCK_SIZE;
         erase_block(code[i]->type,code[i]->index,code[i]->addr,blocknum);
     }
     sys_printf("clear program OK.\r\n");

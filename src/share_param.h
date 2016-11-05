@@ -33,14 +33,14 @@ typedef struct
     uint32_t flag;//升级标志
     uint32_t mem_type;//升级程序的介质类型
     uint32_t addr;//升级程序的地址
-    uint32_t lenth;// 升级程序的长度
+    uint32_t datalen;// 升级程序的长度
 }upgrade_region_s;
 
 //保留空间参数区
 typedef struct
 {
     uint32_t addr;//保留空间的地址
-    uint32_t lenth;//保留空间的长度
+    uint32_t size;//保留空间的长度
     uint32_t mem_type;//保留空间的类型
     uint32_t pad;
 }reserve_region_s;

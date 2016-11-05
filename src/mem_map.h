@@ -44,8 +44,8 @@ typedef struct __region
     memtype_e type; 
     uint32_t index;
     uint32_t addr;
-    uint32_t maxlen;
-    uint32_t lenth;
+    uint32_t size;
+    uint32_t datalen;
     uint32_t crc;
     uint32_t status; 
 }region_s;
@@ -58,12 +58,13 @@ typedef struct __ROM_map_s
     region_s sys_program1;//第一份程序代码区
     region_s sys_program2;//第二份程序代码区
     region_s sys_param;//为加载的系统保留的参数区
+    region_s rom_fs;//文件系统
 }rom_map_s;
 
 typedef struct __RAM_map_s
 {
-    region_s boot_ram;//bootloader运行使用的内存区
-    region_s upgrade_buffer;//程序下载的内存区
+    region_s data_ram;//bootloader运行使用的内存区
+    region_s load_buffer;//程序下载的内存区
     region_s share_param;//bootloader与应用程序的参数交换区
 }ram_map_s;
 

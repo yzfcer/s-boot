@@ -35,7 +35,7 @@ int32_t repair_rom_space(region_s *src,region_s *dest)
     if(ret != 0)
     {
         sys_error("repir space %s base 0x%x,lenth %d failed.",
-                    memtype_name(dest->type),dest->addr,dest->maxlen);
+                    memtype_name(dest->type),dest->addr,dest->size);
         return -1;
     }
     return 0;
@@ -64,8 +64,8 @@ int32_t repair_running_space(void)
     {
         //如果不是同一块sys_program1与运行区不是同一块，则数据需要先解密
         sys_notice("repair program from \"%s\" to \"%s\"",src->regname,dest->regname);
-        copy_region_data(src,&bp->mem_map.ram.upgrade_buffer);
-        src = &bp->mem_map.ram.upgrade_buffer;
+        copy_region_data(src,&bp->mem_map.ram.load_buffer);
+        src = &bp->mem_map.ram.load_buffer;
         if((bp->mem_map.rom.sys_program1.type != bp->mem_map.run.flash.type) ||
             (bp->mem_map.rom.sys_program1.index != bp->mem_map.run.flash.index) ||
             (bp->mem_map.rom.sys_program1.addr != bp->mem_map.run.flash.addr))
@@ -75,7 +75,7 @@ int32_t repair_running_space(void)
         else
         {
             copy_region_info(src,&bin);
-            bin.maxlen = src->maxlen;
+            bin.size = src->size;
         }
         ret = repair_rom_space(&bin,dest);
     }
@@ -106,7 +106,7 @@ static int32_t repair_program(boot_param_s *bp)
         else
         {
             bp->mem_map.rom.sys_program1.addr = bp->mem_map.run.flash.addr;
-            bp->mem_map.rom.sys_program1.lenth = bp->mem_map.run.flash.lenth;
+            bp->mem_map.rom.sys_program1.datalen = bp->mem_map.run.flash.datalen;
             bp->mem_map.rom.sys_program1.crc = bp->mem_map.run.flash.crc;
             bp->mem_map.rom.sys_program1.status = MEM_NORMAL;
         }
@@ -137,14 +137,14 @@ int32_t check_rom_program(region_s *code)
     if(prog.status == MEM_NULL)
     {
         sys_notice("region \"%s\" type %s base 0x%x lenth %d is empty.",
-                    prog.regname,memtype_name(prog.type),prog.addr,prog.lenth);
+                    prog.regname,memtype_name(prog.type),prog.addr,prog.datalen);
         return 0;
     }
     
     if(prog.status != MEM_ERROR)
     {
-        sys_debug("check program base 0x%x,lenth %d",prog.addr,prog.lenth);
-        blocks = (prog.lenth + BLOCK_SIZE - 1) / BLOCK_SIZE;
+        sys_debug("check program base 0x%x,lenth %d",prog.addr,prog.datalen);
+        blocks = (prog.datalen + BLOCK_SIZE - 1) / BLOCK_SIZE;
         for(i = 0;i < blocks;i ++)
         {
             base = prog.addr + i * BLOCK_SIZE;
@@ -155,7 +155,7 @@ int32_t check_rom_program(region_s *code)
                             memtype_name(prog.type),base,BLOCK_SIZE);
                 return -1;
             }
-            len = (i == blocks - 1)?prog.lenth - i * BLOCK_SIZE:BLOCK_SIZE;
+            len = (i == blocks - 1)?prog.datalen - i * BLOCK_SIZE:BLOCK_SIZE;
             if(i == 0)
             {
                 head = (img_head_s*)buff;
@@ -176,7 +176,7 @@ int32_t check_rom_program(region_s *code)
     if(MEM_ERROR == prog.status || cal_crc != prog.crc)
     {
         sys_warn("check program CRC in %s base 0x%x,lenth %d failed.",
-                    memtype_name(prog.type),prog.addr,prog.lenth);
+                    memtype_name(prog.type),prog.addr,prog.datalen);
         sys_debug("cal_crc:0x%x,crc:0x%x",cal_crc,prog.crc);
         code->status = MEM_ERROR;
         return -1;
@@ -209,7 +209,7 @@ int32_t check_rom_programs(void)
         {
             
             sys_warn("check program CRC in %s base 0x%x,lenth %d failed.",
-                        memtype_name(code[i]->type),code[i]->addr,code[i]->lenth);
+                        memtype_name(code[i]->type),code[i]->addr,code[i]->datalen);
             ret= 1;
         }
     }

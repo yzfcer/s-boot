@@ -24,7 +24,7 @@ extern "C" {
 
 
 boot_param_s *g_pbp = NULL;
-static uint8_t g_bootparam[PARAM_LENTH];
+static uint8_t g_bootparam[BOOT_PARAM1_SIZE];
 
 static void init_reg_name(boot_param_s *bp)
 {
@@ -187,8 +187,8 @@ int32_t param_flush(void)
     reg[0] = &map->rom.boot_param1;
     reg[1] = &map->rom.boot_param2;
     
-    bp->mem_map.rom.boot_param1.lenth = sizeof(boot_param_s);
-    bp->mem_map.rom.boot_param2.lenth = sizeof(boot_param_s);    
+    bp->mem_map.rom.boot_param1.datalen = sizeof(boot_param_s);
+    bp->mem_map.rom.boot_param2.datalen = sizeof(boot_param_s);    
     upate_bootparam_crc((uint8_t*)bp);
     for(i = 0;i < 2;i ++)
     {
