@@ -77,7 +77,6 @@ static int32_t boot_app_debug_check(void)
 static int32_t boot_first_check(void)
 {
     int32_t ret;
-    mem_map_s *map;
     boot_param_s *bp;
     sys_notice("begin to check first running time...");
     bp = (boot_param_s *)get_boot_params();
@@ -88,9 +87,7 @@ static int32_t boot_first_check(void)
         return 0;
     }
     sys_notice("NO valid boot params found.");
-    map = get_memory_map();
-    print_map_info(map);
-    param_init(map);
+    param_init();
     ret = param_flush();
     if(0 != ret)
     {

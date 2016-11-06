@@ -77,11 +77,13 @@ void *get_boot_params_from_ROM(void)
 }
 
 
-void param_init(const mem_map_s *mmap)
+void param_init(void)
 {
     int32_t i;
     char *src,*dest;
+    mem_map_s *map = get_memory_map();
     boot_param_s *bp = (boot_param_s*)g_bootparam;
+    print_map_info(map);
     bp->magic = BOOT_PARAM_MAGIC;
     bp->lenth = sizeof(boot_param_s);
 
@@ -92,7 +94,7 @@ void param_init(const mem_map_s *mmap)
     bp->encrypt_type = ENCRYPT_TYPE;
     bp->lock_en = MCU_LOCK_ENABLE;
     
-    src = (char*)mmap;
+    src = (char*)map;
     dest = (char*)&bp->mem_map;
     for(i = 0;i < sizeof(mem_map_s);i ++)
     {

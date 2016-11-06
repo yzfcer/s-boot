@@ -34,7 +34,7 @@ typedef struct
     uint8_t wait_sec;   //等待键盘事件秒数
     uint8_t run_type;   //运行在RAM或Flash
     uint8_t encrypt_type;//程序加密使能
-    bool_t lock_en;     //芯片锁定使能
+    uint8_t lock_en;     //芯片锁定使能
     
     mem_map_s mem_map;//系统的空间映射表
 }boot_param_s;
@@ -42,7 +42,7 @@ typedef struct
 void *get_boot_params(void);
 void *get_boot_params_from_ROM(void);
 
-void param_init(const mem_map_s *mmap);
+void param_init(void);
 int32_t param_check_valid(uint8_t *prmbuf);
 int32_t param_check_debug_mode(void);
 void    param_clear_buffer(void);

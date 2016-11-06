@@ -183,10 +183,8 @@ void bootloader_test(void)
 
 static void do_clear_flash_data(uint8_t unlock)
 {
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
     clean_program();
-    
-    param_init(&bp->mem_map);
+    param_init();
     (void)param_flush();
     
     param_clear_buffer();
@@ -196,7 +194,7 @@ static void do_clear_flash_data(uint8_t unlock)
 
 static void clear_boot_param(void)
 {
-    if(make_sure_input("Are you sure to unlock MCU"))
+    if(make_sure_input("Are you sure to clear params"))
         do_clear_flash_data(0);
     sys_printf("clear boot param complete.\r\n");
 }
