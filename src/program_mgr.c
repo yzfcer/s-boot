@@ -84,24 +84,6 @@ static int head_endian_convert(img_head_s *head)
     return -1;        
 }
 
-static uint32_t calc_img_crc(region_s *img)
-{
-    img_head_s *head;
-	head = (img_head_s*)img->addr;
-    return calc_crc32((uint8_t *)(img->addr+head->head_len),
-                        img->datalen-head->head_len,0xffffffff);
-}
-
-
-void convert_uint32_to_byte(uint8_t *buf,int32_t index,uint32_t va)
-{
-    int32_t i;
-    for(i = 0;i < 4;i ++)
-    {
-        buf[i + index] = (uint8_t)(va >> (i*8));
-    }
-}
-
 int memory_compare(uint8_t *dest,uint8_t *src,int len)
 {
     int i;
@@ -288,24 +270,6 @@ int32_t copy_region_data(region_s *src,region_s *dest)
 }
 
 
-int32_t flush_img_to_ram(region_s *img)
-{
-    int32_t ret;
-    region_s bin;
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
-    decrypt_img_data(img,&bin);
-    //这里需要修改，不能直接使用img，因为会修改程序缓存的起始地址，
-    //另外需要重新考虑程序运行在RAM中间时，程序因该怎样存储
-    
-    sys_notice("begin to copy code to memory...");
-    ret = copy_region_data(&bin,&bp->mem_map.run.ram);
-    if(0 != ret)
-    {
-        sys_warn("copy img to running space failed.");
-        return -1;
-    }
-    return 0;
-}
 
 static bool_t region_equal(region_s *src,region_s *dest)
 {
@@ -358,6 +322,26 @@ int32_t roll_back_program(void)
     return 0;
 }
 
+int32_t flush_img_to_ram(region_s *img)
+{
+    int32_t ret;
+    region_s bin;
+    boot_param_s *bp = (boot_param_s*)get_boot_params();
+    decrypt_img_data(img,&bin);
+    //这里需要修改，不能直接使用img，因为会修改程序缓存的起始地址，
+    //另外需要重新考虑程序运行在RAM中间时，程序因该怎样存储
+    
+    sys_notice("begin to copy code to memory...");
+    ret = copy_region_data(&bin,&bp->mem_map.run.ram);
+    if(0 != ret)
+    {
+        sys_warn("copy img to running space failed.");
+        return -1;
+    }
+    return 0;
+}
+
+
 //先备份原来的程序，再烧录新程序到sys_program1和运行区
 int32_t flush_img_to_rom(region_s *img)
 {
@@ -378,7 +362,6 @@ int32_t flush_img_to_rom(region_s *img)
         return -1;
     }
     
-
     head = (img_head_s*)img->addr;
     src = &bp->mem_map.rom.sys_program1;
     dest = &bp->mem_map.run.flash;
@@ -421,7 +404,7 @@ int32_t flush_img_to_rom(region_s *img)
 }
 
 
-int32_t flush_code_data(memtype_e type,region_s *img)
+int32_t flush_img_file(memtype_e type,region_s *img)
 {
     int32_t ret;   
     switch(type)
@@ -476,7 +459,7 @@ int32_t download_img_file(memtype_e type)
         sys_error("check img file ERROR");
         return -1; 
     }
-    ret = flush_code_data(type,img);
+    ret = flush_img_file(type,img);
     if(0 != ret)
     {
         sys_warn("flush data to %s failed.",memtype_name(type));

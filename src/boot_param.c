@@ -26,16 +26,6 @@ extern "C" {
 boot_param_s *g_pbp = NULL;
 static uint8_t g_bootparam[BOOT_PARAM1_SIZE];
 
-static void init_reg_name(boot_param_s *bp)
-{
-    int32_t i;
-    region_s *mp = (region_s*)&bp->mem_map;
-    int32_t cnt = (sizeof(boot_param_s)/sizeof(region_s));
-    for(i = 0;i < cnt;i ++)
-    {
-        mp[i].regname = region_name(i);
-    }
-}
 
 static void upate_bootparam_crc(uint8_t *prmbuf)
 {
@@ -63,7 +53,6 @@ void *get_boot_params_from_ROM(void)
         return NULL;
     }
     map = get_memory_map();
-    //init_reg_name((boot_param_s *)&g_bootparam);
     g_pbp = (boot_param_s *)&g_bootparam;
     src = (region_s*)map;
     dest = (region_s*)&g_pbp->mem_map;

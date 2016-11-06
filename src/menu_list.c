@@ -64,6 +64,7 @@ static int32_t make_sure_input(char *info)
             return 0;
     }
 }
+
 int32_t get_menu_go_direction(void)
 {
     return g_go_ahead;
