@@ -46,8 +46,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="aes.cs" />
+    <Compile Include="aes.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Crc32.cs" />
+    <Compile Include="Crypt.cs" />
     <Compile Include="fileinfo.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>

@@ -404,7 +404,6 @@ int DES_encrypt(uint8_t *data,int datalen)
     blocks = ((datalen+7) >> 3); 
     for(i=0;i<blocks;i++)
     {
-        //cleardog();
         idx = (i << 3);
         DES_EncryptBlock(&data[idx],subKeys,cipherBlock);  
         mem_cpy(&data[idx],cipherBlock,8);

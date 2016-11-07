@@ -1,7 +1,7 @@
-﻿#加密方式可选填：none,AES,DES和RC4中的一种，其中选择none表示不加密
+#加密方式可选填：none,AES,DES和RC4中的一种，其中选择none表示不加密
 encrypttype=none
 #加密密钥
-encryptkey=bjbjhgbkhhhfdb
+encryptkey=0x12,0x25,0x38,0x54,0x85,0xa5,0x7c,0x96,0x34,0x57,0xf2,0x39,0xa,0x83,0x98,0x65
 
 
 #打包源文件的在img中的偏移地址和文件的路径
@@ -16,20 +16,16 @@ sourcefile=0x3200,J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\test
 
 outputfile=J:\git_hub_src\s-boot\tools\s-boot-img\boot_img\testfiles\imgfile.none.img
 
+#硬件版本信息
+hardversion=V1.0.0
 #在下面添加CPU架构信息：
 arch=Intel i3
 arch=Cortex-M4
 
-
-
 #在下面添加CPU型号信息：
 cpu=Intel core i3-4170
 cpu=STM32F407ZET6
-
-
 #在下面添加设备板卡信息：
 board=windows simulation
 board=IMT407Z V2.1
-
-
 

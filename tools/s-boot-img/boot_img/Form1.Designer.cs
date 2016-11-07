@@ -35,7 +35,7 @@
             this.cpucomboBox = new System.Windows.Forms.ComboBox();
             this.archcomboBox = new System.Windows.Forms.ComboBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.keytextBox = new System.Windows.Forms.TextBox();
+            this.hardvertextBox = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.encryptcomboBox = new System.Windows.Forms.ComboBox();
             this.label20 = new System.Windows.Forms.Label();
@@ -45,6 +45,8 @@
             this.removebutton = new System.Windows.Forms.Button();
             this.insertbutton = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.offset = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.path = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.outviewbutton = new System.Windows.Forms.Button();
             this.outpathtextBox = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
@@ -58,8 +60,6 @@
             this.savecfgbutton = new System.Windows.Forms.Button();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.info = new System.Windows.Forms.ToolStripStatusLabel();
-            this.offset = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.path = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -124,7 +124,7 @@
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox1.Controls.Add(this.keytextBox);
+            this.groupBox1.Controls.Add(this.hardvertextBox);
             this.groupBox1.Controls.Add(this.label7);
             this.groupBox1.Controls.Add(this.encryptcomboBox);
             this.groupBox1.Controls.Add(this.label20);
@@ -143,15 +143,13 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "产品信息";
             // 
-            // keytextBox
+            // hardvertextBox
             // 
-            this.keytextBox.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.keytextBox.Location = new System.Drawing.Point(419, 81);
-            this.keytextBox.Name = "keytextBox";
-            this.keytextBox.Size = new System.Drawing.Size(210, 21);
-            this.keytextBox.TabIndex = 11;
-            this.keytextBox.UseSystemPasswordChar = true;
-            this.keytextBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.keytextBox_MouseClick);
+            this.hardvertextBox.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.hardvertextBox.Location = new System.Drawing.Point(419, 81);
+            this.hardvertextBox.Name = "hardvertextBox";
+            this.hardvertextBox.Size = new System.Drawing.Size(210, 21);
+            this.hardvertextBox.TabIndex = 11;
             // 
             // label7
             // 
@@ -160,7 +158,7 @@
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(53, 12);
             this.label7.TabIndex = 10;
-            this.label7.Text = "加密密钥";
+            this.label7.Text = "硬件版本";
             // 
             // encryptcomboBox
             // 
@@ -263,6 +261,20 @@
             this.dataGridView1.Size = new System.Drawing.Size(541, 150);
             this.dataGridView1.TabIndex = 33;
             // 
+            // offset
+            // 
+            this.offset.HeaderText = "偏移位置";
+            this.offset.Name = "offset";
+            this.offset.ReadOnly = true;
+            this.offset.Width = 80;
+            // 
+            // path
+            // 
+            this.path.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.path.HeaderText = "文件路径";
+            this.path.Name = "path";
+            this.path.ReadOnly = true;
+            // 
             // outviewbutton
             // 
             this.outviewbutton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -272,7 +284,6 @@
             this.outviewbutton.TabIndex = 32;
             this.outviewbutton.Text = "浏览";
             this.outviewbutton.UseVisualStyleBackColor = true;
-            this.outviewbutton.Click += new System.EventHandler(this.outviewbutton_Click);
             // 
             // outpathtextBox
             // 
@@ -303,7 +314,6 @@
             this.viewbutton.TabIndex = 28;
             this.viewbutton.Text = "浏览";
             this.viewbutton.UseVisualStyleBackColor = true;
-            this.viewbutton.Click += new System.EventHandler(this.viewbutton_Click);
             // 
             // label18
             // 
@@ -387,20 +397,6 @@
             this.info.Size = new System.Drawing.Size(56, 17);
             this.info.Text = "操作消息";
             // 
-            // offset
-            // 
-            this.offset.HeaderText = "偏移位置";
-            this.offset.Name = "offset";
-            this.offset.ReadOnly = true;
-            this.offset.Width = 80;
-            // 
-            // path
-            // 
-            this.path.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.path.HeaderText = "文件路径";
-            this.path.Name = "path";
-            this.path.ReadOnly = true;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -450,7 +446,7 @@
         private System.Windows.Forms.ComboBox encryptcomboBox;
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.Button viewbutton;
-        private System.Windows.Forms.TextBox keytextBox;
+        private System.Windows.Forms.TextBox hardvertextBox;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button outviewbutton;
         private System.Windows.Forms.TextBox outpathtextBox;

@@ -37,6 +37,7 @@ static uint8_t  aes_key[16] = ENCRYPT_KEY;
 void cleardog(void)
 {
 }
+
 static void mem_set(char *dest,char value,int len)
 {
     int i;

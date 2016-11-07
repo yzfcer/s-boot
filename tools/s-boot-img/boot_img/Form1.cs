@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,9 +13,10 @@ namespace boot_img
     {
         byte[] filehead;
         byte[] imgdata;
-        Int32 imglen;//imgæ–‡ä»¶é•¿åº¦
+        Int32 imglen;//imgÎÄ¼ş³¤¶È
         UInt32 filecrc;
         List<fileinfo> listfi;
+        byte[] cryptkey;
 
         public Form1()
         {
@@ -47,7 +48,22 @@ namespace boot_img
                     }
                     else if (strarr[0].CompareTo("encryptkey") == 0)
                     {
-                        keytextBox.Text = strarr[1];
+                        //hardvertextBox.Text = strarr[1];
+                        if (strarr.Length < 17)
+                        {
+                            set_error("ÃÜÂëÖÁÉÙĞèÒª16×Ö½Ú");
+                            sr.Close();
+                            return;
+                        }
+                        cryptkey = new byte[16];
+                        for (int i = 1; i < 17; i++)
+                        {
+                            cryptkey[i-1] = Convert.ToByte(strarr[i],16);
+                        }
+                    }
+                    else if (strarr[0].CompareTo("hardversion") == 0) 
+                    {
+                        hardvertextBox.Text = strarr[1];
                     }
                     else if (strarr[0].CompareTo("encrypttype") == 0)
                     {
@@ -65,8 +81,8 @@ namespace boot_img
                     }
                     else if (strarr[0].CompareTo("sourcefile") == 0)
                     {
-                        this.dataGridView1.Rows.Add(strarr[1],strarr[2]);
-                        
+                        this.dataGridView1.Rows.Add(strarr[1], strarr[2]);
+
                     }
                 }
             }
@@ -77,14 +93,19 @@ namespace boot_img
         {
             string strline = "";
             System.IO.StreamWriter sw = new System.IO.StreamWriter(filename);
-            sw.WriteLine("#åŠ å¯†æ–¹å¼å¯é€‰å¡«ï¼šnone,AES,DESå’ŒRC4ä¸­çš„ä¸€ç§ï¼Œå…¶ä¸­é€‰æ‹©noneè¡¨ç¤ºä¸åŠ å¯†");
+            sw.WriteLine("#¼ÓÃÜ·½Ê½¿ÉÑ¡Ìî£ºnone,AES,DESºÍRC4ÖĞµÄÒ»ÖÖ£¬ÆäÖĞÑ¡Ôñnone±íÊ¾²»¼ÓÃÜ");
             sw.WriteLine("encrypttype="+encryptcomboBox.Text);
-            sw.WriteLine("#åŠ å¯†å¯†é’¥");
-            sw.WriteLine("encryptkey=" + keytextBox.Text);
+            sw.WriteLine("#¼ÓÃÜÃÜÔ¿");
+            string key = "";
+            key += "";
+            for (int i = 0; i < 15; i++)
+                key += "0x"+cryptkey[i].ToString("x")+",";
+            key += "0x" + cryptkey[15].ToString("x");
+            sw.WriteLine("encryptkey=" + key);
             sw.WriteLine();
             sw.WriteLine(strline);
-            sw.WriteLine("#æ‰“åŒ…æºæ–‡ä»¶çš„åœ¨imgä¸­çš„åç§»åœ°å€å’Œæ–‡ä»¶çš„è·¯å¾„");
-            sw.WriteLine("#åç§»ä½ç½®ä»0x200å¼€å§‹,0x200ä¹‹å‰çš„ç©ºé—´ç”¨äºä¿å­˜imgæè¿°ä¿¡æ¯");
+            sw.WriteLine("#´ò°üÔ´ÎÄ¼şµÄÔÚimgÖĞµÄÆ«ÒÆµØÖ·ºÍÎÄ¼şµÄÂ·¾¶");
+            sw.WriteLine("#Æ«ÒÆÎ»ÖÃ´Ó0x200¿ªÊ¼,0x200Ö®Ç°µÄ¿Õ¼äÓÃÓÚ±£´æimgÃèÊöĞÅÏ¢");
             for (int i = 0; i < dataGridView1.Rows.Count; i++)
             {
                 string filestr = "sourcefile="+ dataGridView1.Rows[i].Cells["offset"].Value.ToString();
@@ -97,22 +118,23 @@ namespace boot_img
             sw.WriteLine();
 
 
+            sw.WriteLine("#Ó²¼ş°æ±¾ĞÅÏ¢");
+            sw.WriteLine("hardversion="+hardvertextBox.Text);
 
-
-            sw.WriteLine("#åœ¨ä¸‹é¢æ·»åŠ CPUæ¶æ„ä¿¡æ¯ï¼š");
+            sw.WriteLine("#ÔÚÏÂÃæÌí¼ÓCPU¼Ü¹¹ĞÅÏ¢£º");
             for (int i = 0; i < archcomboBox.Items.Count; i++)
             {
                 sw.WriteLine("arch=" + archcomboBox.Items[i].ToString());
             }
             sw.WriteLine();
 
-            sw.WriteLine("#åœ¨ä¸‹é¢æ·»åŠ CPUå‹å·ä¿¡æ¯ï¼š");
+            sw.WriteLine("#ÔÚÏÂÃæÌí¼ÓCPUĞÍºÅĞÅÏ¢£º");
             for (int i = 0; i < cpucomboBox.Items.Count; i++)
             {
                 sw.WriteLine("cpu=" + cpucomboBox.Items[i].ToString());
             }
 
-            sw.WriteLine("#åœ¨ä¸‹é¢æ·»åŠ è®¾å¤‡æ¿å¡ä¿¡æ¯ï¼š");
+            sw.WriteLine("#ÔÚÏÂÃæÌí¼ÓÉè±¸°å¿¨ĞÅÏ¢£º");
             for (int i = 0; i < boardcomboBox.Items.Count; i++)
             {
                 sw.WriteLine("board=" + boardcomboBox.Items[i].ToString());
@@ -148,12 +170,11 @@ namespace boot_img
         private void viewbutton_Click(object sender, EventArgs e)
         {
              OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Title = "é€‰æ‹©æ–‡ä»¶";
+            ofd.Title = "Ñ¡ÔñÎÄ¼ş";
             if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 srcpathtextBox.Text = ofd.FileName;
             }
-           
         }
 
         private void outviewbutton_Click(object sender, EventArgs e)
@@ -161,42 +182,21 @@ namespace boot_img
             string filename = "imgfile." + encryptcomboBox.Text + ".img";
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.FileName = filename;
-            sfd.Title = "ä¿å­˜ä½ç½®";
+            sfd.Title = "±£´æÎ»ÖÃ";
             if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 outpathtextBox.Text = sfd.FileName;
             }
         }
-        private void loadcfgbutton_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog ofd = new OpenFileDialog();
-            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                dataGridView1.Rows.Clear();
-                load_config(ofd.FileName);
-                set_info("å¯¼å…¥æˆåŠŸ");
-            }
-        }
 
-        private void savecfgbutton_Click(object sender, EventArgs e)
-        {
 
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.FileName = "config.txt";
-            sfd.Title = "ä¿å­˜é…ç½®æ–‡ä»¶";
-            if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                save_config(sfd.FileName);
-                set_info("ä¿å­˜æˆåŠŸ");
-            }
-        }
 
         private void keytextBox_MouseClick(object sender, MouseEventArgs e)
         {
-            if (keytextBox.UseSystemPasswordChar)
-                keytextBox.UseSystemPasswordChar = false;
+            if (hardvertextBox.UseSystemPasswordChar)
+                hardvertextBox.UseSystemPasswordChar = false;
             else
-                keytextBox.UseSystemPasswordChar = true;
+                hardvertextBox.UseSystemPasswordChar = true;
         }
 
 
@@ -217,38 +217,38 @@ namespace boot_img
         {
             if (boardcomboBox.SelectedIndex < 0)
             {
-                set_error("è¯·é€‰æ‹©å•æ¿åç§°");
+                set_error("ÇëÑ¡Ôñµ¥°åÃû³Æ");
                 return false;
             }
             if (archcomboBox.SelectedIndex < 0)
             {
-                set_error("è¯·é€‰æ‹©CPUæ¶æ„");
+                set_error("ÇëÑ¡ÔñCPU¼Ü¹¹");
                 return false;
             }
             if (cpucomboBox.SelectedIndex < 0)
             {
-                set_error("è¯·é€‰æ‹©CPUå‹å·");
+                set_error("ÇëÑ¡ÔñCPUĞÍºÅ");
                 return false;
             }
             if (encryptcomboBox.SelectedIndex < 0)
             {
-                set_error("è¯·é€‰æ‹©åŠ å¯†æ–¹å¼");
+                set_error("ÇëÑ¡Ôñ¼ÓÃÜ·½Ê½");
                 return false;
             }
             if (softvertextBox.Text == "")
             {
-                set_error("è¯·è¾“å…¥è½¯ä»¶ç‰ˆæœ¬");
+                set_error("ÇëÊäÈëÈí¼ş°æ±¾");
                 return false;
             }
-            if ((encryptcomboBox.SelectedIndex != 0) && (keytextBox.Text == ""))
+            if ((encryptcomboBox.SelectedIndex != 0) && (hardvertextBox.Text == ""))
             {
-                set_error("è¯·è¾“å…¥åŠ å¯†å¯†é’¥");
+                set_error("ÇëÊäÈë¼ÓÃÜÃÜÔ¿");
                 return false;
             }
             
             if (outpathtextBox.Text  == "")
             {
-                set_error("è¯·é€‰æ‹©è¾“å‡ºè·¯å¾„");
+                set_error("ÇëÑ¡ÔñÊä³öÂ·¾¶");
                 return false;
             }
            return true;
@@ -298,7 +298,7 @@ namespace boot_img
             idx +=fill_bytearr(filehead, idx, archcomboBox.Text,32);
 
             idx += fill_bytearr(filehead, idx, cpucomboBox.Text,32);
-            
+            idx += fill_bytearr(filehead, idx, hardvertextBox.Text, 16);
             UInt32 crc = (UInt32)Crc32.calc_crc32(filehead, 0, 512 - 4,0xffffffff);
             fill_bytearr(filehead, 512-4, crc);
 
@@ -321,7 +321,7 @@ namespace boot_img
             {
                 if (listfi[i].Offset + listfi[i].Filelen > listfi[i + 1].Offset)
                 {
-                    set_error("æ–‡ä»¶"+listfi[i].Path+"çš„é•¿åº¦è¶…å‡ºäº†å¡«å……èŒƒå›´ï¼");
+                    set_error("ÎÄ¼ş"+listfi[i].Path+"µÄ³¤¶È³¬³öÁËÌî³ä·¶Î§£¡");
                     return false;
                 }
             }
@@ -333,7 +333,7 @@ namespace boot_img
             }
             
 
-            //è¿™é‡Œéœ€æ·»åŠ åŠ å¯†åŠŸèƒ½
+            //ÕâÀïĞèÌí¼Ó¼ÓÃÜ¹¦ÄÜ
 
 
             filecrc = (UInt32)Crc32.calc_crc32(imgdata, 512, imglen - 512,0xffffffff);
@@ -351,9 +351,9 @@ namespace boot_img
             
             try
             {
-                set_info("æ­£åœ¨è½¬æ¢...");
+                set_info("ÕıÔÚ×ª»»...");
                 if(pack_img() == true)
-                    set_info("ç”Ÿæˆimgæ–‡ä»¶æˆåŠŸ");
+                    set_info("Éú³ÉimgÎÄ¼ş³É¹¦");
             }
             catch(Exception ex)
             {
@@ -377,6 +377,34 @@ namespace boot_img
             dataGridView1.Rows.Add(offsettextBox.Text,srcpathtextBox.Text);
             
         }
+
+        private void savecfgbutton_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.FileName = "config.txt";
+            sfd.Title = "±£´æÅäÖÃÎÄ¼ş";
+            if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                save_config(sfd.FileName);
+                set_info("±£´æ³É¹¦");
+            }
+
+        }
+
+        private void loadcfgbutton_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                dataGridView1.Rows.Clear();
+                load_config(ofd.FileName);
+                set_info("µ¼Èë³É¹¦");
+            }
+        }
+
+        
+
+        
 
        
     }
