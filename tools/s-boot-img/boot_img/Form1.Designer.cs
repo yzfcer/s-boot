@@ -166,8 +166,6 @@
             this.encryptcomboBox.FormattingEnabled = true;
             this.encryptcomboBox.Items.AddRange(new object[] {
             "none",
-            "AES",
-            "DES",
             "RC4"});
             this.encryptcomboBox.Location = new System.Drawing.Point(96, 77);
             this.encryptcomboBox.Name = "encryptcomboBox";
@@ -284,6 +282,7 @@
             this.outviewbutton.TabIndex = 32;
             this.outviewbutton.Text = "浏览";
             this.outviewbutton.UseVisualStyleBackColor = true;
+            this.outviewbutton.Click += new System.EventHandler(this.outviewbutton_Click);
             // 
             // outpathtextBox
             // 
@@ -314,6 +313,7 @@
             this.viewbutton.TabIndex = 28;
             this.viewbutton.Text = "浏览";
             this.viewbutton.UseVisualStyleBackColor = true;
+            this.viewbutton.Click += new System.EventHandler(this.viewbutton_Click);
             // 
             // label18
             // 

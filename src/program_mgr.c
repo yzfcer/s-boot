@@ -136,9 +136,10 @@ int decrypt_img_data(region_s *img,region_s *bin)
 	head = (img_head_s*)bin->addr;
     bin->addr += head->head_len;
     bin->size = img->size - head->head_len;
+    bin->datalen = img->datalen - head->head_len;
     sys_notice("decrypt img file...");
     sys_debug("decrypt_data base:0x%x,lenth:%d",bin->addr,bin->datalen);
-	len = decrypt_data(head->encry_type,(uint8_t *)bin->addr,img->datalen);
+	len = decrypt_data(head->encry_type,(uint8_t *)bin->addr,bin->datalen);
     if(len < 0)
     {
         sys_warn("decrypt img file failed.");

@@ -99,12 +99,6 @@
     <ClCompile Include="..\..\..\..\..\..\src\share_param.c">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\encrypt\aes.c">
-      <Filter>encrypt</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\encrypt\des.c">
-      <Filter>encrypt</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\encrypt\rc4.c">
       <Filter>encrypt</Filter>
     </ClCompile>

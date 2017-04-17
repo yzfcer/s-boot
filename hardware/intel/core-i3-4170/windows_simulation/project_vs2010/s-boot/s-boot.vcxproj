@@ -29,8 +29,6 @@
     <ClInclude Include="..\..\port\port.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\..\encrypt\aes.c" />
-    <ClCompile Include="..\..\..\..\..\..\encrypt\des.c" />
     <ClCompile Include="..\..\..\..\..\..\encrypt\encrypt.c" />
     <ClCompile Include="..\..\..\..\..\..\encrypt\rc4.c" />
     <ClCompile Include="..\..\..\..\..\..\src\boot_check.c" />

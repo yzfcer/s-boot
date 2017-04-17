@@ -12,11 +12,13 @@ namespace boot_img
     public partial class Form1 : Form
     {
         byte[] filehead;
-        byte[] imgdata;
+        byte[] bindata;
         Int32 imglen;//img文件长度
+        Int32 binlen;//img文件长度
         UInt32 filecrc;
         List<fileinfo> listfi;
         byte[] cryptkey;
+        Crypt crypt;
 
         public Form1()
         {
@@ -268,17 +270,17 @@ namespace boot_img
             return tag.Length;
         }
 
-        void fill_file_head()
+        void fill_file_head(int headlen)
         {
             int idx = 0;
 
-            uint headlen = 0x200;
+            //uint headlen = 0x200;
             uint headver = 1;
             Array.Clear(filehead, 0, filehead.Length);
             idx += fill_bytearr(filehead, idx, "S_BOOT10", 8);
 
             idx += fill_bytearr(filehead, idx, (UInt32)imglen);
-            idx += fill_bytearr(filehead, idx, headlen);
+            idx += fill_bytearr(filehead, idx, (UInt32)headlen);
             idx += fill_bytearr(filehead, idx, headver);
 
             idx += fill_bytearr(filehead, idx, softvertextBox.Text,16);
@@ -300,8 +302,16 @@ namespace boot_img
             idx += fill_bytearr(filehead, idx, cpucomboBox.Text,32);
             idx += fill_bytearr(filehead, idx, hardvertextBox.Text, 16);
             UInt32 crc = (UInt32)Crc32.calc_crc32(filehead, 0, 512 - 4,0xffffffff);
-            fill_bytearr(filehead, 512-4, crc);
+            fill_bytearr(filehead, headlen - 4, crc);
 
+        }
+
+        void init_crypt()
+        {
+            if (encryptcomboBox.Text == "RC4")
+                crypt = new rc4();
+            else
+                crypt = new Crypt();
         }
 
         bool pack_img()
@@ -326,24 +336,29 @@ namespace boot_img
                 }
             }
             imglen = listfi[cnt].Offset + listfi[cnt].Filelen;
-            imgdata = new byte[imglen];
+            binlen = imglen - listfi[0].Offset;
+            bindata = new byte[binlen + 512];
             for (int i = 0; i < listfi.Count; i++)
             {
-                Array.Copy(listfi[i].Data, 0, imgdata, listfi[i].Offset,listfi[i].Filelen);
+                Array.Copy(listfi[i].Data, 0, bindata, listfi[i].Offset-listfi[0].Offset,listfi[i].Filelen);
             }
             
 
             //这里需添加加密功能
+            init_crypt();
+            crypt.set_key(cryptkey, 16);
+            binlen = crypt.encrypt(bindata, binlen);
 
-
-            filecrc = (UInt32)Crc32.calc_crc32(imgdata, 512, imglen - 512,0xffffffff);
-            fill_file_head();
-            Array.Copy(filehead, imgdata, 512);
+            filecrc = (UInt32)Crc32.calc_crc32(bindata, 0, binlen,0xffffffff);
+            fill_file_head(listfi[0].Offset);
+            //Array.Copy(filehead, imgdata, 512);
             System.IO.FileStream fs = new System.IO.FileStream(outpathtextBox.Text, System.IO.FileMode.Create);
-            fs.Write(imgdata, 0, imglen);
+            fs.Write(filehead, 0, listfi[0].Offset);
+            fs.Write(bindata, 0, binlen);
             fs.Close();
             return true;
         }
+
         private void generatebutton_Click(object sender, EventArgs e)
         {
             if (!check_params())
@@ -401,6 +416,8 @@ namespace boot_img
                 set_info("导入成功");
             }
         }
+
+
 
         
 
