@@ -27,7 +27,7 @@
 extern "C" {
 #endif
 
-static volatile int s_boot_status = BOOT_INIT;
+static volatile int s_boot_status = BOOT_FIRST_CHECK;
 
 upgrade_info_s g_upgrade_info;
 sysparam_region_s g_sysparam_reg;
@@ -48,10 +48,9 @@ void print_boot_info(void)
 
 static int32_t boot_init(void)
 {
-    param_clear_buffer();
+    
 	mem_region_init();
-    //print_boot_info();
-    //go_to_next_step();
+    print_boot_info();
     return 0;
 }
 
@@ -78,6 +77,7 @@ static int32_t boot_first_check(void)
     int32_t ret;
     boot_param_s *bp;
     //sys_notice("begin to check first running time...");
+    param_clear_buffer();
     bp = (boot_param_s *)get_boot_params();
     if(NULL != bp)
     {
@@ -258,7 +258,7 @@ static int32_t boot_menu_list(void)
     if(get_menu_go_direction())
         go_to_next_step();
     else
-        set_boot_status(BOOT_INIT);
+        set_boot_status(BOOT_FIRST_CHECK);
     return 0;
 }
 static int32_t boot_load_app(void)
@@ -380,7 +380,7 @@ static int32_t boot_run_system(void)
 
 boot_handle_TB g_status_handTB[] = 
 {
-    {BOOT_INIT,"init",boot_init},
+    //{BOOT_INIT,"init",boot_init},
     {BOOT_FIRST_CHECK,"first_check",boot_first_check},   
     {BOOT_APP_DEBUG_CHECK,"app_debug_check",boot_app_debug_check},
 
@@ -418,6 +418,7 @@ void boot_loop(void)
     ret = boot_hw_init();
     if(ret < 0)
         while(1);
+    boot_init();
     while(1)
     {
         for(i = 0;i < sizeof(g_status_handTB)/sizeof(boot_handle_TB);i ++)
