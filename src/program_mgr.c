@@ -41,7 +41,7 @@ static void print32_t_copy_percents(int32_t numerator, int32_t denominator,int32
     if(del)
         sys_printf("%c%c%c%c",8,8,8,8);
     sys_printf("%3d%%",numerator*100/denominator);
-        feed_watchdog();
+        watchdog_feed();
 }
 static char *encty_type[] = 
 {
@@ -148,7 +148,7 @@ int decrypt_img_data(region_s *img,region_s *bin)
     bin->datalen = len;
     
     bin->crc = calc_crc32((uint8_t *)bin->addr,bin->datalen,0xffffffff);
-    feed_watchdog();
+    watchdog_feed();
     sys_notice("decrypt img file OK.");
     return 0;
 }
@@ -159,7 +159,7 @@ int32_t check_img_valid(region_s *img)
     uint32_t cal_crc,crc;
     img_head_s *head;
 
-    feed_watchdog();
+    watchdog_feed();
 	head = (img_head_s*)img->addr;
     if(0 != head_endian_convert(head))
     {
@@ -183,7 +183,7 @@ int32_t check_img_valid(region_s *img)
         return -1;
     }
     
-    feed_watchdog();
+    watchdog_feed();
 	crc = calc_crc32((uint8_t*)(img->addr+head->head_len),head->img_len - head->head_len,0xffffffff);
     cal_crc = head->bin_crc;
     
@@ -194,7 +194,7 @@ int32_t check_img_valid(region_s *img)
         return -1;
     }
     
-    feed_watchdog();
+    watchdog_feed();
     sys_notice("img file verify OK.");
     return 0;
 }
@@ -257,7 +257,7 @@ int32_t copy_region_data(region_s *src,region_s *dest)
             return -1;
         }
         print32_t_copy_percents(i,blocks,1);
-        feed_watchdog();
+        watchdog_feed();
     }
     print32_t_copy_percents(i,blocks,1);
     sys_printf("\r\n");

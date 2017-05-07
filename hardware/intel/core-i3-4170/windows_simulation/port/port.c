@@ -18,12 +18,22 @@
 #include "boot_param.h"
 #include <conio.h>
 
-int device_init(void)
+int sys_clock_init(void)
 {
-	return 0;
+    return 0;
 }
 
-int device_deinit(void)
+int boot_time_init(void)
+{
+    return 0;
+}
+
+int boot_debug_init(void)
+{
+    return 0;
+}
+
+int boot_exit(void)
 {
 	return 0;
 }
@@ -75,8 +85,12 @@ void boot_jump_to_app(void)
         scanf("%c",&ch);
     }
 }
+int  watchdog_init(void)
+{
+    return 0;
+}
 
-void feed_watchdog(void)
+void watchdog_feed(void)
 {
 
 }

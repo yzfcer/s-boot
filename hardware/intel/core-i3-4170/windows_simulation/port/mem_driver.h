@@ -29,6 +29,7 @@
 #define ROM1_SIZE 0x100000
 #define ROM2_BASE 0xA0000000
 #define ROM2_SIZE 0x800000
+
 //Œﬁ–ßµÿ÷∑
 #define MEM_BASE_INVALID 0xffffffff
 
@@ -107,6 +108,9 @@ uint32_t get_ram_base(int32_t idx);
 uint32_t get_rom_base(int32_t idx);
 uint32_t get_ram_lenth(int32_t idx);
 uint32_t get_rom_lenth(int32_t idx);
+
+int init_ram(int idx);
+int init_rom(int idx);
 
 int read_rom(uint8_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth);
 int write_rom(uint8_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth);

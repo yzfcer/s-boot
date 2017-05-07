@@ -44,7 +44,7 @@ int32_t wait_for_key_input(int32_t to_sec,char *ch,int32_t print_flag)
         sys_printf("\r\nwaiting:%ds",second);
     while(1)
     {
-        feed_watchdog();
+        watchdog_feed();
         ret = boot_getchar_noblocking(ch);
         if(ret == 0)
         {
@@ -82,6 +82,50 @@ int sys_printf(const char *fmt,...)
     va_end(argptr);
     boot_output(outbuf,cnt);
     return cnt;
+}
+
+int boot_hw_init(void)
+{
+    int idx;
+    int ret;
+    ret = sys_clock_init();
+    if(ret < 0)
+        return ret;
+    ret = boot_debug_init();
+    if(ret < 0)
+        return ret;
+    ret = boot_time_init();
+    if(ret < 0)
+    {
+        sys_error("boot time init failed,%d.",ret);
+        return ret;
+    }
+    ret = watchdog_init();
+    if(ret < 0)
+    {
+        sys_error("boot watchdog init failed,%d.",ret);
+        return ret;
+    }
+    for(idx = 0;idx < RAM_COUNT;idx ++)
+    {
+        ret = init_ram(idx);
+        if(ret < 0)
+        {
+            sys_error("boot RAM[%d] init failed,%d.",idx,ret);
+            return ret;
+        }
+    }
+            
+    for(idx = 0;idx < ROM_COUNT;idx ++)
+    {
+        ret = init_rom(idx);
+        if(ret < 0)
+        {
+            sys_error("boot ROM[%d] init failed,%d.",idx,ret);
+            return ret;
+        }
+    }
+
 }
 
 
@@ -148,7 +192,7 @@ static void wait_file_send_compete(void)
 	while(1)
     {
         //ret = wait_for_key_input(3,&ch,0);
-    	feed_watchdog();
+    	watchdog_feed();
     	boot_delay(100);
     	ret = boot_getchar_noblocking(&ch);
     	if(0 == ret)
@@ -213,7 +257,7 @@ int32_t boot_receive_img(uint32_t addr,uint32_t maxlen)
                         g_recvstat.stat = RECV_END;
                     }
                 }
-                feed_watchdog();
+                watchdog_feed();
                 break;
             case RECV_END:
                 sys_printf("\r\n");

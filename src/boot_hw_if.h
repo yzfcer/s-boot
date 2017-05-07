@@ -21,6 +21,7 @@ void boot_delay(uint32_t ms);
 
 int sys_printf(const char *fmt,...);
 
+int boot_hw_init(void);
 int32_t read_char_blocking(char *ch);
 int32_t read_line_blockig(char *buff,int32_t len);
 int32_t wait_for_key_input(int32_t to_sec,char *ch,int32_t print32_t_flag);

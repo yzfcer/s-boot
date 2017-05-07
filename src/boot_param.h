@@ -29,7 +29,7 @@ typedef struct
     uint32_t magic;//魔术字，用于参数头部校验
     uint32_t lenth;//本参数结构体的长度
     
-    uint32_t version;    //bootloader`
+    uint32_t version;    //bootloader
     uint8_t debug_mode; //调试模式
     uint8_t wait_sec;   //等待键盘事件秒数
     uint8_t run_type;   //运行在RAM或Flash
@@ -42,7 +42,7 @@ typedef struct
 void *get_boot_params(void);
 void *get_boot_params_from_ROM(void);
 
-void param_init(void);
+void param_init_default(void);
 int32_t param_check_valid(uint8_t *prmbuf);
 int32_t param_check_debug_mode(void);
 void    param_clear_buffer(void);

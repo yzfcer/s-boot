@@ -147,6 +147,16 @@ static void read_rom_file(uint8_t memidx)
     fclose(fil);
 }
 
+
+int init_ram(int idx)
+{
+    return 0;
+}
+int init_rom(int idx)
+{
+    return 0;
+}
+
 int read_rom(uint8_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth)
 {
     uint8_t *src;

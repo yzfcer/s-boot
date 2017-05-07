@@ -185,7 +185,7 @@ void bootloader_test(void)
 static void do_clear_flash_data(uint8_t unlock)
 {
     clean_program();
-    param_init();
+    param_init_default();
     (void)param_flush();
     
     param_clear_buffer();

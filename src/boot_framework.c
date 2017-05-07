@@ -48,11 +48,10 @@ void print_boot_info(void)
 
 static int32_t boot_init(void)
 {
-    print_boot_info();
-	mem_region_init();
     param_clear_buffer();
-    go_to_next_step();
-    sys_notice("bootloader init OK.");
+	mem_region_init();
+    //print_boot_info();
+    //go_to_next_step();
     return 0;
 }
 
@@ -78,7 +77,7 @@ static int32_t boot_first_check(void)
 {
     int32_t ret;
     boot_param_s *bp;
-    sys_notice("begin to check first running time...");
+    //sys_notice("begin to check first running time...");
     bp = (boot_param_s *)get_boot_params();
     if(NULL != bp)
     {
@@ -87,7 +86,7 @@ static int32_t boot_first_check(void)
         return 0;
     }
     sys_notice("NO valid boot params found.");
-    param_init();
+    param_init_default();
     ret = param_flush();
     if(0 != ret)
     {
@@ -416,7 +415,9 @@ void go_to_next_step(void)
 void boot_loop(void)
 {
     int32_t i,ret;
-    device_init();
+    ret = boot_hw_init();
+    if(ret < 0)
+        while(1);
     while(1)
     {
         for(i = 0;i < sizeof(g_status_handTB)/sizeof(boot_handle_TB);i ++)

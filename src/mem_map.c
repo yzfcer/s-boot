@@ -137,7 +137,7 @@ int32_t mem_region_init(void)
     {
         rombase[i] = get_rom_base(i);
     }
-	SET_REG(map->rom.boot_program,index,rombase,BOOT_PROGRAM,ROM);    
+	SET_REG(map->rom.boot_program,index,rombase,BOOT_PROGRAM,ROM);
 	SET_REG(map->rom.boot_param1,index,rombase,BOOT_PARAM1,ROM);
 	SET_REG(map->rom.boot_param2,index,rombase,BOOT_PARAM2,ROM);
 	SET_REG(map->rom.sys_program1,index,rombase,SYS_PROGRAM1,ROM);

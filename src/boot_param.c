@@ -66,7 +66,7 @@ void *get_boot_params_from_ROM(void)
 }
 
 
-void param_init(void)
+void param_init_default(void)
 {
     int32_t i;
     char *src,*dest;
