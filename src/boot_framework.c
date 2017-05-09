@@ -48,7 +48,6 @@ void print_boot_info(void)
 
 static int32_t boot_init(void)
 {
-    
 	mem_region_init();
     print_boot_info();
     return 0;

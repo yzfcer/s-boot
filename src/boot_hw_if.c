@@ -80,7 +80,7 @@ int sys_printf(const char *fmt,...)
     va_start(argptr, fmt);
     cnt = vsprintf(outbuf, fmt, argptr);
     va_end(argptr);
-    boot_output(outbuf,cnt);
+    boot_debug_output(outbuf,cnt);
     return cnt;
 }
 
@@ -125,6 +125,7 @@ int boot_hw_init(void)
             return ret;
         }
     }
+    return 0;
 
 }
 

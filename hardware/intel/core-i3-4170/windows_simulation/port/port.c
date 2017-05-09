@@ -38,7 +38,7 @@ int boot_exit(void)
 	return 0;
 }
 
-int boot_output(char *buf,int len)
+int boot_debug_output(char *buf,int len)
 {
     int i;
     for(i = 0;i < len;i ++)
