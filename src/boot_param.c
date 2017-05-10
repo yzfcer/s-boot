@@ -25,7 +25,12 @@ extern "C" {
 
 boot_param_s *g_pbp = NULL;
 static uint8_t g_bootparam[BOOT_PARAM1_SIZE];
-
+static void copy(uint8_t *dest,uint8_t *src,int count)
+{
+    int i;
+    for(i = 0;i < count;i ++)
+        dest[i] = src[i];
+}
 
 static void upate_bootparam_crc(uint8_t *prmbuf)
 {
@@ -45,6 +50,7 @@ void *get_boot_params_from_ROM(void)
     int32_t i,ret;
     mem_map_s *map;
     region_s *src,*dest;
+    //sys_printf("mapsize:%d\r\n",sizeof(mem_map_s));
     ret = param_read();
     if(0 != ret)
     {
@@ -72,6 +78,9 @@ void param_init_default(void)
     char *src,*dest;
     mem_map_s *map = get_memory_map();
     boot_param_s *bp = (boot_param_s*)g_bootparam;
+    for(i = 0;i < sizeof(g_bootparam);i ++)
+        g_bootparam[i] = 0;
+    
     print_map_info(map);
     bp->magic = BOOT_PARAM_MAGIC;
     bp->lenth = sizeof(boot_param_s);
@@ -82,13 +91,14 @@ void param_init_default(void)
     bp->run_type = RUN_SPACE_TYPE;
     bp->encrypt_type = ENCRYPT_TYPE;
     bp->lock_en = MCU_LOCK_ENABLE;
-    
+    copy(bp->keycode1,KEY_CODE1,sizeof(bp->keycode1));
+    bp->keycode1[sizeof(bp->keycode1)-1] = 0;
+    copy(bp->keycode2,KEY_CODE2,sizeof(bp->keycode1));
+    bp->keycode2[sizeof(bp->keycode2)-1] = 0;
     src = (char*)map;
     dest = (char*)&bp->mem_map;
-    for(i = 0;i < sizeof(mem_map_s);i ++)
-    {
-        dest[i] = src[i];
-    }
+    copy(dest,src,sizeof(mem_map_s));
+    //mem_region_init();
     init_map_info(&bp->mem_map);
     sys_notice("init boot param OK.");
 }

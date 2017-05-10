@@ -264,15 +264,14 @@ int32_t open_super_prio(void)
     int32_t i;
     int len;
     int32_t prio = 0;
-    char *prio1 = "test";
-    char *prio2 = "sudo";
+    boot_param_s *bp = (boot_param_s*)get_boot_params();
     uint8_t *buff = get_block_buffer();
     len = read_line_blockig((char*)buff,BLOCK_SIZE);
-    if(is_string_equal((char*)buff,prio1,string_len(prio1)))
+    if(is_string_equal((char*)buff,bp->keycode1,string_len(bp->keycode1)))
     {
         prio = 1;
     }
-    else if(is_string_equal((char*)buff,prio2,string_len(prio2)))
+    else if(is_string_equal((char*)buff,bp->keycode2,string_len(bp->keycode2)))
     {
         prio = 2;
     }

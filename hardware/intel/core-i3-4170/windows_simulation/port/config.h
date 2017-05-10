@@ -25,9 +25,7 @@ extern "C" {
 
 //加密方式
 #define ENCRYPT_NONE 0
-#define ENCRYPT_AES 1
-#define ENCRYPT_DES 2
-#define ENCRYPT_RC4 3
+#define ENCRYPT_RC4 1
 #define ENCRYPT_TYPE ENCRYPT_RC4
 
 
@@ -44,6 +42,9 @@ extern "C" {
 
 //读写ROM时的基本块大小
 #define BLOCK_SIZE 4096
+
+#define KEY_CODE1 "test"
+#define KEY_CODE2 "sudo"
 
 #ifdef __cplusplus
 }

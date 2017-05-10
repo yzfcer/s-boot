@@ -71,6 +71,8 @@ char *region_name(uint32_t regidx)
 
 mem_map_s *get_memory_map(void)
 {
+    //boot_param_s *bp = (boot_param_s*)get_boot_params();
+    //return &bp->mem_map;
     return &g_memmap;
 }
 
@@ -128,7 +130,9 @@ int32_t mem_region_init(void)
     int index = 0;
     uint32_t rambase[RAM_COUNT];
     uint32_t rombase[ROM_COUNT];
+    //boot_param_s *bp = (boot_param_s*)get_boot_params();
 	mem_map_s *map = &g_memmap;
+	//mem_map_s *map = &bp->mem_map;
     for(i = 0;i < RAM_COUNT;i ++)
     {
         rambase[i] = get_ram_base(i);
@@ -249,8 +253,10 @@ int32_t check_probuf_and_running(region_s *probuf,region_s *run)
 int32_t check_map_valid(void)
 {
     mem_map_s *map;
+    boot_param_s *bp = (boot_param_s*)get_boot_params();
     sys_notice("begin to check momery map params...");
     map = &g_memmap;
+    //map = &bp->mem_map;
     if(check_rom_conflict(&map->rom))
     {
         sys_warn("check rom conflict error.");

@@ -35,6 +35,9 @@ typedef struct
     uint8_t run_type;   //运行在RAM或Flash
     uint8_t encrypt_type;//程序加密使能
     uint8_t lock_en;     //芯片锁定使能
+    uint8_t keycode1[16];
+    uint8_t keycode2[16];
+    
     
     mem_map_s mem_map;//系统的空间映射表
 }boot_param_s;
