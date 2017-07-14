@@ -147,7 +147,7 @@ int32_t mem_region_init(void)
 	SET_REG(map->rom.sys_program1,index,rombase,SYS_PROGRAM1,ROM);
 	SET_REG(map->rom.sys_program2,index,rombase,SYS_PROGRAM2,ROM);
 	SET_REG(map->rom.sys_param,index,rombase,SYS_PARAM,ROM);   
-	SET_REG(map->rom.rom_fs,index,rombase,SYS_ROMFS,ROM);   
+	SET_REG(map->rom.rom_fs,index,rombase,SYS_ROMFS,ROM);
     
 	SET_REG(map->ram.data_ram,index,rambase,DATA_RAM,RAM);
 	SET_REG(map->ram.load_buffer,index,rambase,SYS_LOADBUF,RAM);
@@ -171,7 +171,8 @@ static int32_t check_rom_conflict(rom_map_s *rom)
         {
             if(check_region_conflict(&reg[i],&reg[j]))
             {
-                sys_warn("map %d region \"%s\" and \"%s\" conflict.",i+1,reg[i].regname,reg[j].regname);
+                sys_warn("map %d region \"%s\" and \"%s\" conflict.",
+                    i+1,reg[i].regname,reg[j].regname);
                 ret = -1;
             }
         }
@@ -223,7 +224,8 @@ static int32_t check_ram_conflict(ram_map_s *ram)
         {
             if(check_region_conflict(&reg[i],&reg[j]))
             {
-                sys_warn("map %d region \"%s\" and \"%s\" conflict.",i+1,reg[i].regname,reg[j].regname);
+                sys_warn("map %d region \"%s\" and \"%s\" conflict.",
+                    i+1,reg[i].regname,reg[j].regname);
                 return -1;
             }
         }
