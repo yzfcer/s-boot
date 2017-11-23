@@ -23,10 +23,10 @@
     <ClInclude Include="..\..\..\..\..\..\src\program_mgr.h" />
     <ClInclude Include="..\..\..\..\..\..\src\share_param.h" />
     <ClInclude Include="..\..\..\..\..\..\src\sys_debug.h" />
+    <ClInclude Include="..\..\port\boot_config.h" />
     <ClInclude Include="..\..\port\boot_type.h" />
-    <ClInclude Include="..\..\port\config.h" />
+    <ClInclude Include="..\..\port\boo_port.h" />
     <ClInclude Include="..\..\port\mem_driver.h" />
-    <ClInclude Include="..\..\port\port.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\..\..\encrypt\encrypt.c" />
@@ -41,8 +41,8 @@
     <ClCompile Include="..\..\..\..\..\..\src\menu_list.c" />
     <ClCompile Include="..\..\..\..\..\..\src\program_mgr.c" />
     <ClCompile Include="..\..\..\..\..\..\src\share_param.c" />
+    <ClCompile Include="..\..\port\boot_port.c" />
     <ClCompile Include="..\..\port\mem_driver.c" />
-    <ClCompile Include="..\..\port\port.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{43D4A2B2-E9DB-4326-A0DD-C2071A7D02A4}</ProjectGuid>

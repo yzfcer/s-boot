@@ -12,7 +12,7 @@
        Modification:
 **********************************************************************************/
 #include "mem_map.h"
-#include "port.h"
+#include "boot_port.h"
 #include "share_param.h"
 #include "sys_debug.h"
 #include "boot_param.h"

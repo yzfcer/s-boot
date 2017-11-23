@@ -15,7 +15,7 @@
 #include "mem_map.h"
 #include "boot_param.h"
 #include "menu_list.h"
-#include "port.h"
+#include "boot_port.h"
 #include "share_param.h"
 #include "sys_debug.h"
 #include "crc.h"
@@ -36,7 +36,7 @@ void print_boot_info(void)
 {
     sys_printf("\r\n");
     sys_printf("+---------------------------------------------+\r\n");
-    sys_printf("               s-boot %d.%d.%d\r\n",(uint8_t)(BOOT_VERSION >> 16),
+    sys_printf("               wind-boot %d.%d.%d\r\n",(uint8_t)(BOOT_VERSION >> 16),
                 (uint8_t)(BOOT_VERSION >> 8),(uint8_t)(BOOT_VERSION));
     sys_printf("      *** To Make Ease For Developing ***\r\n");
     sys_printf("+---------------------------------------------+\r\n");

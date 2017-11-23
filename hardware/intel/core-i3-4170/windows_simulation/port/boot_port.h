@@ -11,8 +11,8 @@
        Author:
        Modification:
 **********************************************************************************/
-#ifndef PORT_H__
-#define PORT_H__
+#ifndef BOOT_PORT_H__
+#define BOOT_PORT_H__
 #include "boot_type.h"
 #include <stdio.h>
 

@@ -14,7 +14,7 @@
 #ifndef BOOT_TEST_H__
 #define BOOT_TEST_H__
 #include "boot_type.h"
-#include "config.h"
+#include "boot_config.h"
 #include "mem_map.h"
 #ifdef __cplusplus
 extern "C" {

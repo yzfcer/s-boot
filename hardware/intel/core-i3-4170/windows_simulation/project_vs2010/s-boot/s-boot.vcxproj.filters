@@ -22,9 +22,6 @@
     <ClInclude Include="..\..\port\mem_driver.h">
       <Filter>port</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\port\port.h">
-      <Filter>port</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\src\boot_framework.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -58,18 +55,18 @@
     <ClInclude Include="..\..\..\..\..\..\src\sys_debug.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\port\config.h">
-      <Filter>port</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\src\boot_check.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\port\boo_port.h">
+      <Filter>port</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\port\boot_config.h">
+      <Filter>port</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\port\mem_driver.c">
-      <Filter>port</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\port\port.c">
       <Filter>port</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\src\boot_framework.c">
@@ -107,6 +104,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\src\boot_check.c">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\port\boot_port.c">
+      <Filter>port</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

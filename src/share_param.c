@@ -12,7 +12,7 @@
        Modification:
 **********************************************************************************/
 #include "share_param.h"
-#include "port.h"
+#include "boot_port.h"
 #include "sys_debug.h"
 #include "crc.h"
 

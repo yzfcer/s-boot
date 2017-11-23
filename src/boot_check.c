@@ -11,7 +11,7 @@
        Author:
        Modification:
 **********************************************************************************/
-#include "config.h"
+#include "boot_config.h"
 #include "boot_check.h"
 #include "boot_param.h"
 #include "sys_debug.h"
