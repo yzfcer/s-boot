@@ -14,7 +14,7 @@
 #include "boot_param.h"
 #include "boot_port.h"
 #include "sys_debug.h"
-#include "crc.h"
+#include "wind_crc32.h"
 #include "mem_map.h"
 #include "boot_test.h"
 #include "share_param.h"

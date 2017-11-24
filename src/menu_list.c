@@ -18,7 +18,7 @@
 #include "boot_framework.h"
 #include "sys_debug.h"
 
-#include "crc.h"
+#include "wind_crc32.h"
 #include "share_param.h"
 #include "program_mgr.h"
 #include "boot_test.h"

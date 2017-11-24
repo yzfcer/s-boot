@@ -15,7 +15,7 @@
 #include "boot_param.h"
 #include "boot_port.h"
 #include "sys_debug.h"
-#include "crc.h"
+#include "wind_crc32.h"
 #include "mem_driver.h"
 
 #ifdef __cplusplus
@@ -30,7 +30,7 @@ static w_uint8_t g_bootparam[BOOT_PARAM1_SIZE];
 static void upate_bootparam_crc(w_uint8_t *prmbuf)
 {
     w_uint32_t *crc = (w_uint32_t*)&prmbuf[sizeof(boot_param_s)];
-    *crc = calc_crc32(prmbuf,sizeof(boot_param_s),0xffffffff);
+    *crc = wind_crc32(0xffffffff,prmbuf,sizeof(boot_param_s));
 }
 
 void *get_boot_params(void)
@@ -109,7 +109,7 @@ w_int32_t param_check_valid(w_uint8_t *prmbuf)
         sys_warn("param block lenth is invalid.");
         return -1;
     }
-    if(*crc != calc_crc32((char*)bp,sizeof(boot_param_s),0xffffffff))
+    if(*crc != wind_crc32(0xffffffff,(char*)bp,sizeof(boot_param_s)))
     {
         sys_warn("param block crc is invalid.");
         return -1;

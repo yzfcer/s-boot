@@ -11,13 +11,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\..\comman\wind_crc32.h" />
     <ClInclude Include="..\..\..\..\..\..\encrypt\encrypt.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot_check.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot_framework.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot_hw_if.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot_param.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot_test.h" />
-    <ClInclude Include="..\..\..\..\..\..\src\crc.h" />
     <ClInclude Include="..\..\..\..\..\..\src\mem_map.h" />
     <ClInclude Include="..\..\..\..\..\..\src\menu_list.h" />
     <ClInclude Include="..\..\..\..\..\..\src\program_mgr.h" />
@@ -29,6 +29,7 @@
     <ClInclude Include="..\..\port\mem_driver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\..\comman\wind_crc32.c" />
     <ClCompile Include="..\..\..\..\..\..\encrypt\encrypt.c" />
     <ClCompile Include="..\..\..\..\..\..\encrypt\rc4.c" />
     <ClCompile Include="..\..\..\..\..\..\src\boot_check.c" />
@@ -36,7 +37,6 @@
     <ClCompile Include="..\..\..\..\..\..\src\boot_hw_if.c" />
     <ClCompile Include="..\..\..\..\..\..\src\boot_param.c" />
     <ClCompile Include="..\..\..\..\..\..\src\boot_test.c" />
-    <ClCompile Include="..\..\..\..\..\..\src\crc.c" />
     <ClCompile Include="..\..\..\..\..\..\src\mem_map.c" />
     <ClCompile Include="..\..\..\..\..\..\src\menu_list.c" />
     <ClCompile Include="..\..\..\..\..\..\src\program_mgr.c" />
@@ -71,7 +71,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)..\..\..\..\..\..\src;$(ProjectDir)..\..\..\..\..\..\hardware\intel\core-i3-4170\windows_simulation\port;$(ProjectDir)..\..\..\..\..\..\encrypt;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)..\..\..\..\..\..\src;$(ProjectDir)..\..\..\..\..\..\hardware\intel\core-i3-4170\windows_simulation\port;$(ProjectDir)..\..\..\..\..\..\encrypt;$(ProjectDir)..\..\..\..\..\..\comman;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

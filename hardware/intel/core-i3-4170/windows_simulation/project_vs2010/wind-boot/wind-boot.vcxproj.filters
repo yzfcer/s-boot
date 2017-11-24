@@ -14,6 +14,9 @@
     <Filter Include="encrypt">
       <UniqueIdentifier>{e3e6e71f-8532-46ab-8082-40f3adf96105}</UniqueIdentifier>
     </Filter>
+    <Filter Include="comman">
+      <UniqueIdentifier>{a2b2f458-be6a-45f3-b571-7251fcf587c7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\port\boot_type.h">
@@ -32,9 +35,6 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\src\boot_test.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\crc.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\src\mem_map.h">
@@ -64,6 +64,9 @@
     <ClInclude Include="..\..\port\boot_config.h">
       <Filter>port</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\comman\wind_crc32.h">
+      <Filter>comman</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\port\mem_driver.c">
@@ -79,9 +82,6 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\src\boot_test.c">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\src\crc.c">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\src\mem_map.c">
@@ -107,6 +107,9 @@
     </ClCompile>
     <ClCompile Include="..\..\port\boot_port.c">
       <Filter>port</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\comman\wind_crc32.c">
+      <Filter>comman</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

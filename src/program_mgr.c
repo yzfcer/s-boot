@@ -18,7 +18,7 @@
 #include "boot_param.h"
 #include "boot_framework.h"
 #include "sys_debug.h"
-#include "crc.h"
+#include "wind_crc32.h"
 #include "share_param.h"
 #include "program_mgr.h"
 #include "mem_map.h"
@@ -147,7 +147,7 @@ w_int32_t decrypt_img_data(region_s *img,region_s *bin)
     }
     bin->datalen = len;
     
-    bin->crc = calc_crc32((w_uint8_t *)bin->addr,bin->datalen,0xffffffff);
+    bin->crc = wind_crc32(0xffffffff,(w_uint8_t *)bin->addr,bin->datalen);
     feed_watchdog();
     sys_notice("decrypt img file OK.");
     return 0;
@@ -167,7 +167,7 @@ w_int32_t check_img_valid(region_s *img)
         return -1;
     }
     
-    cal_crc = calc_crc32((w_uint8_t*)head,head->head_len - 4,0xffffffff);
+    cal_crc = wind_crc32(0xffffffff,(w_uint8_t*)head,head->head_len - 4);
     crc = head->head_crc;
     
     sys_debug("img file head crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
@@ -184,7 +184,7 @@ w_int32_t check_img_valid(region_s *img)
     }
     
     feed_watchdog();
-	crc = calc_crc32((w_uint8_t*)(img->addr+head->head_len),head->img_len - head->head_len,0xffffffff);
+	crc = wind_crc32(0xffffffff,(w_uint8_t*)(img->addr+head->head_len),head->img_len - head->head_len);
     cal_crc = head->bin_crc;
     
     sys_debug("bin file crc:0x%x,calc_crc:0x%x.",crc,cal_crc);

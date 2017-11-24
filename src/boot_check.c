@@ -15,7 +15,7 @@
 #include "boot_check.h"
 #include "boot_param.h"
 #include "sys_debug.h"
-#include "crc.h"
+#include "wind_crc32.h"
 #include "program_mgr.h"
 
 w_int32_t repair_rom_space(region_s *src,region_s *dest)
@@ -159,15 +159,15 @@ w_int32_t check_rom_program(region_s *code)
                 head = (img_head_s*)buff;
 				if(head->head_len > BLOCK_SIZE)
                 {
-                    cal_crc = calc_crc32(buff,len,0xffffffff);
+                    cal_crc = wind_crc32(0xffffffff,buff,len);
                 }            
-                else if(head->head_crc == calc_crc32(buff,head->head_len-4,0xffffffff))
-                    cal_crc = calc_crc32(&buff[head->head_len],BLOCK_SIZE-head->head_len,0xffffffff);
+                else if(head->head_crc == wind_crc32(0xffffffff,buff,head->head_len-4))
+                    cal_crc = wind_crc32(0xffffffff,&buff[head->head_len],BLOCK_SIZE-head->head_len);
                 else
-                    cal_crc = calc_crc32(buff,len,cal_crc);
+                    cal_crc = wind_crc32(cal_crc,buff,len);
             }
             else
-                cal_crc = calc_crc32(buff,len,cal_crc);
+                cal_crc = wind_crc32(cal_crc,buff,len);
         }
     }
     
