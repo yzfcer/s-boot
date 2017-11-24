@@ -107,7 +107,7 @@ w_int32_t string_len(const char *str)
     return i;
 }
 
-bool_t check_hardware_matched(img_head_s *head)
+w_bool_t check_hardware_matched(img_head_s *head)
 {
     if(0 != memory_compare(head->board_name,BOARD_NAME,string_len(BOARD_NAME)))
     {
@@ -272,7 +272,7 @@ w_int32_t copy_region_data(region_s *src,region_s *dest)
 
 
 
-static bool_t region_equal(region_s *src,region_s *dest)
+static w_bool_t region_equal(region_s *src,region_s *dest)
 {
     if(src->type != dest->type)
         return B_FALSE;
@@ -288,7 +288,7 @@ w_int32_t roll_back_program(void)
     w_int32_t ret;
     region_s *src;
     region_s bin;
-    bool_t run_in_program1;
+    w_bool_t run_in_program1;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     
     //先将原来的程序拷贝到备份空间    
@@ -350,7 +350,7 @@ w_int32_t flush_img_to_rom(region_s *img)
     region_s *src,*dest;
     region_s bin;
     img_head_s *head;
-    bool_t run_in_program1;
+    w_bool_t run_in_program1;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     sys_notice("begin to flush code to rom space...");
     

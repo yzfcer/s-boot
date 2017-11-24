@@ -81,7 +81,7 @@ void feed_watchdog(void)
 
 }
 
-bool_t is_chip_lock()
+w_bool_t is_chip_lock()
 {
 	return B_TRUE;
 }

@@ -34,6 +34,7 @@ extern "C" {
 #define sys_warn(fmt,...) wind_printf("\r\n%s"fmt" \r\n\r\n","------WARNING------\r\n",##__VA_ARGS__)
 #define sys_error(fmt,...) wind_printf("\r\n%s"fmt" \r\n\r\n","------ERROR------\r\n",##__VA_ARGS__)
 #endif
+
 #ifndef NULL 
 #define NULL (void*)0
 #endif

@@ -24,9 +24,9 @@
     <ClInclude Include="..\..\..\..\..\..\src\share_param.h" />
     <ClInclude Include="..\..\..\..\..\..\src\sys_debug.h" />
     <ClInclude Include="..\..\port\boot_config.h" />
-    <ClInclude Include="..\..\port\boot_type.h" />
     <ClInclude Include="..\..\port\boo_port.h" />
     <ClInclude Include="..\..\port\mem_driver.h" />
+    <ClInclude Include="..\..\port\wind_type.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\..\..\comman\wind_crc32.c" />
