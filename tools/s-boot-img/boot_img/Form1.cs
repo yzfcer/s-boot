@@ -58,7 +58,7 @@ namespace boot_img
                             return;
                         }
                         cryptkey = new byte[16];
-                        for (int i = 1; i < 17; i++)
+                        for (w_int32_t i = 1; i < 17; i++)
                         {
                             cryptkey[i-1] = Convert.ToByte(strarr[i],16);
                         }
@@ -69,7 +69,7 @@ namespace boot_img
                     }
                     else if (strarr[0].CompareTo("encrypttype") == 0)
                     {
-                        for (int i = 0; i < encryptcomboBox.Items.Count; i++)
+                        for (w_int32_t i = 0; i < encryptcomboBox.Items.Count; i++)
                         {
                             if (strarr[1].ToUpper().CompareTo(encryptcomboBox.Items[i].ToString().ToUpper()) == 0)
                             {
@@ -100,7 +100,7 @@ namespace boot_img
             sw.WriteLine("#加密密钥");
             string key = "";
             key += "";
-            for (int i = 0; i < 15; i++)
+            for (w_int32_t i = 0; i < 15; i++)
                 key += "0x"+cryptkey[i].ToString("x")+",";
             key += "0x" + cryptkey[15].ToString("x");
             sw.WriteLine("encryptkey=" + key);
@@ -108,7 +108,7 @@ namespace boot_img
             sw.WriteLine(strline);
             sw.WriteLine("#打包源文件的在img中的偏移地址和文件的路径");
             sw.WriteLine("#偏移位置从0x200开始,0x200之前的空间用于保存img描述信息");
-            for (int i = 0; i < dataGridView1.Rows.Count; i++)
+            for (w_int32_t i = 0; i < dataGridView1.Rows.Count; i++)
             {
                 string filestr = "sourcefile="+ dataGridView1.Rows[i].Cells["offset"].Value.ToString();
                 filestr += ("," + dataGridView1.Rows[i].Cells["path"].Value.ToString());
@@ -124,20 +124,20 @@ namespace boot_img
             sw.WriteLine("hardversion="+hardvertextBox.Text);
 
             sw.WriteLine("#在下面添加CPU架构信息：");
-            for (int i = 0; i < archcomboBox.Items.Count; i++)
+            for (w_int32_t i = 0; i < archcomboBox.Items.Count; i++)
             {
                 sw.WriteLine("arch=" + archcomboBox.Items[i].ToString());
             }
             sw.WriteLine();
 
             sw.WriteLine("#在下面添加CPU型号信息：");
-            for (int i = 0; i < cpucomboBox.Items.Count; i++)
+            for (w_int32_t i = 0; i < cpucomboBox.Items.Count; i++)
             {
                 sw.WriteLine("cpu=" + cpucomboBox.Items[i].ToString());
             }
 
             sw.WriteLine("#在下面添加设备板卡信息：");
-            for (int i = 0; i < boardcomboBox.Items.Count; i++)
+            for (w_int32_t i = 0; i < boardcomboBox.Items.Count; i++)
             {
                 sw.WriteLine("board=" + boardcomboBox.Items[i].ToString());
             }
@@ -256,23 +256,23 @@ namespace boot_img
            return true;
         }
 
-        int fill_bytearr(byte[] arr, int idx, string str,int maxlen)
+        w_int32_t fill_bytearr(byte[] arr, w_int32_t idx, string str,w_int32_t maxlen)
         {
             byte[] tag = System.Text.Encoding.Default.GetBytes(str);
             tag.CopyTo(filehead, idx);
             return maxlen;
         }
 
-        int fill_bytearr(byte[] arr, int idx, UInt32 value)
+        w_int32_t fill_bytearr(byte[] arr, w_int32_t idx, UInt32 value)
         {
             byte[] tag = System.BitConverter.GetBytes(value);
             tag.CopyTo(filehead, idx);
             return tag.Length;
         }
 
-        void fill_file_head(int headlen)
+        void fill_file_head(w_int32_t headlen)
         {
-            int idx = 0;
+            w_int32_t idx = 0;
 
             //uint headlen = 0x200;
             uint headver = 1;
@@ -286,13 +286,13 @@ namespace boot_img
             idx += fill_bytearr(filehead, idx, softvertextBox.Text,16);
 
             idx += fill_bytearr(filehead, idx, filecrc);
-            int encrypttype = encryptcomboBox.SelectedIndex;
+            w_int32_t encrypttype = encryptcomboBox.SelectedIndex;
             idx += fill_bytearr(filehead, idx, (UInt32)encrypttype);
 
             idx += fill_bytearr(filehead, idx, 0x12345678);
             idx += fill_bytearr(filehead, idx, "", 16);
             string[] split = outpathtextBox.Text.Split('/', '\\');
-            int count = split.Length;
+            w_int32_t count = split.Length;
             idx += fill_bytearr(filehead, idx, split[count - 1], 64);
             
 
@@ -317,7 +317,7 @@ namespace boot_img
         bool pack_img()
         {
             listfi.Clear();
-            for (int i = 0; i < dataGridView1.Rows.Count; i++)
+            for (w_int32_t i = 0; i < dataGridView1.Rows.Count; i++)
             {
                 fileinfo fi = new fileinfo();
                 fi.Path = dataGridView1.Rows[i].Cells["path"].Value.ToString();
@@ -326,8 +326,8 @@ namespace boot_img
                 if(fi.Filelen > 0)
                     listfi.Add(fi);
             }
-            int cnt = listfi.Count - 1;
-            for (int i = 0; i < cnt; i++)
+            w_int32_t cnt = listfi.Count - 1;
+            for (w_int32_t i = 0; i < cnt; i++)
             {
                 if (listfi[i].Offset + listfi[i].Filelen > listfi[i + 1].Offset)
                 {
@@ -338,7 +338,7 @@ namespace boot_img
             imglen = listfi[cnt].Offset + listfi[cnt].Filelen;
             binlen = imglen - listfi[0].Offset;
             bindata = new byte[binlen + 512];
-            for (int i = 0; i < listfi.Count; i++)
+            for (w_int32_t i = 0; i < listfi.Count; i++)
             {
                 Array.Copy(listfi[i].Data, 0, bindata, listfi[i].Offset-listfi[0].Offset,listfi[i].Filelen);
             }

@@ -13,11 +13,11 @@
 **********************************************************************************/
 #ifndef CRC_H__
 #define CRC_H__
-#include "boot_type.h"
+#include "wind_type.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
-uint32_t calc_crc32(uint8_t *data, int32_t len,uint32_t crc);
+w_uint32_t calc_crc32(w_uint8_t *data, w_int32_t len,w_uint32_t crc);
 
 #ifdef __cplusplus
 }

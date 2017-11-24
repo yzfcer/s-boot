@@ -15,16 +15,16 @@
 #include <string.h>
 #include <stdio.h>
 
-uint8_t g_ram1[RAM1_SIZE];
-uint8_t g_ram2[RAM2_SIZE];
-uint8_t g_rom1[ROM1_SIZE];
-uint8_t g_rom2[ROM2_SIZE];
+w_uint8_t g_ram1[RAM1_SIZE];
+w_uint8_t g_ram2[RAM2_SIZE];
+w_uint8_t g_rom1[ROM1_SIZE];
+w_uint8_t g_rom2[ROM2_SIZE];
 
 #if 0
 typedef struct
 {
-    uint32_t base;
-    uint32_t size;
+    w_uint32_t base;
+    w_uint32_t size;
 }MEM_SPACE_S;
 
 MEM_SPACE_S g_rom[] = 
@@ -41,20 +41,20 @@ MEM_SPACE_S g_ram[] =
 #endif
 
 
-uint32_t get_rom_base(int32_t idx)
+w_uint32_t get_rom_base(w_int32_t idx)
 {
     switch(idx)
     {
         case 0:
-            return (uint32_t)&g_rom1;
+            return (w_uint32_t)&g_rom1;
         case 1:
-            return (uint32_t)&g_rom2;
+            return (w_uint32_t)&g_rom2;
         default:
             return MEM_BASE_INVALID;
     }
 }
 
-uint32_t get_rom_lenth(int32_t idx)
+w_uint32_t get_rom_lenth(w_int32_t idx)
 {
     switch(idx)
     {
@@ -67,20 +67,20 @@ uint32_t get_rom_lenth(int32_t idx)
     }
 }
 
-uint32_t get_ram_base(int32_t idx)
+w_uint32_t get_ram_base(w_int32_t idx)
 {
     switch(idx)
     {
         case 0:
-            return (uint32_t)&g_ram1;
+            return (w_uint32_t)&g_ram1;
         case 1:
-            return (uint32_t)&g_ram2;
+            return (w_uint32_t)&g_ram2;
         default:
             return MEM_BASE_INVALID;
     }
 }
 
-uint32_t get_ram_lenth(int32_t idx)
+w_uint32_t get_ram_lenth(w_int32_t idx)
 {
     switch(idx)
     {
@@ -96,19 +96,19 @@ uint32_t get_ram_lenth(int32_t idx)
 
 
 
-static void flush_rom_file(uint8_t memidx)
+static void flush_rom_file(w_uint8_t memidx)
 {
     FILE *fil;
     char filename[16];
-    uint32_t len;
-    uint8_t *buf;
+    w_uint32_t len;
+    w_uint8_t *buf;
     switch(memidx)
     {
     case 0:
-        buf = (uint8_t *)(g_rom1);
+        buf = (w_uint8_t *)(g_rom1);
         break;
     case 1:
-        buf = (uint8_t *)(g_rom2);
+        buf = (w_uint8_t *)(g_rom2);
     default:
         return ;
     }
@@ -119,19 +119,19 @@ static void flush_rom_file(uint8_t memidx)
     fclose(fil);
 }
 
-static void read_rom_file(uint8_t memidx)
+static void read_rom_file(w_uint8_t memidx)
 {
     FILE *fil;
     char filename[16];
-    uint32_t len;
-    uint8_t *buf;// = (uint8_t*)(get_rom_base(memidx);
+    w_uint32_t len;
+    w_uint8_t *buf;// = (w_uint8_t*)(get_rom_base(memidx);
     switch(memidx)
     {
     case 0:
-        buf = (uint8_t *)(g_rom1);
+        buf = (w_uint8_t *)(g_rom1);
         break;
     case 1:
-        buf = (uint8_t *)(g_rom2);
+        buf = (w_uint8_t *)(g_rom2);
     default:
         return ;
     }
@@ -147,17 +147,17 @@ static void read_rom_file(uint8_t memidx)
     fclose(fil);
 }
 
-int read_rom(uint8_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth)
+w_int32_t read_rom(w_uint8_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t lenth)
 {
-    uint8_t *src;
-    uint32_t base = get_rom_base(memidx);
+    w_uint8_t *src;
+    w_uint32_t base = get_rom_base(memidx);
     switch(memidx)
     {
     case 0:
-        src = (uint8_t *)(g_rom1+addr-base);
+        src = (w_uint8_t *)(g_rom1+addr-base);
         break;
     case 1:
-        src = (uint8_t *)(g_rom2+addr-base);
+        src = (w_uint8_t *)(g_rom2+addr-base);
     default:
         return -1;
     }
@@ -166,17 +166,17 @@ int read_rom(uint8_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth)
     return lenth;
 }
 
-int write_rom(uint8_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth)
+w_int32_t write_rom(w_uint8_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t lenth)
 {
-    uint8_t *dest;
-    uint32_t base = get_rom_base(memidx);
+    w_uint8_t *dest;
+    w_uint32_t base = get_rom_base(memidx);
     switch(memidx)
     {
     case 0:
-        dest = (uint8_t *)(g_rom1+addr-base);
+        dest = (w_uint8_t *)(g_rom1+addr-base);
         break;
     case 1:
-        dest = (uint8_t *)(g_rom2+addr-base);
+        dest = (w_uint8_t *)(g_rom2+addr-base);
     default:
         return -1;
     }
@@ -185,9 +185,9 @@ int write_rom(uint8_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth)
     return lenth;
 }
 
-int erase_rom(uint8_t memidx,uint32_t addr,int32_t lenth)
+w_int32_t erase_rom(w_uint8_t memidx,w_uint32_t addr,w_int32_t lenth)
 {
-    uint8_t *dest = (uint8_t *)addr;
+    w_uint8_t *dest = (w_uint8_t *)addr;
     memset(dest,0,lenth);
     flush_rom_file(memidx);
     return lenth;

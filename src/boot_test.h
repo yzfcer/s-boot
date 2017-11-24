@@ -13,7 +13,7 @@
 **********************************************************************************/
 #ifndef BOOT_TEST_H__
 #define BOOT_TEST_H__
-#include "boot_type.h"
+#include "wind_type.h"
 #include "boot_config.h"
 #include "mem_map.h"
 #ifdef __cplusplus
@@ -32,7 +32,7 @@ typedef enum
 
 typedef struct __boot_stub
 {
-    uint8_t err[ERR_CNT];
+    w_uint8_t err[ERR_CNT];
 }boot_stub_s;
 
 
@@ -42,9 +42,9 @@ typedef struct
     char *item_desc;
     void (*test)(void);
 }boot_test_s;
-void set_error(uint8_t err_type,uint8_t err);
-uint8_t get_error(uint8_t err_type);
-int32_t test_entry(void);
+void set_error(w_uint8_t err_type,w_uint8_t err);
+w_uint8_t get_error(w_uint8_t err_type);
+w_int32_t test_entry(void);
 #else
 #define get_error(t) 0
 #endif

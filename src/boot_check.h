@@ -14,7 +14,7 @@
 #ifndef BOOT_CHECK_H__
 #define BOOT_CHECK_H__
 #include "mem_map.h"
-int32_t check_rom_program(region_s *code);
-int32_t check_rom_programs(void);
+w_int32_t check_rom_program(region_s *code);
+w_int32_t check_rom_programs(void);
 
 #endif

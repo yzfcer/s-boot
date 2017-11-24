@@ -27,26 +27,26 @@
 extern "C" {
 #endif
 
-static volatile int s_boot_status = BOOT_INIT;
+static volatile w_int32_t s_boot_status = BOOT_INIT;
 
 upgrade_info_s g_upgrade_info;
 sysparam_region_s g_sysparam_reg;
 
 void print_boot_info(void)
 {
-    sys_printf("\r\n");
-    sys_printf("+---------------------------------------------+\r\n");
-    sys_printf("               wind-boot %d.%d.%d\r\n",(uint8_t)(BOOT_VERSION >> 16),
-                (uint8_t)(BOOT_VERSION >> 8),(uint8_t)(BOOT_VERSION));
-    sys_printf("      *** To Make Ease For Developing ***\r\n");
-    sys_printf("+---------------------------------------------+\r\n");
-    sys_printf("Build: %s %s\r\n",__DATE__,__TIME__);
-    sys_printf("Borad: %s\r\n",BOARD_NAME);
-    sys_printf("Arch : %s\r\n",ARCH_NAME);
-    sys_printf("CPU  : %s\r\n\r\n",CPU_NAME);
+    wind_printf("\r\n");
+    wind_printf("+---------------------------------------------+\r\n");
+    wind_printf("               wind-boot %d.%d.%d\r\n",(w_uint8_t)(BOOT_VERSION >> 16),
+                (w_uint8_t)(BOOT_VERSION >> 8),(w_uint8_t)(BOOT_VERSION));
+    wind_printf("      *** To Make Ease For Developing ***\r\n");
+    wind_printf("+---------------------------------------------+\r\n");
+    wind_printf("Build: %s %s\r\n",__DATE__,__TIME__);
+    wind_printf("Borad: %s\r\n",BOARD_NAME);
+    wind_printf("Arch : %s\r\n",ARCH_NAME);
+    wind_printf("CPU  : %s\r\n\r\n",CPU_NAME);
 }
 
-static int32_t boot_init(void)
+static w_int32_t boot_init(void)
 {
     print_boot_info();
 	mem_region_init();
@@ -56,9 +56,9 @@ static int32_t boot_init(void)
     return 0;
 }
 
-static int32_t boot_app_debug_check(void)
+static w_int32_t boot_app_debug_check(void)
 {
-    int32_t dbg_mode = param_check_debug_mode();
+    w_int32_t dbg_mode = param_check_debug_mode();
     if(dbg_mode)
     {
         sys_warn("bootloader mode:DEBUG");
@@ -74,9 +74,9 @@ static int32_t boot_app_debug_check(void)
 }
 
 
-static int32_t boot_first_check(void)
+static w_int32_t boot_first_check(void)
 {
-    int32_t ret;
+    w_int32_t ret;
     boot_param_s *bp;
     sys_notice("begin to check first running time...");
     bp = (boot_param_s *)get_boot_params();
@@ -101,7 +101,7 @@ static int32_t boot_first_check(void)
     
 }
 
-static int32_t boot_chip_lock_check(void)
+static w_int32_t boot_chip_lock_check(void)
 {
     if(is_chip_lock())
     {
@@ -117,9 +117,9 @@ static int32_t boot_chip_lock_check(void)
 
 
 
-static int32_t boot_self_check(void)
+static w_int32_t boot_self_check(void)
 {
-    int32_t ret;
+    w_int32_t ret;
     boot_param_s *bp = (boot_param_s *)get_boot_params();
     ret = check_map_valid();
     if(ret)
@@ -135,9 +135,9 @@ static int32_t boot_self_check(void)
 
 
 
-static int32_t  boot_upgrade_check(void)
+static w_int32_t  boot_upgrade_check(void)
 {
-    int32_t ret;
+    w_int32_t ret;
     region_s img;
     boot_param_s *bp = (boot_param_s *)get_boot_params();
     
@@ -208,10 +208,10 @@ static int32_t  boot_upgrade_check(void)
     
 }
 
-static int32_t  boot_rollback_check(void)
+static w_int32_t  boot_rollback_check(void)
 {
-    uint8_t roll_flag;
-    int32_t ret;
+    w_uint8_t roll_flag;
+    w_int32_t ret;
     boot_param_s *bp = (boot_param_s *)get_boot_params();
     
     sys_notice("begin to check app roll back status...");
@@ -236,24 +236,24 @@ static int32_t  boot_rollback_check(void)
 }
 
 
-static int32_t boot_wait_key_press(void)
+static w_int32_t boot_wait_key_press(void)
 {
     char ch = 0;
 
     boot_param_s *bp = (boot_param_s *)get_boot_params();
-    sys_printf("press any key to enter menu list:");
+    wind_printf("press any key to enter menu list:");
     if(0 == wait_for_key_input(bp->wait_sec,&ch,1))
     {
         go_to_next_step();
-        sys_printf("\r\n");
+        wind_printf("\r\n");
         return 0;
     }
     set_boot_status(BOOT_LOAD_APP);
-    sys_printf("\r\n");
+    wind_printf("\r\n");
     return 0;
 }
 
-static int32_t boot_menu_list(void)
+static w_int32_t boot_menu_list(void)
 {
     run_menu();
     if(get_menu_go_direction())
@@ -262,7 +262,7 @@ static int32_t boot_menu_list(void)
         set_boot_status(BOOT_INIT);
     return 0;
 }
-static int32_t boot_load_app(void)
+static w_int32_t boot_load_app(void)
 {
     mem_status_e mem_stat = MEM_ERROR;
     region_s *regi = NULL;
@@ -328,7 +328,7 @@ static int32_t boot_load_app(void)
     
 }
 
-static int32_t boot_set_app_param(void)
+static w_int32_t boot_set_app_param(void)
 {
     boot_param_s *bp = (boot_param_s *)get_boot_params();
     sys_notice("begin to set App params...");
@@ -342,16 +342,16 @@ static int32_t boot_set_app_param(void)
     g_upgrade_info.mem_type = bp->mem_map.ram.load_buffer.type;
     sp_set_upgrade_param(&g_upgrade_info);
     sp_get_upgrade_param(&g_upgrade_info);
-    sys_printf("set upgrade params:\r\n");
-    sys_printf("buffer addr:0x%x\r\n",g_upgrade_info.addr);
-    sys_printf("buffer lenth:0x%x\r\n",g_upgrade_info.datalen);
+    wind_printf("set upgrade params:\r\n");
+    wind_printf("buffer addr:0x%x\r\n",g_upgrade_info.addr);
+    wind_printf("buffer lenth:0x%x\r\n",g_upgrade_info.datalen);
 
     g_sysparam_reg.addr = bp->mem_map.rom.sys_param.addr;
     g_sysparam_reg.size = bp->mem_map.rom.sys_param.size;
     g_sysparam_reg.mem_type = bp->mem_map.rom.sys_param.type;
-    sys_printf("set sysparam region params:\r\n");
-    sys_printf("sysparam addr:0x%x\r\n",g_sysparam_reg.addr);
-    sys_printf("sysparam lenth:0x%x\r\n",g_sysparam_reg.size);
+    wind_printf("set sysparam region params:\r\n");
+    wind_printf("sysparam addr:0x%x\r\n",g_sysparam_reg.addr);
+    wind_printf("sysparam lenth:0x%x\r\n",g_sysparam_reg.size);
     sp_set_sysparam_param(&g_sysparam_reg);
     
     sys_notice("set App params OK.");
@@ -360,7 +360,7 @@ static int32_t boot_set_app_param(void)
 }
 
 
-static int32_t boot_error_handle(void)
+static w_int32_t boot_error_handle(void)
 {
     char ch;
     while(1)
@@ -370,10 +370,10 @@ static int32_t boot_error_handle(void)
     }
     return 0;
 }
-static int32_t boot_run_system(void)
+static w_int32_t boot_run_system(void)
 {
 	sys_notice("begin to jump to App space...");
-	sys_printf("\r\n\r\n\r\n");
+	wind_printf("\r\n\r\n\r\n");
 	boot_jump_to_app();
 	return 0;
 }
@@ -404,7 +404,7 @@ void set_boot_status(boot_status_e status)
     s_boot_status = status;
 }
 
-int get_boot_status(void)
+w_int32_t get_boot_status(void)
 {
     return s_boot_status;
 }
@@ -415,7 +415,7 @@ void go_to_next_step(void)
 
 void boot_loop(void)
 {
-    int32_t i,ret;
+    w_int32_t i,ret;
     device_init();
     while(1)
     {
@@ -427,7 +427,7 @@ void boot_loop(void)
                 ret = g_status_handTB[i].handle();
                 if(0 != ret)
                 {
-                    sys_printf("step[%d] %s captures some errors.\r\n",i + 1,g_status_handTB[i].stepname);
+                    wind_printf("step[%d] %s captures some errors.\r\n",i + 1,g_status_handTB[i].stepname);
                 }
                 break;
             }
@@ -441,7 +441,7 @@ void boot_loop(void)
 }
 
 
-int32_t main(void)
+w_int32_t main(void)
 {
     boot_loop();
     return 0;

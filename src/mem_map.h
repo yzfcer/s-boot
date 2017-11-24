@@ -13,7 +13,7 @@
 **********************************************************************************/
 #ifndef MEM_MAP_H__
 #define MEM_MAP_H__
-#include "boot_type.h"
+#include "wind_type.h"
 #include "share_param.h"
 #ifdef __cplusplus
 extern "C" {
@@ -42,12 +42,12 @@ typedef struct __region
 {
     char *regname;
     memtype_e type; 
-    uint32_t index;
-    uint32_t addr;
-    uint32_t size;
-    uint32_t datalen;
-    uint32_t crc;
-    uint32_t status; 
+    w_uint32_t index;
+    w_uint32_t addr;
+    w_uint32_t size;
+    w_uint32_t datalen;
+    w_uint32_t crc;
+    w_uint32_t status; 
 }region_s;
 
 typedef struct __ROM_map_s
@@ -83,15 +83,15 @@ typedef struct __mem_map_s
 }mem_map_s;
 
 void init_map_info(mem_map_s *map);
-int32_t mem_region_init(void);
-int32_t check_map_valid(void);
+w_int32_t mem_region_init(void);
+w_int32_t check_map_valid(void);
 
 void print_map_info(mem_map_s *map);
 void print_program_space(mem_map_s *map);
 
-uint32_t get_share_addr(void);
-char *memtype_name(uint32_t type);
-char *region_name(uint32_t regidx);
+w_uint32_t get_share_addr(void);
+char *memtype_name(w_uint32_t type);
+char *region_name(w_uint32_t regidx);
 mem_map_s *get_memory_map(void);
 
 void copy_region_info(region_s *src,region_s *dest);

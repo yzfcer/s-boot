@@ -24,12 +24,12 @@ extern "C" {
 
 
 boot_param_s *g_pbp = NULL;
-static uint8_t g_bootparam[BOOT_PARAM1_SIZE];
+static w_uint8_t g_bootparam[BOOT_PARAM1_SIZE];
 
 
-static void upate_bootparam_crc(uint8_t *prmbuf)
+static void upate_bootparam_crc(w_uint8_t *prmbuf)
 {
-    uint32_t *crc = (uint32_t*)&prmbuf[sizeof(boot_param_s)];
+    w_uint32_t *crc = (w_uint32_t*)&prmbuf[sizeof(boot_param_s)];
     *crc = calc_crc32(prmbuf,sizeof(boot_param_s),0xffffffff);
 }
 
@@ -42,7 +42,7 @@ void *get_boot_params(void)
 
 void *get_boot_params_from_ROM(void)
 {
-    int32_t i,ret;
+    w_int32_t i,ret;
     mem_map_s *map;
     region_s *src,*dest;
     ret = param_read();
@@ -68,7 +68,7 @@ void *get_boot_params_from_ROM(void)
 
 void param_init(void)
 {
-    int32_t i;
+    w_int32_t i;
     char *src,*dest;
     mem_map_s *map = get_memory_map();
     boot_param_s *bp = (boot_param_s*)g_bootparam;
@@ -95,10 +95,10 @@ void param_init(void)
 
 
 //检查参数是否有效，有效返回1，无效返回0
-int32_t param_check_valid(uint8_t *prmbuf)
+w_int32_t param_check_valid(w_uint8_t *prmbuf)
 {
     boot_param_s *bp = (boot_param_s *)prmbuf;
-    uint32_t *crc = (uint32_t*)&prmbuf[sizeof(boot_param_s)];
+    w_uint32_t *crc = (w_uint32_t*)&prmbuf[sizeof(boot_param_s)];
     if(bp->magic != BOOT_PARAM_MAGIC)
     {
         sys_warn("param block is invalid.");
@@ -124,7 +124,7 @@ int32_t param_check_valid(uint8_t *prmbuf)
 
 void param_clear_buffer(void)
 {
-    int32_t i;
+    w_int32_t i;
     for(i = 0;i < sizeof(g_bootparam);i ++)
     {
         g_bootparam[i] = 0;
@@ -132,10 +132,10 @@ void param_clear_buffer(void)
     g_pbp = NULL;
 }
 
-int32_t param_read(void)
+w_int32_t param_read(void)
 {
-    uint32_t err = 0;
-    int32_t i,j,len,ret;
+    w_uint32_t err = 0;
+    w_int32_t i,j,len,ret;
     region_s *reg[2];
     mem_map_s *map = get_memory_map();
     reg[0] = &map->rom.boot_param1;
@@ -171,9 +171,9 @@ int32_t param_read(void)
     
 }
 
-int32_t param_flush(void)
+w_int32_t param_flush(void)
 {
-    int32_t i,j,len,err = 0;
+    w_int32_t i,j,len,err = 0;
     region_s *reg[2];
     boot_param_s *bp = (boot_param_s *)g_bootparam;
     mem_map_s *map = get_memory_map();
@@ -182,7 +182,7 @@ int32_t param_flush(void)
     
     bp->mem_map.rom.boot_param1.datalen = sizeof(boot_param_s);
     bp->mem_map.rom.boot_param2.datalen = sizeof(boot_param_s);    
-    upate_bootparam_crc((uint8_t*)bp);
+    upate_bootparam_crc((w_uint8_t*)bp);
     for(i = 0;i < 2;i ++)
     {
         for(j = 0;j < 3;j ++)
@@ -210,7 +210,7 @@ int32_t param_flush(void)
     return 0;
 }
 
-int32_t param_check_debug_mode(void)
+w_int32_t param_check_debug_mode(void)
 {
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     if(NULL == bp)

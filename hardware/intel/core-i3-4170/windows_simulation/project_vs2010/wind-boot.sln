@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "s-boot", "s-boot\s-boot.vcxproj", "{43D4A2B2-E9DB-4326-A0DD-C2071A7D02A4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wind-boot", "wind-boot\wind-boot.vcxproj", "{43D4A2B2-E9DB-4326-A0DD-C2071A7D02A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

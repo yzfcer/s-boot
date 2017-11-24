@@ -13,7 +13,7 @@
 **********************************************************************************/
 #ifndef MEM_DRIVER_H__
 #define MEM_DRIVER_H__
-#include "boot_type.h"
+#include "wind_type.h"
 #include "mem_map.h"
  
 //硬件RAM数量和基地址和空间大小定义
@@ -103,13 +103,13 @@
 #define SYS_RAMRUN_ADDR 0x40000
 #define SYS_RAMRUN_SIZE 0xC0000
 
-uint32_t get_ram_base(int32_t idx);
-uint32_t get_rom_base(int32_t idx);
-uint32_t get_ram_lenth(int32_t idx);
-uint32_t get_rom_lenth(int32_t idx);
+w_uint32_t get_ram_base(w_int32_t idx);
+w_uint32_t get_rom_base(w_int32_t idx);
+w_uint32_t get_ram_lenth(w_int32_t idx);
+w_uint32_t get_rom_lenth(w_int32_t idx);
 
-int read_rom(uint8_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth);
-int write_rom(uint8_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth);
-int erase_rom(uint8_t memidx,uint32_t addr,int32_t lenth);
+w_int32_t read_rom(w_uint8_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t lenth);
+w_int32_t write_rom(w_uint8_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t lenth);
+w_int32_t erase_rom(w_uint8_t memidx,w_uint32_t addr,w_int32_t lenth);
 
 #endif

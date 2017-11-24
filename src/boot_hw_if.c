@@ -23,25 +23,25 @@ extern "C" {
 #endif
 
 //通用缓存器，一般在拷贝数据时做缓存，或者接收命令字符
-uint8_t commbuffer[BLOCK_SIZE];
+w_uint8_t commbuffer[BLOCK_SIZE];
 
-void boot_delay(uint32_t ms)
+void boot_delay(w_uint32_t ms)
 {
-    uint32_t tick = boot_get_sys_ms();
+    w_uint32_t tick = boot_get_sys_ms();
     while(boot_get_sys_ms() - tick < ms);
 }
 
-int32_t wait_for_key_input(int32_t to_sec,char *ch,int32_t print_flag)
+w_int32_t wait_for_key_input(w_int32_t to_sec,char *ch,w_int32_t print_flag)
 {
-    int32_t second;
-    uint32_t tick;
-    int32_t ret = -1;
+    w_int32_t second;
+    w_uint32_t tick;
+    w_int32_t ret = -1;
     if(to_sec <= 0)
         return -1;
     second = to_sec > 99?99:to_sec;
     tick = boot_get_sys_ms();
     if(print_flag)
-        sys_printf("\r\nwaiting:%ds",second);
+        wind_printf("\r\nwaiting:%ds",second);
     while(1)
     {
         feed_watchdog();
@@ -61,19 +61,19 @@ int32_t wait_for_key_input(int32_t to_sec,char *ch,int32_t print_flag)
             }
             if(print_flag)
             {
-                sys_printf("%c%c%c",8,8,8);
-                sys_printf("%2ds",second);
+                wind_printf("%c%c%c",8,8,8);
+                wind_printf("%2ds",second);
             }
         }
     }
-    sys_printf("\r\n");
+    wind_printf("\r\n");
     return ret;
 }
 
 
-int sys_printf(const char *fmt,...)
+w_int32_t wind_printf(const char *fmt,...)
 {
-    int cnt;
+    w_int32_t cnt;
     va_list argptr;
     static char outbuf[256];
     
@@ -85,19 +85,19 @@ int sys_printf(const char *fmt,...)
 }
 
 
-int32_t read_char_blocking(char *ch)
+w_int32_t read_char_blocking(char *ch)
 {
     if(0 == wait_for_key_input(60,ch,0))
         return 0;
-    sys_printf("you have NOT input any key in a 60 seconds,boot exit the menu list.\r\n");
+    wind_printf("you have NOT input any key in a 60 seconds,boot exit the menu list.\r\n");
     if(0 == wait_for_key_input(30,ch,1))
         return 0;
     return -1;
 }
 
-int32_t read_line_blockig(char *buff,int32_t len)
+w_int32_t read_line_blockig(char *buff,w_int32_t len)
 {
-    int idx = 0;
+    w_int32_t idx = 0;
     char ch;
 	while(1)
     {
@@ -128,9 +128,9 @@ typedef enum
 
 typedef struct
 {
-    uint32_t stat;
-    uint32_t idx;
-    uint32_t mstick;
+    w_uint32_t stat;
+    w_uint32_t idx;
+    w_uint32_t mstick;
 }recv_stat_s;
 
 recv_stat_s g_recvstat;
@@ -142,7 +142,7 @@ void init_recv_stat(recv_stat_s *stat)
 }
 static void wait_file_send_compete(void)
 {
-	int32_t ret;
+	w_int32_t ret;
 	char ch;
 	g_recvstat.stat = boot_get_sys_ms();
 	while(1)
@@ -160,10 +160,10 @@ static void wait_file_send_compete(void)
     }
 }
 
-int32_t boot_receive_img(uint32_t addr,uint32_t maxlen)
+w_int32_t boot_receive_img(w_uint32_t addr,w_uint32_t maxlen)
 {
-    int32_t ret;
-    int32_t i,end;
+    w_int32_t ret;
+    w_int32_t i,end;
     char *buf = (char*)addr;
     init_recv_stat(&g_recvstat);
     while(1)
@@ -199,11 +199,11 @@ int32_t boot_receive_img(uint32_t addr,uint32_t maxlen)
                     g_recvstat.mstick = boot_get_sys_ms();
                     if((g_recvstat.idx & 0x1ff) == 0)
                     {
-                        sys_printf("#");
+                        wind_printf("#");
                     }
                     if((g_recvstat.idx & 0x7fff) == 0)
                     {
-                        sys_printf("\r\n");
+                        wind_printf("\r\n");
                     }
                 }
                 else
@@ -216,7 +216,7 @@ int32_t boot_receive_img(uint32_t addr,uint32_t maxlen)
                 feed_watchdog();
                 break;
             case RECV_END:
-                sys_printf("\r\n");
+                wind_printf("\r\n");
                 end = (g_recvstat.idx + BLOCK_SIZE - 1)/BLOCK_SIZE*BLOCK_SIZE;
                 for(i = g_recvstat.idx;i < end; i ++)
                     buf[i] = 0;
@@ -226,14 +226,14 @@ int32_t boot_receive_img(uint32_t addr,uint32_t maxlen)
 }
 #endif
 
-static int read_ram(uint32_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth)
+static w_int32_t read_ram(w_uint32_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t lenth)
 {
-    int i;
-    uint8_t *src;
-    uint32_t base;
-    uint32_t size;
+    w_int32_t i;
+    w_uint8_t *src;
+    w_uint32_t base;
+    w_uint32_t size;
 
-    src = (uint8_t*)addr;
+    src = (w_uint8_t*)addr;
     base = get_ram_base(memidx);
     size = get_ram_lenth(memidx);
     if(addr - base + lenth >= size)
@@ -245,14 +245,14 @@ static int read_ram(uint32_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth)
     return lenth;
 }
 
-static int write_ram(uint32_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth)
+static w_int32_t write_ram(w_uint32_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t lenth)
 {
-    int i;
-    uint8_t *dest;
-    uint32_t base;
-    uint32_t size;
+    w_int32_t i;
+    w_uint8_t *dest;
+    w_uint32_t base;
+    w_uint32_t size;
 
-    dest = (uint8_t*)addr;
+    dest = (w_uint8_t*)addr;
     base = get_ram_base(memidx);
     size = get_ram_lenth(memidx);
     if(addr - base + lenth >= size)
@@ -265,13 +265,13 @@ static int write_ram(uint32_t memidx,uint32_t addr,uint8_t *buf,int32_t lenth)
     return lenth;
 }
 
-uint8_t *get_block_buffer(void)
+w_uint8_t *get_block_buffer(void)
 {
     return commbuffer;
 }
-int32_t read_block(uint8_t memtype,uint32_t memidx,uint32_t addr,uint8_t *buf,int32_t blkcount)
+w_int32_t read_block(w_uint8_t memtype,w_uint32_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t blkcount)
 {
-    int len;
+    w_int32_t len;
     //sys_notice("read block base:0x%x",addr);
     switch(memtype)
     {
@@ -291,9 +291,9 @@ int32_t read_block(uint8_t memtype,uint32_t memidx,uint32_t addr,uint8_t *buf,in
     return blkcount;
 }
 
-int32_t write_block(uint8_t memtype,uint32_t memidx,uint32_t addr,uint8_t *buf,int32_t blkcount)
+w_int32_t write_block(w_uint8_t memtype,w_uint32_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t blkcount)
 {
-    int len; 
+    w_int32_t len; 
     //sys_notice("write block base:0x%x",addr);
     switch(memtype)
     {
@@ -313,9 +313,9 @@ int32_t write_block(uint8_t memtype,uint32_t memidx,uint32_t addr,uint8_t *buf,i
     return blkcount;
 }
 
-int32_t erase_block(uint8_t memtype,uint32_t memidx,uint32_t addr,int32_t blkcount)
+w_int32_t erase_block(w_uint8_t memtype,w_uint32_t memidx,w_uint32_t addr,w_int32_t blkcount)
 {
-    int len; 
+    w_int32_t len; 
     switch(memtype)
     {
         case MEM_TYPE_ROM:

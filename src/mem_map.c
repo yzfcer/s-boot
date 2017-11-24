@@ -54,17 +54,17 @@ char *g_memtype_name[] =
     "ROM",
 };
 
-uint32_t get_share_addr (void)
+w_uint32_t get_share_addr (void)
 {
     mem_map_s *map = get_memory_map();
 	return map->ram.share_param.addr;
 }
 
-char *memtype_name(uint32_t type)
+char *memtype_name(w_uint32_t type)
 {
     return g_memtype_name[type];
 }
-char *region_name(uint32_t regidx)
+char *region_name(w_uint32_t regidx)
 {
     return g_reg_name[regidx];
 }
@@ -76,7 +76,7 @@ mem_map_s *get_memory_map(void)
 
 
 //检查定义的区域之间是否存在冲突
-static int32_t check_region_conflict(region_s *reg1,region_s *reg2)
+static w_int32_t check_region_conflict(region_s *reg1,region_s *reg2)
 {
     if(reg1->type != reg2->type)
         return 0;
@@ -104,7 +104,7 @@ static int32_t check_region_conflict(region_s *reg1,region_s *reg2)
 
 void init_map_info(mem_map_s *map)
 {
-    int32_t i;
+    w_int32_t i;
     region_s *rg = (region_s*)map;
     for(i = 0;i < sizeof(mem_map_s)/sizeof(region_s);i ++)
     {
@@ -114,20 +114,20 @@ void init_map_info(mem_map_s *map)
     }
 }
 
-static uint32_t alloc_region(region_s * reg,uint32_t *base,uint32_t size)
+static w_uint32_t alloc_region(region_s * reg,w_uint32_t *base,w_uint32_t size)
 {
-    uint32_t idx = reg->index;
+    w_uint32_t idx = reg->index;
 	reg->addr = base[idx]+reg->addr;
 	reg->size = size;
 	return size;
 }
 
-int32_t mem_region_init(void)
+w_int32_t mem_region_init(void)
 {
-    int i;
-    int index = 0;
-    uint32_t rambase[RAM_COUNT];
-    uint32_t rombase[ROM_COUNT];
+    w_int32_t i;
+    w_int32_t index = 0;
+    w_uint32_t rambase[RAM_COUNT];
+    w_uint32_t rombase[ROM_COUNT];
 	mem_map_s *map = &g_memmap;
     for(i = 0;i < RAM_COUNT;i ++)
     {
@@ -154,10 +154,10 @@ int32_t mem_region_init(void)
 	return 0;
 }
 
-static int32_t check_rom_conflict(rom_map_s *rom)
+static w_int32_t check_rom_conflict(rom_map_s *rom)
 {
-    int32_t i,j,size;
-    int32_t ret = 0;
+    w_int32_t i,j,size;
+    w_int32_t ret = 0;
     region_s *reg;
     size = sizeof(rom_map_s)/sizeof(region_s);
     reg = (region_s*)rom;
@@ -175,9 +175,9 @@ static int32_t check_rom_conflict(rom_map_s *rom)
     return ret;
 }
 
-static int32_t check_rom_type(rom_map_s *rom)
+static w_int32_t check_rom_type(rom_map_s *rom)
 {
-    int32_t i,size;
+    w_int32_t i,size;
     region_s *reg;
     size = sizeof(rom_map_s)/sizeof(region_s);
     reg = (region_s*)rom;
@@ -190,9 +190,9 @@ static int32_t check_rom_type(rom_map_s *rom)
     return 0;
 }
 
-static int32_t check_ram_type(ram_map_s *ram)
+static w_int32_t check_ram_type(ram_map_s *ram)
 {
-    int32_t i,size;
+    w_int32_t i,size;
     region_s *reg;
     size = sizeof(ram_map_s)/sizeof(region_s);
     reg = (region_s*)ram;
@@ -207,9 +207,9 @@ static int32_t check_ram_type(ram_map_s *ram)
 
 
 
-static int32_t check_ram_conflict(ram_map_s *ram)
+static w_int32_t check_ram_conflict(ram_map_s *ram)
 {
-    int32_t i,j,size;
+    w_int32_t i,j,size;
     region_s *reg;
     size = sizeof(ram_map_s)/sizeof(region_s);
     reg = (region_s*)ram;
@@ -227,7 +227,7 @@ static int32_t check_ram_conflict(ram_map_s *ram)
     return 0;
 }
 
-static int32_t check_run_type(run_map_s *run)
+static w_int32_t check_run_type(run_map_s *run)
 {
     if(run->flash.type != MEM_TYPE_ROM)
         return -1;
@@ -236,7 +236,7 @@ static int32_t check_run_type(run_map_s *run)
     return 0;
 }
 
-int32_t check_probuf_and_running(region_s *probuf,region_s *run)
+w_int32_t check_probuf_and_running(region_s *probuf,region_s *run)
 {
     if(probuf->type != run->type)
         return 0;
@@ -246,7 +246,7 @@ int32_t check_probuf_and_running(region_s *probuf,region_s *run)
         return 0;
     return -1;
 }
-int32_t check_map_valid(void)
+w_int32_t check_map_valid(void)
 {
     mem_map_s *map;
     sys_notice("begin to check momery map params...");
@@ -290,26 +290,26 @@ void print_map_info(mem_map_s *map)
 {
 #define REGION_FORMAT "%-15s%-8d0x%-12x0x%-12x%s\r\n" 
 #define REGION_PARAM(reg) (reg)->regname,(reg)->index,(reg)->addr,(reg)->size,memtype_name((reg)->type)
-    int32_t i;
+    w_int32_t i;
     region_s *reg;
-    sys_printf("memory map as following:\r\n");
-    sys_printf("%-15s%-8s%-14s%-14s%-12s\r\n","region","memidx","addr","size","type");
+    wind_printf("memory map as following:\r\n");
+    wind_printf("%-15s%-8s%-14s%-14s%-12s\r\n","region","memidx","addr","size","type");
     reg = (region_s*)&map->rom;
     for(i = 0;i < sizeof(map->rom)/sizeof(region_s);i ++)
     {
-        sys_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
+        wind_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
     }
-    sys_printf("\r\n");
+    wind_printf("\r\n");
     reg = (region_s*)&map->ram;
     for(i = 0;i < sizeof(map->ram)/sizeof(region_s);i ++)
     {
-        sys_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
+        wind_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
     }
-    sys_printf("\r\n");
+    wind_printf("\r\n");
     reg = (region_s*)&map->run;
     for(i = 0;i < sizeof(map->run)/sizeof(region_s);i ++)
     {
-        sys_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
+        wind_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
     }
 }
 
@@ -318,10 +318,10 @@ void print_program_space(mem_map_s *map)
 #define REGION_FORMAT1 "%-15s%-8d0x%-10x0x%-9x0x%-9x%-9s%4d%%\r\n" 
 #define REGION_PARAM1(reg) (reg)->regname,(reg)->index,(reg)->addr,(reg)->size,\
                         (reg)->datalen,memtype_name((reg)->type),(reg)->size?((reg)->datalen*100)/(reg)->size:0
-        sys_printf("%-15s%-8s%-12s%-11s%-11s%-9s%-8s\r\n","region","memidx","addr","size","datalen","type","usage");
-        sys_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.sys_program1));
-        sys_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.sys_program2));
-        sys_printf(REGION_FORMAT1,REGION_PARAM1(&map->run.flash));
+        wind_printf("%-15s%-8s%-12s%-11s%-11s%-9s%-8s\r\n","region","memidx","addr","size","datalen","type","usage");
+        wind_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.sys_program1));
+        wind_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.sys_program2));
+        wind_printf(REGION_FORMAT1,REGION_PARAM1(&map->run.flash));
 }
 
 void copy_region_info(region_s *src,region_s *dest)

@@ -17,13 +17,13 @@
 extern "C" {
 #endif
 
-uint32_t POLYNOMIAL = 0xEDB88320;
-int32_t have_table = 0;
-uint32_t table[256];
+w_uint32_t POLYNOMIAL = 0xEDB88320;
+w_int32_t have_table = 0;
+w_uint32_t table[256];
 
 void make_table()
 {
-    int32_t i, j ;
+    w_int32_t i, j ;
     have_table = 1 ;
     for (i = 0;i < 256;i++)
         for (j = 0,table[i] = i;j < 8;j++)
@@ -31,9 +31,9 @@ void make_table()
 }
 
 
-uint32_t calc_crc32(uint8_t *data, int32_t len,uint32_t crc)
+w_uint32_t calc_crc32(w_uint8_t *data, w_int32_t len,w_uint32_t crc)
 {
-    int32_t i;
+    w_int32_t i;
     if(!have_table) 
         make_table();
     crc = ~crc;

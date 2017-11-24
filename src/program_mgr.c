@@ -31,16 +31,16 @@ extern "C" {
 #endif
 
 
-static uint32_t LE_TO_BE32(uint32_t x) 
+static w_uint32_t LE_TO_BE32(w_uint32_t x) 
 {
     return (((x)&0xff)<<24) + (((x>>8)&0xff)<<16) + (((x>>16)&0xff)<<8) + (((x>>24)&0xff));
 }
 
-static void print32_t_copy_percents(int32_t numerator, int32_t denominator,int32_t del)
+static void print32_t_copy_percents(w_int32_t numerator, w_int32_t denominator,w_int32_t del)
 {
     if(del)
-        sys_printf("%c%c%c%c",8,8,8,8);
-    sys_printf("%3d%%",numerator*100/denominator);
+        wind_printf("%c%c%c%c",8,8,8,8);
+    wind_printf("%3d%%",numerator*100/denominator);
         feed_watchdog();
 }
 static char *encty_type[] = 
@@ -53,20 +53,20 @@ static char *encty_type[] =
 
 static void print_img_head(img_head_s *head)
 {
-    sys_printf("img head info:\r\n");
-	//sys_printf("board index:%d\r\n",(uint32_t)(&head->board_name)-(uint32_t)(&head->magic));
-    sys_printf("board name     : %s\r\n",(char*)head->board_name);
-    sys_printf("cpu arch       : %s\r\n",(char*)head->arch_name);
-    sys_printf("CPU model      : %s\r\n",(char*)head->cpu_name);
-    sys_printf("img file name  : %s\r\n",(char*)head->img_name);
-    sys_printf("img file lenth : %d\r\n",head->img_len);
-    sys_printf("soft version   : %s\r\n",head->bin_ver);
+    wind_printf("img head info:\r\n");
+	//wind_printf("board index:%d\r\n",(w_uint32_t)(&head->board_name)-(w_uint32_t)(&head->magic));
+    wind_printf("board name     : %s\r\n",(char*)head->board_name);
+    wind_printf("cpu arch       : %s\r\n",(char*)head->arch_name);
+    wind_printf("CPU model      : %s\r\n",(char*)head->cpu_name);
+    wind_printf("img file name  : %s\r\n",(char*)head->img_name);
+    wind_printf("img file lenth : %d\r\n",head->img_len);
+    wind_printf("soft version   : %s\r\n",head->bin_ver);
     if(head->encry_type < 4);
-        sys_printf("encrypt type   : %s\r\n",encty_type[head->encry_type]);
-    sys_printf("\r\n");
+        wind_printf("encrypt type   : %s\r\n",encty_type[head->encry_type]);
+    wind_printf("\r\n");
 }
 
-static int head_endian_convert(img_head_s *head)
+static w_int32_t head_endian_convert(img_head_s *head)
 {
     if(head->endian_test = 0x12345678)
         return 0;
@@ -84,9 +84,9 @@ static int head_endian_convert(img_head_s *head)
     return -1;        
 }
 
-int memory_compare(uint8_t *dest,uint8_t *src,int len)
+w_int32_t memory_compare(w_uint8_t *dest,w_uint8_t *src,w_int32_t len)
 {
-    int i;
+    w_int32_t i;
     for(i = 0;i < len;i ++)
     {
         if(dest[i] > src[i])
@@ -97,9 +97,9 @@ int memory_compare(uint8_t *dest,uint8_t *src,int len)
     return 0;
 }
 
-int string_len(const char *str)
+w_int32_t string_len(const char *str)
 {
-    int i = 0;
+    w_int32_t i = 0;
     if(str == NULL)
         return 0;
     while(str[i])
@@ -127,9 +127,9 @@ bool_t check_hardware_matched(img_head_s *head)
     return B_TRUE;    
 }
 
-int decrypt_img_data(region_s *img,region_s *bin)
+w_int32_t decrypt_img_data(region_s *img,region_s *bin)
 {
-    int len;
+    w_int32_t len;
     img_head_s *head;
 
     copy_region_info(img,bin);
@@ -139,7 +139,7 @@ int decrypt_img_data(region_s *img,region_s *bin)
     bin->datalen = img->datalen - head->head_len;
     sys_notice("decrypt img file...");
     sys_debug("decrypt_data base:0x%x,lenth:%d",bin->addr,bin->datalen);
-	len = decrypt_data(head->encry_type,(uint8_t *)bin->addr,bin->datalen);
+	len = decrypt_data(head->encry_type,(w_uint8_t *)bin->addr,bin->datalen);
     if(len < 0)
     {
         sys_warn("decrypt img file failed.");
@@ -147,16 +147,16 @@ int decrypt_img_data(region_s *img,region_s *bin)
     }
     bin->datalen = len;
     
-    bin->crc = calc_crc32((uint8_t *)bin->addr,bin->datalen,0xffffffff);
+    bin->crc = calc_crc32((w_uint8_t *)bin->addr,bin->datalen,0xffffffff);
     feed_watchdog();
     sys_notice("decrypt img file OK.");
     return 0;
 }
 
 
-int32_t check_img_valid(region_s *img)
+w_int32_t check_img_valid(region_s *img)
 {
-    uint32_t cal_crc,crc;
+    w_uint32_t cal_crc,crc;
     img_head_s *head;
 
     feed_watchdog();
@@ -167,7 +167,7 @@ int32_t check_img_valid(region_s *img)
         return -1;
     }
     
-    cal_crc = calc_crc32((uint8_t*)head,head->head_len - 4,0xffffffff);
+    cal_crc = calc_crc32((w_uint8_t*)head,head->head_len - 4,0xffffffff);
     crc = head->head_crc;
     
     sys_debug("img file head crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
@@ -184,7 +184,7 @@ int32_t check_img_valid(region_s *img)
     }
     
     feed_watchdog();
-	crc = calc_crc32((uint8_t*)(img->addr+head->head_len),head->img_len - head->head_len,0xffffffff);
+	crc = calc_crc32((w_uint8_t*)(img->addr+head->head_len),head->img_len - head->head_len,0xffffffff);
     cal_crc = head->bin_crc;
     
     sys_debug("bin file crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
@@ -200,11 +200,11 @@ int32_t check_img_valid(region_s *img)
 }
 
 
-int32_t copy_region_data(region_s *src,region_s *dest)
+w_int32_t copy_region_data(region_s *src,region_s *dest)
 {
-    int32_t i,j,len,blocks,times;
-    uint32_t addr;
-    uint8_t *buff = get_block_buffer();
+    w_int32_t i,j,len,blocks,times;
+    w_uint32_t addr;
+    w_uint8_t *buff = get_block_buffer();
 
     if(0 >= src->datalen)
         return 0;
@@ -220,7 +220,7 @@ int32_t copy_region_data(region_s *src,region_s *dest)
                 memtype_name(dest->type),dest->addr,dest->size);
     
     blocks = (src->datalen + BLOCK_SIZE - 1) / BLOCK_SIZE;
-    sys_printf("complete:");
+    wind_printf("complete:");
     print32_t_copy_percents(0,1,0);
     for(i = 0;i < blocks;i ++)
     {    
@@ -260,7 +260,7 @@ int32_t copy_region_data(region_s *src,region_s *dest)
         feed_watchdog();
     }
     print32_t_copy_percents(i,blocks,1);
-    sys_printf("\r\n");
+    wind_printf("\r\n");
 
     dest->datalen = src->datalen;
     dest->crc = src->crc;
@@ -283,9 +283,9 @@ static bool_t region_equal(region_s *src,region_s *dest)
     return B_TRUE;
 }
 
-int32_t roll_back_program(void)
+w_int32_t roll_back_program(void)
 {
-    int32_t ret;
+    w_int32_t ret;
     region_s *src;
     region_s bin;
     bool_t run_in_program1;
@@ -323,9 +323,9 @@ int32_t roll_back_program(void)
     return 0;
 }
 
-int32_t flush_img_to_ram(region_s *img)
+w_int32_t flush_img_to_ram(region_s *img)
 {
-    int32_t ret;
+    w_int32_t ret;
     region_s bin;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     decrypt_img_data(img,&bin);
@@ -344,9 +344,9 @@ int32_t flush_img_to_ram(region_s *img)
 
 
 //先备份原来的程序，再烧录新程序到sys_program1和运行区
-int32_t flush_img_to_rom(region_s *img)
+w_int32_t flush_img_to_rom(region_s *img)
 {
-    int32_t ret;
+    w_int32_t ret;
     region_s *src,*dest;
     region_s bin;
     img_head_s *head;
@@ -405,9 +405,9 @@ int32_t flush_img_to_rom(region_s *img)
 }
 
 
-int32_t flush_img_file(memtype_e type,region_s *img)
+w_int32_t flush_img_file(memtype_e type,region_s *img)
 {
-    int32_t ret;   
+    w_int32_t ret;   
     switch(type)
     {
         case MEM_TYPE_RAM:
@@ -432,9 +432,9 @@ int32_t flush_img_file(memtype_e type,region_s *img)
     return ret;
 }
 
-int32_t download_img_file(memtype_e type)
+w_int32_t download_img_file(memtype_e type)
 {
-    int32_t ret,len;
+    w_int32_t ret,len;
     region_s *img;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
 
@@ -444,7 +444,7 @@ int32_t download_img_file(memtype_e type)
         return -1;
     }
     img = &bp->mem_map.ram.load_buffer;
-    sys_printf("begin to receive file data,please wait.\r\n");
+    wind_printf("begin to receive file data,please wait.\r\n");
     len = boot_receive_img(img->addr,img->size);
     if(len <= 0)
     {
@@ -452,7 +452,7 @@ int32_t download_img_file(memtype_e type)
         return -1;
     }
 
-    img->datalen = (uint32_t)len;
+    img->datalen = (w_uint32_t)len;
     sys_notice("img file lenth:%d",img->datalen);
     ret = check_img_valid(img);
     if(ret != 0)
@@ -472,13 +472,13 @@ int32_t download_img_file(memtype_e type)
 
 
 
-int32_t clean_program(void)
+w_int32_t clean_program(void)
 {
-    int idx = 0;
-    uint32_t i,blocknum;
+    w_int32_t idx = 0;
+    w_uint32_t i,blocknum;
     region_s *code[5];
     boot_param_s *bp = (boot_param_s*)get_boot_params();
-    sys_printf("clearing program ...\r\n");
+    wind_printf("clearing program ...\r\n");
     code[idx++] = &bp->mem_map.rom.sys_program1;
     code[idx++] = &bp->mem_map.rom.sys_program2;
     code[idx++] = &bp->mem_map.run.flash;
@@ -491,7 +491,7 @@ int32_t clean_program(void)
         blocknum = (code[i]->datalen + BLOCK_SIZE - 1) / BLOCK_SIZE;
         erase_block(code[i]->type,code[i]->index,code[i]->addr,blocknum);
     }
-    sys_printf("clear program OK.\r\n");
+    wind_printf("clear program OK.\r\n");
     return 0;
 }
 

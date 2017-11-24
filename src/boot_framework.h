@@ -13,7 +13,7 @@
 **********************************************************************************/
 #ifndef MAIN_H__
 #define MAIN_H__
-#include "boot_type.h"
+#include "wind_type.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -36,7 +36,7 @@ typedef enum
     BOOT_STEP_CNT
 }boot_status_e;
 
-typedef int32_t (*Boot_handle)(void);
+typedef w_int32_t (*Boot_handle)(void);
 typedef struct 
 {
     boot_status_e status;

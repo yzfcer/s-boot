@@ -11,9 +11,9 @@
        Author:
        Modification:
 **********************************************************************************/
-#include "boot_type.h"
-typedef int (*Encrypt)(uint8_t *data,int lenth);
-typedef int (*Decrypt)(uint8_t *data,int lenth);
+#include "wind_type.h"
+typedef w_int32_t (*Encrypt)(w_uint8_t *data,w_int32_t lenth);
+typedef w_int32_t (*Decrypt)(w_uint8_t *data,w_int32_t lenth);
 typedef struct
 {
     Encrypt encrypt;
@@ -21,8 +21,8 @@ typedef struct
 }crypt_port_s;
 
 
-int RC4_crypt(uint8_t *data, int32_t datalen);
-static int none_crypt(uint8_t *data,int datalen)
+w_int32_t RC4_crypt(w_uint8_t *data, w_int32_t datalen);
+static w_int32_t none_crypt(w_uint8_t *data,w_int32_t datalen)
 {
 	return datalen;
 }
@@ -33,10 +33,10 @@ crypt_port_s crypt_port[] =
     {RC4_crypt,RC4_crypt},
 };
 
-int encrypt_data(int crypttype,uint8_t *data,int lenth)
+w_int32_t encrypt_data(w_int32_t crypttype,w_uint8_t *data,w_int32_t lenth)
 {
     crypt_port_s *port;
-    int count = sizeof(crypt_port)/sizeof(crypt_port_s);
+    w_int32_t count = sizeof(crypt_port)/sizeof(crypt_port_s);
     if(crypttype >= count)
         return lenth;
     port = &crypt_port[crypttype];
@@ -45,10 +45,10 @@ int encrypt_data(int crypttype,uint8_t *data,int lenth)
     return port->encrypt(data,lenth);
 }
 
-int decrypt_data(int crypttype,uint8_t *data,int lenth)
+w_int32_t decrypt_data(w_int32_t crypttype,w_uint8_t *data,w_int32_t lenth)
 {
     crypt_port_s *port;
-    int count = sizeof(crypt_port)/sizeof(crypt_port_s);
+    w_int32_t count = sizeof(crypt_port)/sizeof(crypt_port_s);
     if(crypttype >= count)
         return lenth;
     port = &crypt_port[crypttype];

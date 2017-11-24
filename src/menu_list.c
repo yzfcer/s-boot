@@ -29,10 +29,10 @@ extern "C" {
 #endif
 
 
-extern int string_len(const char *str);
-static int32_t is_string_equal(char *str1,char *str2,int32_t len)
+extern w_int32_t string_len(const char *str);
+static w_int32_t is_string_equal(char *str1,char *str2,w_int32_t len)
 {
-    int32_t i;
+    w_int32_t i;
     for(i = 0;i < len;i ++)
     {
         if(str1[i] != str2[i])
@@ -41,18 +41,18 @@ static int32_t is_string_equal(char *str1,char *str2,int32_t len)
     return 1;
 }
 //退出菜单标记，如果只为有效，回到菜单时将退出菜单
-static uint8_t exit_menu_flag = 0;
+static w_uint8_t exit_menu_flag = 0;
 //高级权限标志，拥有高级权限可以使用更多功能
-static int32_t super_prio_flag = 0;
+static w_int32_t super_prio_flag = 0;
 //退出菜单的的运行方向，如果不为0，则向下执行，否则重新初始化
-static int32_t g_go_ahead = 0;
+static w_int32_t g_go_ahead = 0;
 static void exit_menu(void);
-static int32_t make_sure_input(char *info)
+static w_int32_t make_sure_input(char *info)
 {
     char ch;
     while(1)
     {
-        sys_printf("%s?[y/n]\r\n",info);
+        wind_printf("%s?[y/n]\r\n",info);
         if(0 != read_char_blocking(&ch))
         {
             exit_menu();
@@ -65,7 +65,7 @@ static int32_t make_sure_input(char *info)
     }
 }
 
-int32_t get_menu_go_direction(void)
+w_int32_t get_menu_go_direction(void)
 {
     return g_go_ahead;
 }
@@ -79,7 +79,7 @@ static void download_img_to_rom(void)
 
 static void download_img_to_ram(void)
 {
-    int32_t ret;
+    w_int32_t ret;
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     if(bp->mem_map.run.ram.size <= 0)
     {
@@ -102,7 +102,7 @@ static void download_filesystem(void)
 
 static void set_debug_mode(void)
 {
-    int32_t i;
+    w_int32_t i;
     char ch;
     char *mode[] = 
     {
@@ -112,10 +112,10 @@ static void set_debug_mode(void)
     boot_param_s *bp = (boot_param_s*)get_boot_params();
     while(1)
     {
-        sys_printf("set debug mode options:\r\n");
+        wind_printf("set debug mode options:\r\n");
         for(i = 0;i < sizeof(mode)/sizeof(char*);i ++)
         {
-            sys_printf("[%d] %s\r\n",i+1,mode[i]);
+            wind_printf("[%d] %s\r\n",i+1,mode[i]);
         }
         if(0 != read_char_blocking(&ch))
         {
@@ -138,7 +138,7 @@ static void set_debug_mode(void)
 static void show_memmap(void)
 {
     boot_param_s *bp = (boot_param_s *)get_boot_params();
-    sys_printf("current memory map info:\r\n");
+    wind_printf("current memory map info:\r\n");
     print_map_info(&bp->mem_map);
 }
 
@@ -182,7 +182,7 @@ void bootloader_test(void)
 }
 #endif
 
-static void do_clear_flash_data(uint8_t unlock)
+static void do_clear_flash_data(w_uint8_t unlock)
 {
     clean_program();
     param_init();
@@ -197,17 +197,17 @@ static void clear_boot_param(void)
 {
     if(make_sure_input("Are you sure to clear params"))
         do_clear_flash_data(0);
-    sys_printf("clear boot param complete.\r\n");
+    wind_printf("clear boot param complete.\r\n");
 }
 
 static void exit_and_save(void)
 {
-    int32_t ret;
+    w_int32_t ret;
     
     ret = param_flush();
     if(ret != 0)
     {
-        sys_printf("write param fialed.\r\n");
+        wind_printf("write param fialed.\r\n");
     }    //这里是否还需要对参数做进一步的验证
     exit_menu();
 }
@@ -234,7 +234,7 @@ static menu_handle_TB g_menu_handleTB[] =
 
 static void exit_menu(void)
 {
-    int32_t i;
+    w_int32_t i;
     exit_menu_flag = 1;
     if(super_prio_flag)
     {
@@ -247,26 +247,26 @@ static void exit_menu(void)
 
 void print32_t_menu_list(void)
 {
-    int32_t i;
-    sys_printf("\r\n\r\nmenu list:\r\n");
+    w_int32_t i;
+    wind_printf("\r\n\r\nmenu list:\r\n");
     for(i = 0;i < sizeof(g_menu_handleTB)/sizeof(menu_handle_TB);i ++)
     {
         if(!g_menu_handleTB[i].prio)
         {
-            sys_printf("[%c] %s\r\n",g_menu_handleTB[i].key,g_menu_handleTB[i].menu_item);
+            wind_printf("[%c] %s\r\n",g_menu_handleTB[i].key,g_menu_handleTB[i].menu_item);
         }
     }
 }
 
 //开启超级权限，可以删除程序，修改重要参数等
-int32_t open_super_prio(void)
+w_int32_t open_super_prio(void)
 {
-    int32_t i;
-    int len;
-    int32_t prio = 0;
+    w_int32_t i;
+    w_int32_t len;
+    w_int32_t prio = 0;
     char *prio1 = "test";
     char *prio2 = "sudo";
-    uint8_t *buff = get_block_buffer();
+    w_uint8_t *buff = get_block_buffer();
     len = read_line_blockig((char*)buff,BLOCK_SIZE);
     if(is_string_equal((char*)buff,prio1,string_len(prio1)))
     {
@@ -293,7 +293,7 @@ int32_t open_super_prio(void)
 void run_menu(void)
 {
     char ch;
-    int32_t i,ret;
+    w_int32_t i,ret;
     
     exit_menu_flag = 0;
     g_go_ahead = 0;
@@ -317,7 +317,7 @@ void run_menu(void)
         {
             if(ch == '0')
             {
-                sys_printf("\r\n");
+                wind_printf("\r\n");
                 ret = open_super_prio();
                 if(0 == ret)
                 {

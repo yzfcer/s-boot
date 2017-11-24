@@ -33,14 +33,14 @@ void clear_errors(void)
     
 }
 
-void set_error(uint8_t err_type,uint8_t err)
+void set_error(w_uint8_t err_type,w_uint8_t err)
 {
     if(err_type < ERR_CNT)
     {
         boot_stub.err[err_type] = err;
     }
 }
-uint8_t get_error(uint8_t err_type)
+w_uint8_t get_error(w_uint8_t err_type)
 {
     if(err_type < ERR_CNT)
     {
@@ -52,8 +52,8 @@ uint8_t get_error(uint8_t err_type)
 
 void destroy_code_space(region_s *code)
 {
-    uint32_t i;
-    uint8_t *buff = get_block_buffer();
+    w_uint32_t i;
+    w_uint8_t *buff = get_block_buffer();
     for(i = 0;i < BLOCK_SIZE;i ++)
     {
         buff[i] = 0xff;
@@ -85,7 +85,7 @@ void test_upgrade(void)
     boot_param_s *bp = (boot_param_s*)get_boot_params();
 
     img = &bp->mem_map.ram.load_buffer;
-    sys_printf("begin to receive file data,please wait.\r\n");
+    wind_printf("begin to receive file data,please wait.\r\n");
     img->datalen = boot_receive_img(img->addr,img->size);
     if(img->datalen <= 0)
     {
@@ -117,18 +117,18 @@ boot_test_s g_boottest[] =
 
 void print32_t_boottest(void)
 {
-    int32_t i;
-    sys_printf("choose test items:\r\n");
+    w_int32_t i;
+    wind_printf("choose test items:\r\n");
     for(i = 0;i < sizeof(g_boottest)/sizeof(boot_test_s);i ++)
     {
-        sys_printf("[%c] %s\r\n",g_boottest[i].key,g_boottest[i].item_desc);
+        wind_printf("[%c] %s\r\n",g_boottest[i].key,g_boottest[i].item_desc);
     }
 }
 
-int32_t test_entry(void)
+w_int32_t test_entry(void)
 {
     char ch;
-    int32_t i;
+    w_int32_t i;
     while(1)
     {
         print32_t_boottest();

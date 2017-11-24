@@ -17,18 +17,18 @@
 extern "C" {
 #endif
 
-typedef unsigned long long uint64_t;
-typedef unsigned int uint32_t;
-typedef unsigned short uint16_t;
-typedef unsigned char uint8_t;
+typedef unsigned long long w_uint64_t;
+typedef unsigned int w_uint32_t;
+typedef unsigned short w_uint16_t;
+typedef unsigned char w_uint8_t;
 
-typedef long long int64_t;
-typedef int int32_t;
-typedef short int16_t;
-typedef char int8_t;
+typedef long long w_int64_t;
+typedef int w_int32_t;
+typedef short w_int16_t;
+typedef char w_int8_t;
 
-typedef float fp32_t;
-typedef double fp64_t;
+typedef float w_fp32_t;
+typedef double w_fp64_t;
 typedef enum 
 {
     B_FALSE=0,
