@@ -1,7 +1,7 @@
 /*********************************************************************************
   *Copyright(C),2016-2018,yzfcer@163.com
   *FileName:  
-  *Author:      Zhou Jiangcun
+  *Author:      Jason Zhou
   *Version:     1.0
   *Date:        2016/11/04
   *Description:  
