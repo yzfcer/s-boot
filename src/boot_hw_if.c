@@ -232,10 +232,11 @@ static w_int32_t read_ram(w_uint32_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int
     w_uint8_t *src;
     w_uint32_t base;
     w_uint32_t size;
+    part_s *part = part_get_inst_idx(memidx);
 
     src = (w_uint8_t*)addr;
-    base = get_ram_base(memidx);
-    size = get_ram_lenth(memidx);
+    base = part->addr;
+    size = part->size;
     if(addr - base + lenth >= size)
         return -1;
     for(i = 0;i < lenth;i ++)
@@ -251,10 +252,11 @@ static w_int32_t write_ram(w_uint32_t memidx,w_uint32_t addr,w_uint8_t *buf,w_in
     w_uint8_t *dest;
     w_uint32_t base;
     w_uint32_t size;
+    part_s *part = part_get_inst_idx(memidx);
 
     dest = (w_uint8_t*)addr;
-    base = get_ram_base(memidx);
-    size = get_ram_lenth(memidx);
+    base = part->addr;
+    size = part->size;
     if(addr - base + lenth >= size)
         return -1;
 
@@ -269,7 +271,7 @@ w_uint8_t *get_block_buffer(void)
 {
     return commbuffer;
 }
-w_int32_t read_block(w_uint8_t memtype,w_uint32_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t blkcount)
+w_int32_t read_block(w_uint16_t memtype,w_uint32_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t blkcount)
 {
     w_int32_t len;
     //sys_notice("read block base:0x%x",addr);
@@ -281,7 +283,7 @@ w_int32_t read_block(w_uint8_t memtype,w_uint32_t memidx,w_uint32_t addr,w_uint8
                 return len;
             break;
         case MEM_TYPE_ROM:
-            len = read_rom(memidx,addr,buf,blkcount*BLOCK_SIZE);
+            len = mem_read(memidx,addr,buf,blkcount*BLOCK_SIZE);
             if(len < 0)
                 return len;
             break;
@@ -291,7 +293,7 @@ w_int32_t read_block(w_uint8_t memtype,w_uint32_t memidx,w_uint32_t addr,w_uint8
     return blkcount;
 }
 
-w_int32_t write_block(w_uint8_t memtype,w_uint32_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t blkcount)
+w_int32_t write_block(w_uint16_t memtype,w_uint32_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t blkcount)
 {
     w_int32_t len; 
     //sys_notice("write block base:0x%x",addr);
@@ -303,7 +305,7 @@ w_int32_t write_block(w_uint8_t memtype,w_uint32_t memidx,w_uint32_t addr,w_uint
                 return len;
             break;
         case MEM_TYPE_ROM:
-            len = write_rom(memidx,addr,buf,blkcount*BLOCK_SIZE);
+            len = mem_write(memidx,addr,buf,blkcount*BLOCK_SIZE);
             if(len < 0)
                 return len;
             break;
@@ -313,13 +315,13 @@ w_int32_t write_block(w_uint8_t memtype,w_uint32_t memidx,w_uint32_t addr,w_uint
     return blkcount;
 }
 
-w_int32_t erase_block(w_uint8_t memtype,w_uint32_t memidx,w_uint32_t addr,w_int32_t blkcount)
+w_int32_t erase_block(w_uint16_t memtype,w_uint32_t memidx,w_uint32_t addr,w_int32_t blkcount)
 {
     w_int32_t len; 
     switch(memtype)
     {
         case MEM_TYPE_ROM:
-            len = erase_rom(memidx,addr,blkcount*BLOCK_SIZE);
+            len = mem_erase(memidx,addr,blkcount*BLOCK_SIZE);
             if(len < 0)
                 return len;
             break;

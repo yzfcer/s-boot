@@ -80,8 +80,9 @@ static void download_img_to_rom(void)
 static void download_img_to_ram(void)
 {
     w_int32_t ret;
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
-    if(bp->mem_map.run.ram.size <= 0)
+    region_s *dest = mem_map_get_reg("ramrun");
+    boot_param_s *bp = (boot_param_s*)boot_param_instance();
+    if(dest->size <= 0)
     {
         sys_warn("img can not download to RAM,device NOT support.");
         return;
@@ -109,7 +110,7 @@ static void set_debug_mode(void)
         "Normal",
         "Debug",
     };
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
+    boot_param_s *bp = (boot_param_s*)boot_param_instance();
     while(1)
     {
         wind_printf("set debug mode options:\r\n");
@@ -137,14 +138,14 @@ static void set_debug_mode(void)
 
 static void show_memmap(void)
 {
-    boot_param_s *bp = (boot_param_s *)get_boot_params();
+    boot_param_s *bp = (boot_param_s *)boot_param_instance();
     wind_printf("current memory map info:\r\n");
-    print_map_info(&bp->mem_map);
+    part_print_detail();
 }
 
 static void lock_mcu(void)
 {
-    boot_param_s *bp = (boot_param_s *)get_boot_params();
+    boot_param_s *bp = (boot_param_s *)boot_param_instance();
     if(is_chip_lock())
     {
         sys_notice("MCU has been locked before.");
@@ -156,7 +157,7 @@ static void lock_mcu(void)
 
 static void unlock_mcu(void)
 {
-    boot_param_s *bp = (boot_param_s *)get_boot_params();
+    boot_param_s *bp = (boot_param_s *)boot_param_instance();
     if(!is_chip_lock())
     {
         sys_notice("MCU has NOT been locked before.");
@@ -168,8 +169,8 @@ static void unlock_mcu(void)
 
 static void show_program_status(void)
 {
-    boot_param_s *bp = (boot_param_s *)get_boot_params();
-    print_program_space(&bp->mem_map);
+    boot_param_s *bp = (boot_param_s *)boot_param_instance();
+    mem_map_print_status();
 }
 
 #if BOOT_TEST_ENABLE
@@ -185,10 +186,10 @@ void bootloader_test(void)
 static void do_clear_flash_data(w_uint8_t unlock)
 {
     clean_program();
-    param_init();
-    (void)param_flush();
+    boot_param_reset();
+    (void)boot_param_flush();
     
-    param_clear_buffer();
+    boot_param_clear_buffer();
     if(unlock)
         set_chip_lock(0);
 }
@@ -204,7 +205,7 @@ static void exit_and_save(void)
 {
     w_int32_t ret;
     
-    ret = param_flush();
+    ret = boot_param_flush();
     if(ret != 0)
     {
         wind_printf("write param fialed.\r\n");

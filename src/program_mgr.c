@@ -36,13 +36,8 @@ static w_uint32_t LE_TO_BE32(w_uint32_t x)
     return (((x)&0xff)<<24) + (((x>>8)&0xff)<<16) + (((x>>16)&0xff)<<8) + (((x>>24)&0xff));
 }
 
-static void print32_t_copy_percents(w_int32_t numerator, w_int32_t denominator,w_int32_t del)
-{
-    if(del)
-        wind_printf("%c%c%c%c",8,8,8,8);
-    wind_printf("%3d%%",numerator*100/denominator);
-        feed_watchdog();
-}
+
+
 static char *encty_type[] = 
 {
     "no encrypt",
@@ -132,7 +127,7 @@ w_int32_t decrypt_img_data(region_s *img,region_s *bin)
     w_int32_t len;
     img_head_s *head;
 
-    copy_region_info(img,bin);
+    mem_map_copy_info(img,bin);
 	head = (img_head_s*)bin->addr;
     bin->addr += head->head_len;
     bin->size = img->size - head->head_len;
@@ -200,75 +195,7 @@ w_int32_t check_img_valid(region_s *img)
 }
 
 
-w_int32_t copy_region_data(region_s *src,region_s *dest)
-{
-    w_int32_t i,j,len,blocks,times;
-    w_uint32_t addr;
-    w_uint8_t *buff = get_block_buffer();
 
-    if(0 >= src->datalen)
-        return 0;
-    if(dest->size < src->datalen)
-    {
-        sys_warn("space is NOT enough.");
-        return -1;
-    }
-    sys_notice("copy data from \"%s\" to \"%s\" lenth %d.",
-                src->regname,dest->regname,src->datalen);
-    sys_debug("source type %s,addr 0x%x,lenth %d dest type,%s,addr 0x%x,lenth %d.",
-                memtype_name(src->type),src->addr,src->datalen,
-                memtype_name(dest->type),dest->addr,dest->size);
-    
-    blocks = (src->datalen + BLOCK_SIZE - 1) / BLOCK_SIZE;
-    wind_printf("complete:");
-    print32_t_copy_percents(0,1,0);
-    for(i = 0;i < blocks;i ++)
-    {    
-        for(times = 0;times < 3;times ++)
-        {
-            addr = src->addr + i * BLOCK_SIZE;
-            if(i >= blocks - 1)
-            {
-                for(j = 0;j < BLOCK_SIZE;j ++)
-                    buff[j] = 0;
-            }
-            len = read_block(src->type,src->index,addr,buff,1);
-            if(len > 0)
-                break;
-        }
-        if(times >= 3)
-        {
-            sys_warn("read block 0x%x,lenth %d failed.",addr,BLOCK_SIZE);
-            dest->status = MEM_ERROR;
-            return -1;
-        }
-
-        for(times = 0;times < 3;times ++)
-        {
-            addr = dest->addr + i * BLOCK_SIZE;
-            len = write_block(dest->type,dest->index,addr,buff,1);
-            if(len > 0)
-                break;
-        }
-        if(times >= 3)
-        {
-            sys_warn("read block 0x%x,lenth %d failed.",addr,BLOCK_SIZE);
-            dest->status = MEM_ERROR;
-            return -1;
-        }
-        print32_t_copy_percents(i,blocks,1);
-        feed_watchdog();
-    }
-    print32_t_copy_percents(i,blocks,1);
-    wind_printf("\r\n");
-
-    dest->datalen = src->datalen;
-    dest->crc = src->crc;
-    dest->status = MEM_NORMAL;
-
-    sys_debug("copy data OK."); 
-    return 0;    
-}
 
 
 
@@ -276,7 +203,7 @@ static w_bool_t region_equal(region_s *src,region_s *dest)
 {
     if(src->type != dest->type)
         return B_FALSE;
-    if(src->index != dest->index)
+    if(src->memidx != dest->memidx)
         return B_FALSE;
     if(src->addr != dest->addr)
         return B_FALSE;
@@ -286,40 +213,46 @@ static w_bool_t region_equal(region_s *src,region_s *dest)
 w_int32_t roll_back_program(void)
 {
     w_int32_t ret;
-    region_s *src;
+    region_s *src,*dest,*tmp1;
     region_s bin;
     w_bool_t run_in_program1;
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
+    boot_param_s *bp = (boot_param_s*)boot_param_instance();
     
     //先将原来的程序拷贝到备份空间    
-    src = &bp->mem_map.rom.sys_program2;
-    ret = copy_region_data(src,&bp->mem_map.rom.sys_program1);
+    dest = mem_map_get_reg("img2");
+    src = mem_map_get_reg("img1");
+    ret = mem_map_copy_data(src,dest);
     if(0 != ret)
     {
         sys_warn("roll back program failed.");
         return -1;
     }
     
-    run_in_program1 = region_equal(&bp->mem_map.rom.sys_program1,&bp->mem_map.run.flash);
+    dest = mem_map_get_reg("romrun");
+    src = mem_map_get_reg("img1");
+    run_in_program1 = region_equal(dest,src);
     if(run_in_program1)
     {
-        bp->mem_map.run.flash.status = MEM_NORMAL;
-        bp->mem_map.run.flash.crc = src->crc;
-        bp->mem_map.run.flash.datalen= src->datalen;
+        tmp1 = mem_map_get_reg("romrun");
+        tmp1->status = MEM_NORMAL;
+        tmp1->crc = src->crc;
+        tmp1->datalen= src->datalen;
     }
     else
     {
-        copy_region_data(src,&bp->mem_map.ram.load_buffer);
-        src = &bp->mem_map.ram.load_buffer;
+        dest = mem_map_get_reg("img1");
+        src = mem_map_get_reg("cache");
+        mem_map_copy_data(src,dest);
         decrypt_img_data(src,&bin);
-        ret = copy_region_data(&bin,&bp->mem_map.run.flash);
+        dest = mem_map_get_reg("romrun");
+        ret = mem_map_copy_data(&bin,dest);
         if(0 != ret)
         {
             sys_error("flush program to running space failed.");
             return -1;
         }
     }
-    param_flush();
+    boot_param_flush();
     return 0;
 }
 
@@ -327,13 +260,15 @@ w_int32_t flush_img_to_ram(region_s *img)
 {
     w_int32_t ret;
     region_s bin;
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
+    region_s *dest;
+    boot_param_s *bp = (boot_param_s*)boot_param_instance();
     decrypt_img_data(img,&bin);
     //这里需要修改，不能直接使用img，因为会修改程序缓存的起始地址，
     //另外需要重新考虑程序运行在RAM中间时，程序因该怎样存储
     
     sys_notice("begin to copy code to memory...");
-    ret = copy_region_data(&bin,&bp->mem_map.run.ram);
+    dest = mem_map_get_reg("ramrun");
+    ret = mem_map_copy_data(&bin,dest);
     if(0 != ret)
     {
         sys_warn("copy img to running space failed.");
@@ -351,12 +286,14 @@ w_int32_t flush_img_to_rom(region_s *img)
     region_s bin;
     img_head_s *head;
     w_bool_t run_in_program1;
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
+    boot_param_s *bp = (boot_param_s*)boot_param_instance();
     sys_notice("begin to flush code to rom space...");
     
     //先将原来的程序拷贝到备份空间    
-    src = &bp->mem_map.rom.sys_program1;
-    ret = copy_region_data(src,&bp->mem_map.rom.sys_program2);
+    src = mem_map_get_reg("img1");
+    dest = mem_map_get_reg("img2");
+    
+    ret = mem_map_copy_data(src,dest);
     if(0 != ret)
     {
         sys_warn("backup old program failed.");
@@ -364,48 +301,52 @@ w_int32_t flush_img_to_rom(region_s *img)
     }
     
     head = (img_head_s*)img->addr;
-    src = &bp->mem_map.rom.sys_program1;
-    dest = &bp->mem_map.run.flash;
+    src = mem_map_get_reg("img1");
+    dest = mem_map_get_reg("romrun");
     run_in_program1 = region_equal(src,dest);
     
     //烧录到sys_program1，如果同时也是运行空间，则先解密，在烧录
     if(run_in_program1)
     {
         decrypt_img_data(img,&bin);
-        ret = copy_region_data(&bin,&bp->mem_map.rom.sys_program1);
+        dest = mem_map_get_reg("img1");
+        ret = mem_map_copy_data(&bin,dest);
         if(0 != ret)
         {
             sys_warn("flush new program failed.");
             return -1;
         }
-        bp->mem_map.run.flash.status = MEM_NORMAL;
-        bp->mem_map.run.flash.crc = bin.crc;
-        bp->mem_map.run.flash.datalen= bin.datalen;
-        param_flush();
+        dest = mem_map_get_reg("romrun");
+        dest->status = MEM_NORMAL;
+        dest->crc = bin.crc;
+        dest->datalen= bin.datalen;
+        boot_param_flush();
         return 0;
     }
     else
     {
-        ret = copy_region_data(img,&bp->mem_map.rom.sys_program1);
+        dest = mem_map_get_reg("img1");
+        ret = mem_map_copy_data(img,dest);
         if(0 != ret)
         {
             sys_warn("flush new program failed.");
             return -1;
         }
         decrypt_img_data(img,&bin);
-        ret = copy_region_data(&bin,&bp->mem_map.run.flash);
+        dest = mem_map_get_reg("romrun");
+        ret = mem_map_copy_data(&bin,dest);
         if(0 != ret)
         {
             sys_error("write new program failed.");
             return -1;
         }
     }
-    param_flush();
+    boot_param_flush();
     return 0;
 }
 
 
-w_int32_t flush_img_file(memtype_e type,region_s *img)
+w_int32_t flush_img_file(w_int16_t type,region_s *img)
 {
     w_int32_t ret;   
     switch(type)
@@ -424,26 +365,26 @@ w_int32_t flush_img_file(memtype_e type,region_s *img)
     if(0 != ret)
     {
         sys_warn("flush img data failed.");
-        (void)get_boot_params_from_ROM();
+        (void)boot_param_from_rom();
         return ret;
     }
     if(MEM_TYPE_ROM == type)
-        (void)param_flush();
+        (void)boot_param_flush();
     return ret;
 }
 
-w_int32_t download_img_file(memtype_e type)
+w_int32_t download_img_file(w_int16_t type)
 {
     w_int32_t ret,len;
     region_s *img;
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
+    boot_param_s *bp = (boot_param_s*)boot_param_instance();
 
     if(bp->debug_mode)
     {
         sys_notice("device can NOT download in debug mode ,set it to normal mode first");
         return -1;
     }
-    img = &bp->mem_map.ram.load_buffer;
+    img = mem_map_get_reg("cache");
     wind_printf("begin to receive file data,please wait.\r\n");
     len = boot_receive_img(img->addr,img->size);
     if(len <= 0)
@@ -477,19 +418,19 @@ w_int32_t clean_program(void)
     w_int32_t idx = 0;
     w_uint32_t i,blocknum;
     region_s *code[5];
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
+    boot_param_s *bp = (boot_param_s*)boot_param_instance();
     wind_printf("clearing program ...\r\n");
-    code[idx++] = &bp->mem_map.rom.sys_program1;
-    code[idx++] = &bp->mem_map.rom.sys_program2;
-    code[idx++] = &bp->mem_map.run.flash;
-    code[idx++] = &bp->mem_map.rom.boot_param1;
-    code[idx++] = &bp->mem_map.rom.boot_param2;
+    code[idx++] = mem_map_get_reg("img1");
+    code[idx++] = mem_map_get_reg("img2");
+    code[idx++] = mem_map_get_reg("romrun");
+    code[idx++] = mem_map_get_reg("btpara1");
+    code[idx++] = mem_map_get_reg("btpara2");
     
     for(i = 0;i < 5;i ++)
     {
         sys_notice("erase base 0x%x,lenth %d.",code[i]->addr,code[i]->datalen);
         blocknum = (code[i]->datalen + BLOCK_SIZE - 1) / BLOCK_SIZE;
-        erase_block(code[i]->type,code[i]->index,code[i]->addr,blocknum);
+        erase_block(code[i]->type,code[i]->memidx,code[i]->addr,blocknum);
     }
     wind_printf("clear program OK.\r\n");
     return 0;

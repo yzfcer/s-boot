@@ -23,7 +23,7 @@ static void rc4_init(w_uint8_t*sbox, w_uint8_t *key, w_int32_t Len)
     w_uint8_t tmp = 0;
     for (i = 0; i<256; i++)
     {
-        sbox[i] = i;
+        sbox[i] = (w_uint8_t)i;
         k[i] = key[i%Len];
     }
     for (i = 0; i<256; i++)

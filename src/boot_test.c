@@ -58,33 +58,33 @@ void destroy_code_space(region_s *code)
     {
         buff[i] = 0xff;
     }
-    write_block(code->type,code->index,code->addr,buff,1);
+    write_block(code->type,code->memidx,code->addr,buff,1);
 }
 
 void test_pro1_error(void)
 {
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
-    destroy_code_space(&bp->mem_map.rom.sys_program1);
+    region_s *reg = mem_map_get_reg("img1");
+    destroy_code_space(reg);
 }
 void test_probak_error(void)
 {
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
-    destroy_code_space(&bp->mem_map.rom.sys_program2);
+    region_s *reg = mem_map_get_reg("img2");
+    destroy_code_space(reg);
 }
 
 
 void test_run_error(void)
 {
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
-    destroy_code_space(&bp->mem_map.run.flash);
+    region_s *reg = mem_map_get_reg("romrun");
+    destroy_code_space(reg);
 }
 
 void test_upgrade(void)
 {
     region_s *img;
-    boot_param_s *bp = (boot_param_s*)get_boot_params();
+    boot_param_s *bp = (boot_param_s*)boot_param_instance();
 
-    img = &bp->mem_map.ram.load_buffer;
+    img = mem_map_get_reg("cache");
     wind_printf("begin to receive file data,please wait.\r\n");
     img->datalen = boot_receive_img(img->addr,img->size);
     if(img->datalen <= 0)

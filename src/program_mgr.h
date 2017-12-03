@@ -41,9 +41,8 @@ struct __img_head_s
 };
 
 w_int32_t decrypt_img_data(region_s *img,region_s *bin);
-w_int32_t download_img_file(memtype_e type);
+w_int32_t download_img_file(w_int16_t type);
 w_int32_t change_boot_app(w_int32_t index);
-w_int32_t copy_region_data(region_s *src,region_s *dest);
 w_int32_t check_img_valid(region_s *img);
 w_int32_t roll_back_program(void);
 

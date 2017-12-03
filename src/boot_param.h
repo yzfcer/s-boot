@@ -15,6 +15,7 @@
 #define BOOT_PARAM_H__
 #include "wind_type.h"
 #include "mem_map.h"
+#include "boot_part.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -35,20 +36,23 @@ typedef struct
     w_uint8_t run_type;   //运行在RAM或Flash
     w_uint8_t encrypt_type;//程序加密使能
     w_uint8_t lock_en;     //芯片锁定使能
-    
-    mem_map_s mem_map;//系统的空间映射表
+
+    w_int32_t reg_count;
+    w_int32_t map_size;
+    char runreg[PART_NAME_LEN];
+
 }boot_param_s;
 
-void *get_boot_params(void);
-void *get_boot_params_from_ROM(void);
+boot_param_s *boot_param_instance(void);
+boot_param_s *boot_param_from_rom(void);
 
-void param_init(void);
-w_int32_t param_check_valid(w_uint8_t *prmbuf);
-w_int32_t param_check_debug_mode(void);
-void    param_clear_buffer(void);
-w_int32_t param_read(void);
-w_int32_t param_flush(void);
-
+void      boot_param_reset(void);
+w_int32_t boot_param_check_valid(w_uint8_t *prmbuf);
+w_int32_t boot_param_check_debug_mode(void);
+void      boot_param_clear_buffer(void);
+w_int32_t boot_param_read(void);
+w_int32_t boot_param_flush(void);
+void *boot_param_mem_map(void);
 #ifdef __cplusplus
 }
 #endif

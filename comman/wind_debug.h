@@ -26,8 +26,8 @@
 #ifndef WIND_DEBUG_H__
 #define WIND_DEBUG_H__
 
-#include "wind_config.h"
-#include "wind_os_hwif.h"
+//#include "wind_config.h"
+//#include "wind_os_hwif.h"
 
 #ifdef __cplusplus
 extern "C" {

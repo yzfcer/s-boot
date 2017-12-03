@@ -23,6 +23,7 @@
 #include "boot_hw_if.h"
 #include "mem_driver.h"
 #include "boot_check.h"
+#include "wind_string.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -49,8 +50,8 @@ void print_boot_info(void)
 static w_int32_t boot_init(void)
 {
     print_boot_info();
-	mem_region_init();
-    param_clear_buffer();
+    mem_drv_init();
+    boot_param_clear_buffer();
     go_to_next_step();
     sys_notice("bootloader init OK.");
     return 0;
@@ -58,7 +59,7 @@ static w_int32_t boot_init(void)
 
 static w_int32_t boot_app_debug_check(void)
 {
-    w_int32_t dbg_mode = param_check_debug_mode();
+    w_int32_t dbg_mode = boot_param_check_debug_mode();
     if(dbg_mode)
     {
         sys_warn("bootloader mode:DEBUG");
@@ -79,7 +80,7 @@ static w_int32_t boot_first_check(void)
     w_int32_t ret;
     boot_param_s *bp;
     sys_notice("begin to check first running time...");
-    bp = (boot_param_s *)get_boot_params();
+    bp = (boot_param_s *)boot_param_instance();
     if(NULL != bp)
     {
         go_to_next_step();
@@ -87,8 +88,8 @@ static w_int32_t boot_first_check(void)
         return 0;
     }
     sys_notice("NO valid boot params found.");
-    param_init();
-    ret = param_flush();
+    boot_param_reset();
+    ret = boot_param_flush();
     if(0 != ret)
     {
         sys_error("write boot params failed.");
@@ -120,8 +121,8 @@ static w_int32_t boot_chip_lock_check(void)
 static w_int32_t boot_self_check(void)
 {
     w_int32_t ret;
-    boot_param_s *bp = (boot_param_s *)get_boot_params();
-    ret = check_map_valid();
+    boot_param_s *bp = (boot_param_s *)boot_param_instance();
+    ret = mem_map_check();
     if(ret)
     {
         sys_error("memory map params ERROR.");
@@ -138,8 +139,8 @@ static w_int32_t boot_self_check(void)
 static w_int32_t  boot_upgrade_check(void)
 {
     w_int32_t ret;
-    region_s img;
-    boot_param_s *bp = (boot_param_s *)get_boot_params();
+    region_s img,*tmp;
+    boot_param_s *bp = (boot_param_s *)boot_param_instance();
     
     if(NULL == bp)
     {
@@ -165,12 +166,12 @@ static w_int32_t  boot_upgrade_check(void)
     sp_set_upgrade_param(&g_upgrade_info);
     
     sys_notice("handling upgrade event,please wait...");
-    
-    img.regname = bp->mem_map.ram.load_buffer.regname;
-    img.size = bp->mem_map.ram.load_buffer.size;
+    tmp = mem_map_get_reg("cache");
+    wind_strcpy(img.name,tmp->name);
+    img.size = tmp->size;
     img.addr = g_upgrade_info.addr;
     img.datalen = g_upgrade_info.datalen;
-    img.type = (memtype_e)g_upgrade_info.mem_type;
+    img.type = (w_int16_t)g_upgrade_info.mem_type;
 
     ret = check_img_valid(&img);
     if(0 != ret)
@@ -178,8 +179,8 @@ static w_int32_t  boot_upgrade_check(void)
         sys_error("check img file ERROR");
         return -1;
     }
-    
-    if(MEM_TYPE_ROM == bp->mem_map.rom.sys_program1.type)
+    tmp = mem_map_get_reg("img1");
+    if(MEM_TYPE_ROM == tmp->type)
     {
         ret = flush_img_to_rom(&img);
     }
@@ -196,7 +197,7 @@ static w_int32_t  boot_upgrade_check(void)
         return -1;
     }
     
-    ret = param_flush();
+    ret = boot_param_flush();
     if(0 != ret)
     {
         sys_error("update params failed.");
@@ -212,7 +213,7 @@ static w_int32_t  boot_rollback_check(void)
 {
     w_uint8_t roll_flag;
     w_int32_t ret;
-    boot_param_s *bp = (boot_param_s *)get_boot_params();
+    boot_param_s *bp = (boot_param_s *)boot_param_instance();
     
     sys_notice("begin to check app roll back status...");
     ret = sp_get_app_rollback(&roll_flag);
@@ -240,7 +241,7 @@ static w_int32_t boot_wait_key_press(void)
 {
     char ch = 0;
 
-    boot_param_s *bp = (boot_param_s *)get_boot_params();
+    boot_param_s *bp = (boot_param_s *)boot_param_instance();
     wind_printf("press any key to enter menu list:");
     if(0 == wait_for_key_input(bp->wait_sec,&ch,1))
     {
@@ -265,12 +266,12 @@ static w_int32_t boot_menu_list(void)
 static w_int32_t boot_load_app(void)
 {
     mem_status_e mem_stat = MEM_ERROR;
-    region_s *regi = NULL;
+    region_s *regi = NULL,*tmp;
     boot_param_s *bp = NULL; 
 
     sys_notice("begin to load App to running space...");
-    bp = (boot_param_s *)get_boot_params();
-    regi = &bp->mem_map.run.flash;
+    bp = (boot_param_s *)boot_param_instance();
+    regi = mem_map_get_reg("romrun");
     
     if(NULL == bp)
     {
@@ -285,23 +286,25 @@ static w_int32_t boot_load_app(void)
         go_to_next_step();
         return 0;
     }
-    if(bp->mem_map.rom.sys_program1.datalen <= 0)
+    tmp = mem_map_get_reg("img1");
+    if(tmp->datalen <= 0)
     {
         sys_notice("program is NOT existing.");
         set_boot_status(BOOT_MENU_LIST);
         return -1;
     }
-
-    if(MEM_TYPE_ROM == bp->mem_map.run.flash.type)
+	tmp = mem_map_get_reg("romrun");
+    if(MEM_TYPE_ROM == tmp->type)
     {
-        if(MEM_NORMAL == bp->mem_map.run.flash.status)
+        if(MEM_NORMAL == tmp->status)
         {
             mem_stat = MEM_NORMAL;
         }        
     }
     else 
     {
-        if(MEM_NORMAL == bp->mem_map.rom.sys_program1.status)
+        tmp = mem_map_get_reg("img1");
+        if(MEM_NORMAL == tmp->status)
         {
             mem_stat = MEM_NORMAL;
         }
@@ -330,25 +333,26 @@ static w_int32_t boot_load_app(void)
 
 static w_int32_t boot_set_app_param(void)
 {
-    boot_param_s *bp = (boot_param_s *)get_boot_params();
+    region_s *tmp;
+    boot_param_s *bp = (boot_param_s *)boot_param_instance();
     sys_notice("begin to set App params...");
     sp_init_share_param();
     
     sp_set_app_rollback(1);
-    
-    g_upgrade_info.addr = bp->mem_map.ram.load_buffer.addr;
+    tmp = mem_map_get_reg("cache");
+    g_upgrade_info.addr = tmp->addr;
     g_upgrade_info.flag = 0;
-    g_upgrade_info.size = bp->mem_map.ram.load_buffer.size;
-    g_upgrade_info.mem_type = bp->mem_map.ram.load_buffer.type;
+    g_upgrade_info.size = tmp->size;
+    g_upgrade_info.mem_type = tmp->type;
     sp_set_upgrade_param(&g_upgrade_info);
     sp_get_upgrade_param(&g_upgrade_info);
     wind_printf("set upgrade params:\r\n");
     wind_printf("buffer addr:0x%x\r\n",g_upgrade_info.addr);
     wind_printf("buffer lenth:0x%x\r\n",g_upgrade_info.datalen);
-
-    g_sysparam_reg.addr = bp->mem_map.rom.sys_param.addr;
-    g_sysparam_reg.size = bp->mem_map.rom.sys_param.size;
-    g_sysparam_reg.mem_type = bp->mem_map.rom.sys_param.type;
+	tmp = mem_map_get_reg("imgpara");
+    g_sysparam_reg.addr = tmp->addr;
+    g_sysparam_reg.size = tmp->size;
+    g_sysparam_reg.mem_type = tmp->type;
     wind_printf("set sysparam region params:\r\n");
     wind_printf("sysparam addr:0x%x\r\n",g_sysparam_reg.addr);
     wind_printf("sysparam lenth:0x%x\r\n",g_sysparam_reg.size);

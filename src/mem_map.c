@@ -17,250 +17,115 @@
 #include "sys_debug.h"
 #include "boot_param.h"
 #include "mem_driver.h"
+#include "wind_string.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
-#define SET_REG(reg,idx,base,title,memtype) do{\
-                    reg.regname = g_reg_name[idx];\
-                    reg.idx = title##_IDX;\
-                    reg.addr = (base[title##_IDX]) + title##_ADDR;\
-                    reg.size = title##_SIZE;\
-                    reg.type = MEM_TYPE_##memtype;\
-                    idx ++;\
-                    }while(0)
 
-mem_map_s g_memmap;
-char *g_reg_name[] = 
+extern part_s g_region_map[];
+w_uint32_t mem_map_share_addr(void)
 {
-    "boot_program",
-    "boot_param1",
-    "boot_param2",
-    "sys_program1",
-    "sys_program2",
-    "sys_param",
-    "sys_romfs",
-    
-    "data_ram",
-    "load_buffer",
-    "share_param",
-    
-    "run_ifalsh",
-    "run_iram",
-};
-
-char *g_memtype_name[] = 
-{
-    "RAM",
-    "ROM",
-};
-
-w_uint32_t get_share_addr (void)
-{
-    mem_map_s *map = get_memory_map();
-	return map->ram.share_param.addr;
+    part_s *entry = part_get_inst_name("share");
+	return entry->addr;
 }
 
-char *memtype_name(w_uint32_t type)
+char *memtype_name(w_int16_t type)
 {
-    return g_memtype_name[type];
-}
-char *region_name(w_uint32_t regidx)
-{
-    return g_reg_name[regidx];
-}
-
-mem_map_s *get_memory_map(void)
-{
-    return &g_memmap;
+    if(type == MEM_TYPE_RAM)
+        return "RAM";
+    else if(type == MEM_TYPE_ROM)
+        return "ROM";
+    return "UNKNOWN";
 }
 
 
-//检查定义的区域之间是否存在冲突
-static w_int32_t check_region_conflict(region_s *reg1,region_s *reg2)
-{
-    if(reg1->type != reg2->type)
-        return 0;
-    if(reg1->addr == reg2->addr)
-    {
-        return -1;
-    }
-    else if(reg1->addr < reg2->addr)
-    {
-        if(reg1->addr + reg1->size > reg2->addr)
-        {
-            return -1;
-        }
-    }
-    else if(reg2->addr < reg1->addr)
-    {
-        if(reg2->addr + reg2->size > reg1->addr)
-        {
-            return -1;
-        }
-    }
-    return 0;
-}
-
-
-void init_map_info(mem_map_s *map)
+region_s *mem_map_get_reg(char *name)
 {
     w_int32_t i;
-    region_s *rg = (region_s*)map;
-    for(i = 0;i < sizeof(mem_map_s)/sizeof(region_s);i ++)
+    region_s *reg = (region_s *)boot_param_mem_map();
+    w_int32_t count = mem_map_get_reg_count();
+    for(i = 0;i < count;i ++)
     {
-        rg[i].crc = 0xffffff;
+        if(wind_strcmp(reg[i].name,name) == 0)
+            return reg;
+    }
+    sys_error("find region %s failed.",name);
+    return (region_s *)NULL;
+}
+
+region_s *mem_map_get_list(void)
+{
+    boot_param_s *bp = boot_param_instance();
+    return (region_s*)(sizeof(boot_param_s)+(w_uint32_t)bp);
+    
+}
+
+w_int32_t mem_map_get_reg_count(void)
+{
+    boot_param_s *bp = boot_param_instance();
+    return bp->reg_count;
+}
+
+
+
+
+
+
+static void copy_reg_name(char *dest,char *src)
+{
+    int len = wind_strlen(dest);
+    len = len > PART_NAME_LEN-1?PART_NAME_LEN-1:len;
+    wind_memcpy(dest,src,len);
+}
+
+
+w_int32_t mem_map_reset(region_s *map)
+{
+    w_int32_t i;
+    region_s *rg = map;
+    part_s *entry = part_get_list();
+    w_int32_t count = part_get_count();
+    for(i = 0;i < count;i ++)
+    {
+        copy_reg_name(rg[i].name,entry->name);
+        rg[i].memidx = entry->memidx;
+        rg[i].addr = entry->addr;
+        rg[i].size = entry->size;
         rg[i].datalen = 0;
+        rg[i].crc = 0xffffff;
         rg[i].status = MEM_NULL;
     }
-}
-
-static w_uint32_t alloc_region(region_s * reg,w_uint32_t *base,w_uint32_t size)
-{
-    w_uint32_t idx = reg->index;
-	reg->addr = base[idx]+reg->addr;
-	reg->size = size;
-	return size;
-}
-
-w_int32_t mem_region_init(void)
-{
-    w_int32_t i;
-    w_int32_t index = 0;
-    w_uint32_t rambase[RAM_COUNT];
-    w_uint32_t rombase[ROM_COUNT];
-	mem_map_s *map = &g_memmap;
-    for(i = 0;i < RAM_COUNT;i ++)
-    {
-        rambase[i] = get_ram_base(i);
-    }
-    for(i = 0;i < ROM_COUNT;i ++)
-    {
-        rombase[i] = get_rom_base(i);
-    }
-	SET_REG(map->rom.boot_program,index,rombase,BOOT_PROGRAM,ROM);    
-	SET_REG(map->rom.boot_param1,index,rombase,BOOT_PARAM1,ROM);
-	SET_REG(map->rom.boot_param2,index,rombase,BOOT_PARAM2,ROM);
-	SET_REG(map->rom.sys_program1,index,rombase,SYS_PROGRAM1,ROM);
-	SET_REG(map->rom.sys_program2,index,rombase,SYS_PROGRAM2,ROM);
-	SET_REG(map->rom.sys_param,index,rombase,SYS_PARAM,ROM);   
-	SET_REG(map->rom.rom_fs,index,rombase,SYS_ROMFS,ROM);   
-    
-	SET_REG(map->ram.data_ram,index,rambase,DATA_RAM,RAM);
-	SET_REG(map->ram.load_buffer,index,rambase,SYS_LOADBUF,RAM);
-	SET_REG(map->ram.share_param,index,rambase,SYS_SHAREPRM,RAM);
-
-    SET_REG(map->run.flash,index,rombase,SYS_ROMRUN,ROM);
-	SET_REG(map->run.ram,index,rambase,SYS_RAMRUN,RAM);
-	return 0;
-}
-
-static w_int32_t check_rom_conflict(rom_map_s *rom)
-{
-    w_int32_t i,j,size;
-    w_int32_t ret = 0;
-    region_s *reg;
-    size = sizeof(rom_map_s)/sizeof(region_s);
-    reg = (region_s*)rom;
-    for(i = 0;i < size - 1;i ++)
-    {
-        for(j = i + 1;j < size;j ++)
-        {
-            if(check_region_conflict(&reg[i],&reg[j]))
-            {
-                sys_warn("map %d region \"%s\" and \"%s\" conflict.",i+1,reg[i].regname,reg[j].regname);
-                ret = -1;
-            }
-        }
-    }
-    return ret;
-}
-
-static w_int32_t check_rom_type(rom_map_s *rom)
-{
-    w_int32_t i,size;
-    region_s *reg;
-    size = sizeof(rom_map_s)/sizeof(region_s);
-    reg = (region_s*)rom;
-    
-    for(i = 0;i < size;i ++)
-    {
-        if(MEM_TYPE_ROM != reg[i].type && MEM_TYPE_ROM != reg[i].type)
-            return -1;
-    }
-    return 0;
-}
-
-static w_int32_t check_ram_type(ram_map_s *ram)
-{
-    w_int32_t i,size;
-    region_s *reg;
-    size = sizeof(ram_map_s)/sizeof(region_s);
-    reg = (region_s*)ram;
-    
-    for(i = 0;i < size;i ++)
-    {
-        if(MEM_TYPE_RAM != reg[i].type)
-            return -1;
-    }
     return 0;
 }
 
 
 
-static w_int32_t check_ram_conflict(ram_map_s *ram)
-{
-    w_int32_t i,j,size;
-    region_s *reg;
-    size = sizeof(ram_map_s)/sizeof(region_s);
-    reg = (region_s*)ram;
-    for(i = 0;i < size - 1;i ++)
-    {
-        for(j = i + 1;j < size;j ++)
-        {
-            if(check_region_conflict(&reg[i],&reg[j]))
-            {
-                sys_warn("map %d region \"%s\" and \"%s\" conflict.",i+1,reg[i].regname,reg[j].regname);
-                return -1;
-            }
-        }
-    }
-    return 0;
-}
 
-static w_int32_t check_run_type(run_map_s *run)
-{
-    if(run->flash.type != MEM_TYPE_ROM)
-        return -1;
-    if(run->ram.type != MEM_TYPE_RAM)
-        return -1;
-    return 0;
-}
 
+
+
+#if 0
 w_int32_t check_probuf_and_running(region_s *probuf,region_s *run)
 {
     if(probuf->type != run->type)
         return 0;
-    if(0 == check_region_conflict(probuf,run))
+    if(0 == do_check_conflict(probuf,run))
         return 0;
     if(probuf->addr >= run->addr)
         return 0;
     return -1;
 }
-w_int32_t check_map_valid(void)
+#endif
+w_int32_t mem_map_check(void)
 {
-    mem_map_s *map;
     sys_notice("begin to check momery map params...");
-    map = &g_memmap;
-    if(check_rom_conflict(&map->rom))
-    {
-        sys_warn("check rom conflict error.");
-        return -1;
-    }
-    if(check_ram_conflict(&map->ram))
+
+    if(part_check_conflict())
     {
         sys_warn("check ram conflict error.");
         return -1;
     }
+#if 0
     if(check_rom_type(&map->rom))
     {
         sys_warn("check rom type error.");
@@ -281,61 +146,117 @@ w_int32_t check_map_valid(void)
         sys_warn("program buffer and running space conflict.");
         return -1;
     }
+#endif
     sys_notice("check momery map params OK.");
     return 0;   
 }
 
 
-void print_map_info(mem_map_s *map)
-{
-#define REGION_FORMAT "%-15s%-8d0x%-12x0x%-12x%s\r\n" 
-#define REGION_PARAM(reg) (reg)->regname,(reg)->index,(reg)->addr,(reg)->size,memtype_name((reg)->type)
-    w_int32_t i;
-    region_s *reg;
-    wind_printf("memory map as following:\r\n");
-    wind_printf("%-15s%-8s%-14s%-14s%-12s\r\n","region","memidx","addr","size","type");
-    reg = (region_s*)&map->rom;
-    for(i = 0;i < sizeof(map->rom)/sizeof(region_s);i ++)
-    {
-        wind_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
-    }
-    wind_printf("\r\n");
-    reg = (region_s*)&map->ram;
-    for(i = 0;i < sizeof(map->ram)/sizeof(region_s);i ++)
-    {
-        wind_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
-    }
-    wind_printf("\r\n");
-    reg = (region_s*)&map->run;
-    for(i = 0;i < sizeof(map->run)/sizeof(region_s);i ++)
-    {
-        wind_printf(REGION_FORMAT,REGION_PARAM((region_s*)&reg[i]));
-    }
-}
 
-void print_program_space(mem_map_s *map)
+void mem_map_print_status(void)
 {
 #define REGION_FORMAT1 "%-15s%-8d0x%-10x0x%-9x0x%-9x%-9s%4d%%\r\n" 
-#define REGION_PARAM1(reg) (reg)->regname,(reg)->index,(reg)->addr,(reg)->size,\
-                        (reg)->datalen,memtype_name((reg)->type),(reg)->size?((reg)->datalen*100)/(reg)->size:0
-        wind_printf("%-15s%-8s%-12s%-11s%-11s%-9s%-8s\r\n","region","memidx","addr","size","datalen","type","usage");
-        wind_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.sys_program1));
-        wind_printf(REGION_FORMAT1,REGION_PARAM1(&map->rom.sys_program2));
-        wind_printf(REGION_FORMAT1,REGION_PARAM1(&map->run.flash));
+#define REGION_PARAM1(reg) (reg).name,(reg).memidx,(reg).addr,(reg).size,\
+                (reg).datalen,(reg).name,(reg).size?((reg).datalen*100)/(reg).size:0
+    w_int32_t i;
+    w_int32_t count = mem_map_get_reg_count();
+    region_s *reg = mem_map_get_list();
+
+    wind_printf("%-15s%-8s%-12s%-11s%-11s%-9s%-8s\r\n","region","memidx","addr","size","datalen","type","usage");
+    for(i = 0;i < count;i ++)
+    {
+        wind_printf(REGION_FORMAT1,REGION_PARAM1(reg[i]));
+    }
 }
 
-void copy_region_info(region_s *src,region_s *dest)
+void mem_map_copy_info(region_s *src,region_s *dest)
 {
-    dest->regname = src->regname;
+	wind_strcpy(dest->name,src->name);
     dest->type = src->type;
-    dest->index = src->index;
+    dest->memidx = src->memidx;
     dest->addr = src->addr;
     dest->size = src->size;
     dest->datalen = src->datalen;
     dest->crc = src->crc;
     dest->status = src->status;
 }
+static void print_copy_percents(w_int32_t numerator, w_int32_t denominator,w_int32_t del)
+{
+    if(del)
+        wind_printf("%c%c%c%c",8,8,8,8);
+    wind_printf("%3d%%",numerator*100/denominator);
+        feed_watchdog();
+}
 
+w_int32_t mem_map_copy_data(region_s *src,region_s *dest)
+{
+    w_int32_t i,j,len,blocks,times;
+    w_uint32_t addr;
+    w_uint8_t *buff = get_block_buffer();
+
+    if(0 >= src->datalen)
+        return 0;
+    if(dest->size < src->datalen)
+    {
+        sys_warn("space is NOT enough.");
+        return -1;
+    }
+    sys_notice("copy data from \"%s\" to \"%s\" lenth %d.",
+                src->name,dest->name,src->datalen);
+    sys_debug("source type %s,addr 0x%x,lenth %d dest type,%s,addr 0x%x,lenth %d.",
+                memtype_name(src->type),src->addr,src->datalen,
+                memtype_name(dest->type),dest->addr,dest->size);
+    
+    blocks = (src->datalen + BLOCK_SIZE - 1) / BLOCK_SIZE;
+    wind_printf("complete:");
+    print_copy_percents(0,1,0);
+    for(i = 0;i < blocks;i ++)
+    {    
+        for(times = 0;times < 3;times ++)
+        {
+            addr = src->addr + i * BLOCK_SIZE;
+            if(i >= blocks - 1)
+            {
+                for(j = 0;j < BLOCK_SIZE;j ++)
+                    buff[j] = 0;
+            }
+            len = read_block(src->type,src->memidx,addr,buff,1);
+            if(len > 0)
+                break;
+        }
+        if(times >= 3)
+        {
+            sys_warn("read block 0x%x,lenth %d failed.",addr,BLOCK_SIZE);
+            dest->status = MEM_ERROR;
+            return -1;
+        }
+
+        for(times = 0;times < 3;times ++)
+        {
+            addr = dest->addr + i * BLOCK_SIZE;
+            len = write_block(dest->type,dest->memidx,addr,buff,1);
+            if(len > 0)
+                break;
+        }
+        if(times >= 3)
+        {
+            sys_warn("read block 0x%x,lenth %d failed.",addr,BLOCK_SIZE);
+            dest->status = MEM_ERROR;
+            return -1;
+        }
+        print_copy_percents(i,blocks,1);
+        feed_watchdog();
+    }
+    print_copy_percents(i,blocks,1);
+    wind_printf("\r\n");
+
+    dest->datalen = src->datalen;
+    dest->crc = src->crc;
+    dest->status = MEM_NORMAL;
+
+    sys_debug("copy data OK."); 
+    return 0;    
+}
 
 #ifdef __cplusplus
 }
