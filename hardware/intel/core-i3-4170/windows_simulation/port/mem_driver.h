@@ -15,9 +15,9 @@
 #define MEM_DRIVER_H__
 #include "wind_type.h"
 
-w_int32_t phymem_get_count(void);
-w_int32_t part_get_count(void);
 
+void phy_mems_register(void);
+void parts_create(void);
 
 //´æ´¢Çý¶¯
 w_bool_t mem_drv_init(void);

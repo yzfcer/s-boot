@@ -13,11 +13,13 @@
 **********************************************************************************/
 #include "mem_map.h"
 #include "boot_port.h"
+#include "boot_config.h"
 #include "share_param.h"
-#include "sys_debug.h"
+#include "wind_debug.h"
 #include "boot_param.h"
 #include "mem_driver.h"
 #include "wind_string.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -49,7 +51,7 @@ region_s *mem_map_get_reg(char *name)
         if(wind_strcmp(reg[i].name,name) == 0)
             return reg;
     }
-    sys_error("find region %s failed.",name);
+    wind_error("find region %s failed.",name);
     return (region_s *)NULL;
 }
 
@@ -118,36 +120,36 @@ w_int32_t check_probuf_and_running(region_s *probuf,region_s *run)
 #endif
 w_int32_t mem_map_check(void)
 {
-    sys_notice("begin to check momery map params...");
+    wind_notice("begin to check momery map params...");
 
+#if 0
     if(part_check_conflict())
     {
-        sys_warn("check ram conflict error.");
+        wind_warn("check ram conflict error.");
         return -1;
     }
-#if 0
     if(check_rom_type(&map->rom))
     {
-        sys_warn("check rom type error.");
+        wind_warn("check rom type error.");
         return -1;
     }
     if(check_ram_type(&map->ram))
     {
-        sys_warn("check ram type error.");
+        wind_warn("check ram type error.");
         return -1;
     }
     if(check_run_type(&map->run))
     {
-        sys_warn("check running space type error.");
+        wind_warn("check running space type error.");
         return -1;
     }
     if(check_probuf_and_running(&map->ram.load_buffer,&map->run.flash))
     {
-        sys_warn("program buffer and running space conflict.");
+        wind_warn("program buffer and running space conflict.");
         return -1;
     }
 #endif
-    sys_notice("check momery map params OK.");
+    wind_notice("check momery map params OK.");
     return 0;   
 }
 
@@ -198,12 +200,12 @@ w_int32_t mem_map_copy_data(region_s *src,region_s *dest)
         return 0;
     if(dest->size < src->datalen)
     {
-        sys_warn("space is NOT enough.");
+        wind_warn("space is NOT enough.");
         return -1;
     }
-    sys_notice("copy data from \"%s\" to \"%s\" lenth %d.",
+    wind_notice("copy data from \"%s\" to \"%s\" lenth %d.",
                 src->name,dest->name,src->datalen);
-    sys_debug("source type %s,addr 0x%x,lenth %d dest type,%s,addr 0x%x,lenth %d.",
+    wind_debug("source type %s,addr 0x%x,lenth %d dest type,%s,addr 0x%x,lenth %d.",
                 memtype_name(src->type),src->addr,src->datalen,
                 memtype_name(dest->type),dest->addr,dest->size);
     
@@ -226,7 +228,7 @@ w_int32_t mem_map_copy_data(region_s *src,region_s *dest)
         }
         if(times >= 3)
         {
-            sys_warn("read block 0x%x,lenth %d failed.",addr,BLOCK_SIZE);
+            wind_warn("read block 0x%x,lenth %d failed.",addr,BLOCK_SIZE);
             dest->status = MEM_ERROR;
             return -1;
         }
@@ -240,7 +242,7 @@ w_int32_t mem_map_copy_data(region_s *src,region_s *dest)
         }
         if(times >= 3)
         {
-            sys_warn("read block 0x%x,lenth %d failed.",addr,BLOCK_SIZE);
+            wind_warn("read block 0x%x,lenth %d failed.",addr,BLOCK_SIZE);
             dest->status = MEM_ERROR;
             return -1;
         }
@@ -254,7 +256,7 @@ w_int32_t mem_map_copy_data(region_s *src,region_s *dest)
     dest->crc = src->crc;
     dest->status = MEM_NORMAL;
 
-    sys_debug("copy data OK."); 
+    wind_debug("copy data OK."); 
     return 0;    
 }
 

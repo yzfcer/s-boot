@@ -12,7 +12,7 @@
        Modification:
 **********************************************************************************/
 #include "boot_port.h"
-#include "sys_debug.h"
+#include "wind_debug.h"
 #include "boot_hw_if.h"
 #include "boot_param.h"
 #include "mem_driver.h"
@@ -71,18 +71,7 @@ w_int32_t wait_for_key_input(w_int32_t to_sec,char *ch,w_int32_t print_flag)
 }
 
 
-w_int32_t wind_printf(const char *fmt,...)
-{
-    w_int32_t cnt;
-    va_list argptr;
-    static char outbuf[256];
-    
-    va_start(argptr, fmt);
-    cnt = vsprintf(outbuf, fmt, argptr);
-    va_end(argptr);
-    boot_output(outbuf,cnt);
-    return cnt;
-}
+
 
 
 w_int32_t read_char_blocking(char *ch)
@@ -181,7 +170,7 @@ w_int32_t boot_receive_img(w_uint32_t addr,w_uint32_t maxlen)
                 }
                 else
                 {
-                    sys_notice("wait for file data time out.");
+                    wind_notice("wait for file data time out.");
                     return -1;
                 }
                 break;
@@ -192,7 +181,7 @@ w_int32_t boot_receive_img(w_uint32_t addr,w_uint32_t maxlen)
                     g_recvstat.idx ++;
                     if(g_recvstat.idx >= maxlen)
                     {
-                        sys_warn("img file is too long.");
+                        wind_warn("img file is too long.");
                                               wait_file_send_compete();
                                               return -1;
                     }
@@ -274,7 +263,7 @@ w_uint8_t *get_block_buffer(void)
 w_int32_t read_block(w_uint16_t memtype,w_uint32_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t blkcount)
 {
     w_int32_t len;
-    //sys_notice("read block base:0x%x",addr);
+    //wind_notice("read block base:0x%x",addr);
     switch(memtype)
     {
         case MEM_TYPE_RAM:
@@ -296,7 +285,7 @@ w_int32_t read_block(w_uint16_t memtype,w_uint32_t memidx,w_uint32_t addr,w_uint
 w_int32_t write_block(w_uint16_t memtype,w_uint32_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t blkcount)
 {
     w_int32_t len; 
-    //sys_notice("write block base:0x%x",addr);
+    //wind_notice("write block base:0x%x",addr);
     switch(memtype)
     {
         case MEM_TYPE_RAM:

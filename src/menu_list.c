@@ -13,10 +13,10 @@
 **********************************************************************************/
 #include "menu_list.h"
 #include "boot_port.h"
-#include "sys_debug.h"
+#include "wind_debug.h"
 #include "boot_param.h"
 #include "boot_framework.h"
-#include "sys_debug.h"
+#include "wind_debug.h"
 
 #include "wind_crc32.h"
 #include "share_param.h"
@@ -84,7 +84,7 @@ static void download_img_to_ram(void)
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
     if(dest->size <= 0)
     {
-        sys_warn("img can not download to RAM,device NOT support.");
+        wind_warn("img can not download to RAM,device NOT support.");
         return;
     }
     ret = download_img_file(MEM_TYPE_RAM);
@@ -98,7 +98,7 @@ static void download_img_to_ram(void)
 
 static void download_filesystem(void)
 {
-    sys_warn("s-boot can NOT support file system right now.");
+    wind_warn("s-boot can NOT support file system right now.");
 }
 
 static void set_debug_mode(void)
@@ -148,7 +148,7 @@ static void lock_mcu(void)
     boot_param_s *bp = (boot_param_s *)boot_param_instance();
     if(is_chip_lock())
     {
-        sys_notice("MCU has been locked before.");
+        wind_notice("MCU has been locked before.");
         return;
     }
     set_chip_lock(1);
@@ -160,7 +160,7 @@ static void unlock_mcu(void)
     boot_param_s *bp = (boot_param_s *)boot_param_instance();
     if(!is_chip_lock())
     {
-        sys_notice("MCU has NOT been locked before.");
+        wind_notice("MCU has NOT been locked before.");
         return;
     }
     set_chip_lock(0);
@@ -322,7 +322,7 @@ void run_menu(void)
                 ret = open_super_prio();
                 if(0 == ret)
                 {
-                    sys_notice("You have opened advanced function.");
+                    wind_notice("You have opened advanced function.");
                 }
             }
         }

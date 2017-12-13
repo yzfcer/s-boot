@@ -14,10 +14,10 @@
 #include "boot_config.h"
 #include "menu_list.h"
 #include "boot_port.h"
-#include "sys_debug.h"
+#include "wind_debug.h"
 #include "boot_param.h"
 #include "boot_framework.h"
-#include "sys_debug.h"
+#include "wind_debug.h"
 #include "wind_crc32.h"
 #include "share_param.h"
 #include "program_mgr.h"
@@ -106,17 +106,17 @@ w_bool_t check_hardware_matched(img_head_s *head)
 {
     if(0 != memory_compare(head->board_name,BOARD_NAME,string_len(BOARD_NAME)))
     {
-        sys_notice("dest board name:%s",BOARD_NAME);
+        wind_notice("dest board name:%s",BOARD_NAME);
         return B_FALSE;
     }
     if(0 != memory_compare(head->arch_name,ARCH_NAME,string_len(ARCH_NAME)))
     {
-        sys_notice("dest arch name:%s",ARCH_NAME);
+        wind_notice("dest arch name:%s",ARCH_NAME);
         return B_FALSE;
     }
     if(0 != memory_compare(head->cpu_name,CPU_NAME,string_len(CPU_NAME)))
     {
-        sys_notice("dest cpu model:%s",CPU_NAME);
+        wind_notice("dest cpu model:%s",CPU_NAME);
         return B_FALSE;
     }
     return B_TRUE;    
@@ -132,19 +132,19 @@ w_int32_t decrypt_img_data(region_s *img,region_s *bin)
     bin->addr += head->head_len;
     bin->size = img->size - head->head_len;
     bin->datalen = img->datalen - head->head_len;
-    sys_notice("decrypt img file...");
-    sys_debug("decrypt_data base:0x%x,lenth:%d",bin->addr,bin->datalen);
+    wind_notice("decrypt img file...");
+    wind_debug("decrypt_data base:0x%x,lenth:%d",bin->addr,bin->datalen);
 	len = decrypt_data(head->encry_type,(w_uint8_t *)bin->addr,bin->datalen);
     if(len < 0)
     {
-        sys_warn("decrypt img file failed.");
+        wind_warn("decrypt img file failed.");
         return -1;
     }
     bin->datalen = len;
     
     bin->crc = wind_crc32(0xffffffff,(w_uint8_t *)bin->addr,bin->datalen);
     feed_watchdog();
-    sys_notice("decrypt img file OK.");
+    wind_notice("decrypt img file OK.");
     return 0;
 }
 
@@ -158,23 +158,23 @@ w_int32_t check_img_valid(region_s *img)
 	head = (img_head_s*)img->addr;
     if(0 != head_endian_convert(head))
     {
-        sys_warn("img file head endian convert ERROR.");
+        wind_warn("img file head endian convert ERROR.");
         return -1;
     }
     
     cal_crc = wind_crc32(0xffffffff,(w_uint8_t*)head,head->head_len - 4);
     crc = head->head_crc;
     
-    sys_debug("img file head crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
+    wind_debug("img file head crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
     if(cal_crc != crc)
     {
-        sys_warn("img file head crc ERROR.");
+        wind_warn("img file head crc ERROR.");
         return -1;
     }
     print_img_head(head);
     if(!check_hardware_matched(head))
     {
-        sys_warn("hardware is NOT matched.");
+        wind_warn("hardware is NOT matched.");
         return -1;
     }
     
@@ -182,15 +182,15 @@ w_int32_t check_img_valid(region_s *img)
 	crc = wind_crc32(0xffffffff,(w_uint8_t*)(img->addr+head->head_len),head->img_len - head->head_len);
     cal_crc = head->bin_crc;
     
-    sys_debug("bin file crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
+    wind_debug("bin file crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
     if(cal_crc != crc)
     {
-        sys_warn("bin file crc ERROR.");
+        wind_warn("bin file crc ERROR.");
         return -1;
     }
     
     feed_watchdog();
-    sys_notice("img file verify OK.");
+    wind_notice("img file verify OK.");
     return 0;
 }
 
@@ -224,7 +224,7 @@ w_int32_t roll_back_program(void)
     ret = mem_map_copy_data(src,dest);
     if(0 != ret)
     {
-        sys_warn("roll back program failed.");
+        wind_warn("roll back program failed.");
         return -1;
     }
     
@@ -248,7 +248,7 @@ w_int32_t roll_back_program(void)
         ret = mem_map_copy_data(&bin,dest);
         if(0 != ret)
         {
-            sys_error("flush program to running space failed.");
+            wind_error("flush program to running space failed.");
             return -1;
         }
     }
@@ -266,12 +266,12 @@ w_int32_t flush_img_to_ram(region_s *img)
     //这里需要修改，不能直接使用img，因为会修改程序缓存的起始地址，
     //另外需要重新考虑程序运行在RAM中间时，程序因该怎样存储
     
-    sys_notice("begin to copy code to memory...");
+    wind_notice("begin to copy code to memory...");
     dest = mem_map_get_reg("ramrun");
     ret = mem_map_copy_data(&bin,dest);
     if(0 != ret)
     {
-        sys_warn("copy img to running space failed.");
+        wind_warn("copy img to running space failed.");
         return -1;
     }
     return 0;
@@ -287,7 +287,7 @@ w_int32_t flush_img_to_rom(region_s *img)
     img_head_s *head;
     w_bool_t run_in_program1;
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
-    sys_notice("begin to flush code to rom space...");
+    wind_notice("begin to flush code to rom space...");
     
     //先将原来的程序拷贝到备份空间    
     src = mem_map_get_reg("img1");
@@ -296,7 +296,7 @@ w_int32_t flush_img_to_rom(region_s *img)
     ret = mem_map_copy_data(src,dest);
     if(0 != ret)
     {
-        sys_warn("backup old program failed.");
+        wind_warn("backup old program failed.");
         return -1;
     }
     
@@ -313,7 +313,7 @@ w_int32_t flush_img_to_rom(region_s *img)
         ret = mem_map_copy_data(&bin,dest);
         if(0 != ret)
         {
-            sys_warn("flush new program failed.");
+            wind_warn("flush new program failed.");
             return -1;
         }
         dest = mem_map_get_reg("romrun");
@@ -329,7 +329,7 @@ w_int32_t flush_img_to_rom(region_s *img)
         ret = mem_map_copy_data(img,dest);
         if(0 != ret)
         {
-            sys_warn("flush new program failed.");
+            wind_warn("flush new program failed.");
             return -1;
         }
         decrypt_img_data(img,&bin);
@@ -337,7 +337,7 @@ w_int32_t flush_img_to_rom(region_s *img)
         ret = mem_map_copy_data(&bin,dest);
         if(0 != ret)
         {
-            sys_error("write new program failed.");
+            wind_error("write new program failed.");
             return -1;
         }
     }
@@ -358,13 +358,13 @@ w_int32_t flush_img_file(w_int16_t type,region_s *img)
             ret = flush_img_to_rom(img);
             break;
         default:
-            sys_error("unknown memory type:%d",type);
+            wind_error("unknown memory type:%d",type);
             ret = -1;
             break;
     }
     if(0 != ret)
     {
-        sys_warn("flush img data failed.");
+        wind_warn("flush img data failed.");
         (void)boot_param_from_rom();
         return ret;
     }
@@ -381,7 +381,7 @@ w_int32_t download_img_file(w_int16_t type)
 
     if(bp->debug_mode)
     {
-        sys_notice("device can NOT download in debug mode ,set it to normal mode first");
+        wind_notice("device can NOT download in debug mode ,set it to normal mode first");
         return -1;
     }
     img = mem_map_get_reg("cache");
@@ -389,25 +389,25 @@ w_int32_t download_img_file(w_int16_t type)
     len = boot_receive_img(img->addr,img->size);
     if(len <= 0)
     {
-        sys_error("receive img data failed.");
+        wind_error("receive img data failed.");
         return -1;
     }
 
     img->datalen = (w_uint32_t)len;
-    sys_notice("img file lenth:%d",img->datalen);
+    wind_notice("img file lenth:%d",img->datalen);
     ret = check_img_valid(img);
     if(ret != 0)
     {
-        sys_error("check img file ERROR");
+        wind_error("check img file ERROR");
         return -1; 
     }
     ret = flush_img_file(type,img);
     if(0 != ret)
     {
-        sys_warn("flush data to %s failed.",memtype_name(type));
+        wind_warn("flush data to %s failed.",memtype_name(type));
         return -1;
     }
-    sys_notice("img flush OK.");
+    wind_notice("img flush OK.");
     return 0;
 }
 
@@ -428,7 +428,7 @@ w_int32_t clean_program(void)
     
     for(i = 0;i < 5;i ++)
     {
-        sys_notice("erase base 0x%x,lenth %d.",code[i]->addr,code[i]->datalen);
+        wind_notice("erase base 0x%x,lenth %d.",code[i]->addr,code[i]->datalen);
         blocknum = (code[i]->datalen + BLOCK_SIZE - 1) / BLOCK_SIZE;
         erase_block(code[i]->type,code[i]->memidx,code[i]->addr,blocknum);
     }

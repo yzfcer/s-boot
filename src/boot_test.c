@@ -13,7 +13,7 @@
 **********************************************************************************/
 #include "boot_param.h"
 #include "boot_port.h"
-#include "sys_debug.h"
+#include "wind_debug.h"
 #include "wind_crc32.h"
 #include "mem_map.h"
 #include "boot_test.h"
@@ -89,7 +89,7 @@ void test_upgrade(void)
     img->datalen = boot_receive_img(img->addr,img->size);
     if(img->datalen <= 0)
     {
-        sys_error("receive img data failed.");
+        wind_error("receive img data failed.");
         return;
     }
     

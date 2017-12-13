@@ -17,7 +17,7 @@
 #include "menu_list.h"
 #include "boot_port.h"
 #include "share_param.h"
-#include "sys_debug.h"
+#include "wind_debug.h"
 #include "wind_crc32.h"
 #include "program_mgr.h"
 #include "boot_hw_if.h"
@@ -51,9 +51,13 @@ static w_int32_t boot_init(void)
 {
     print_boot_info();
     mem_drv_init();
+    phy_mems_register();
+    parts_create();
+    //phymem_print_detail();
+    //part_print_detail();
     boot_param_clear_buffer();
     go_to_next_step();
-    sys_notice("bootloader init OK.");
+    wind_notice("bootloader init OK.");
     return 0;
 }
 
@@ -62,13 +66,13 @@ static w_int32_t boot_app_debug_check(void)
     w_int32_t dbg_mode = boot_param_check_debug_mode();
     if(dbg_mode)
     {
-        sys_warn("bootloader mode:DEBUG");
+        wind_warn("bootloader mode:DEBUG");
         set_boot_status(BOOT_WAIT_KEY_PRESS);
     }
     else
     {
         
-        sys_notice("bootloader mode:NORMAL");
+        wind_notice("bootloader mode:NORMAL");
         go_to_next_step();
     }
     return 0;
@@ -79,25 +83,25 @@ static w_int32_t boot_first_check(void)
 {
     w_int32_t ret;
     boot_param_s *bp;
-    sys_notice("begin to check first running time...");
+    wind_notice("begin to check first running time...");
     bp = (boot_param_s *)boot_param_instance();
     if(NULL != bp)
     {
         go_to_next_step();
-        sys_notice("find it is NOT the first running time.");
+        wind_notice("find it is NOT the first running time.");
         return 0;
     }
-    sys_notice("NO valid boot params found.");
+    wind_notice("NO valid boot params found.");
     boot_param_reset();
     ret = boot_param_flush();
     if(0 != ret)
     {
-        sys_error("write boot params failed.");
+        wind_error("write boot params failed.");
         set_boot_status(BOOT_ERROR);
         return -1;
     }
     go_to_next_step();
-    sys_notice("check first running time OK.");
+    wind_notice("check first running time OK.");
     return 0;
     
 }
@@ -106,11 +110,11 @@ static w_int32_t boot_chip_lock_check(void)
 {
     if(is_chip_lock())
     {
-        sys_notice("MCU chip is locked.");
+        wind_notice("MCU chip is locked.");
     }
     else
     {
-        sys_warn("MCU chip is unlocked.");
+        wind_warn("MCU chip is unlocked.");
     }
     go_to_next_step();
     return 0;
@@ -125,7 +129,7 @@ static w_int32_t boot_self_check(void)
     ret = mem_map_check();
     if(ret)
     {
-        sys_error("memory map params ERROR.");
+        wind_error("memory map params ERROR.");
         set_boot_status(BOOT_ERROR);
         return -1;        
     }
@@ -144,13 +148,13 @@ static w_int32_t  boot_upgrade_check(void)
     
     if(NULL == bp)
     {
-        sys_warn("get boot params failed.");
+        wind_warn("get boot params failed.");
         return -1;
     }
     ret = sp_get_upgrade_param(&g_upgrade_info);
     if(0 != ret)
     {
-        sys_notice("get upgrade params NULL.");
+        wind_notice("get upgrade params NULL.");
         sp_init_share_param();
         go_to_next_step();
         return 0;
@@ -158,14 +162,14 @@ static w_int32_t  boot_upgrade_check(void)
     
     if((!g_upgrade_info.flag))
     {
-        sys_notice("upgrade flags is invalid,need NOT upgrade App.");
+        wind_notice("upgrade flags is invalid,need NOT upgrade App.");
         go_to_next_step();
         return 0;
     }
     g_upgrade_info.flag = 0;
     sp_set_upgrade_param(&g_upgrade_info);
     
-    sys_notice("handling upgrade event,please wait...");
+    wind_notice("handling upgrade event,please wait...");
     tmp = mem_map_get_reg("cache");
     wind_strcpy(img.name,tmp->name);
     img.size = tmp->size;
@@ -176,7 +180,7 @@ static w_int32_t  boot_upgrade_check(void)
     ret = check_img_valid(&img);
     if(0 != ret)
     {
-        sys_error("check img file ERROR");
+        wind_error("check img file ERROR");
         return -1;
     }
     tmp = mem_map_get_reg("img1");
@@ -186,13 +190,13 @@ static w_int32_t  boot_upgrade_check(void)
     }
     else
     {
-        sys_error("memory type ERROR.");
+        wind_error("memory type ERROR.");
         set_boot_status(BOOT_ERROR);
         return -1;
     }
     if(0 != ret)
     {
-        sys_warn("flush upgrade img failed.");
+        wind_warn("flush upgrade img failed.");
         set_boot_status(BOOT_ERROR);
         return -1;
     }
@@ -200,7 +204,7 @@ static w_int32_t  boot_upgrade_check(void)
     ret = boot_param_flush();
     if(0 != ret)
     {
-        sys_error("update params failed.");
+        wind_error("update params failed.");
         set_boot_status(BOOT_ERROR);
         return -1;
     }
@@ -215,22 +219,22 @@ static w_int32_t  boot_rollback_check(void)
     w_int32_t ret;
     boot_param_s *bp = (boot_param_s *)boot_param_instance();
     
-    sys_notice("begin to check app roll back status...");
+    wind_notice("begin to check app roll back status...");
     ret = sp_get_app_rollback(&roll_flag);
     if(0 != ret)
     {
-        sys_notice("get upgrade params NULL.");
+        wind_notice("get upgrade params NULL.");
         sp_init_share_param();
         go_to_next_step();
         return 0;
     }
     if(!roll_flag)
     {
-        sys_notice("roll back flag is invalid,need NOT to roll back.");
+        wind_notice("roll back flag is invalid,need NOT to roll back.");
         go_to_next_step();
         return 0;
     }
-    sys_notice("begin to roll back...");
+    wind_notice("begin to roll back...");
     ret = roll_back_program();
     sp_set_app_rollback(0);
     return ret;
@@ -269,13 +273,13 @@ static w_int32_t boot_load_app(void)
     region_s *regi = NULL,*tmp;
     boot_param_s *bp = NULL; 
 
-    sys_notice("begin to load App to running space...");
+    wind_notice("begin to load App to running space...");
     bp = (boot_param_s *)boot_param_instance();
     regi = mem_map_get_reg("romrun");
     
     if(NULL == bp)
     {
-        sys_error("get boot param failed.");
+        wind_error("get boot param failed.");
         set_boot_status(BOOT_ERROR);
         return -1;
     }
@@ -289,7 +293,7 @@ static w_int32_t boot_load_app(void)
     tmp = mem_map_get_reg("img1");
     if(tmp->datalen <= 0)
     {
-        sys_notice("program is NOT existing.");
+        wind_notice("program is NOT existing.");
         set_boot_status(BOOT_MENU_LIST);
         return -1;
     }
@@ -311,20 +315,20 @@ static w_int32_t boot_load_app(void)
     }
     if(MEM_NORMAL != mem_stat)
     {
-        sys_warn("program has some ERRORs.");
+        wind_warn("program has some ERRORs.");
         set_boot_status(BOOT_MENU_LIST);
         return -1;
     }
 
     if(MEM_TYPE_ROM == regi->type)
     {
-        sys_notice("need not load App to a NORFlash ROM.");
+        wind_notice("need not load App to a NORFlash ROM.");
         set_boot_status(BOOT_SET_APP_PARAM);
         return 0;
     }
     else
     {
-        sys_error("running memory type is not supported.");
+        wind_error("running memory type is not supported.");
         set_boot_status(BOOT_ERROR);
         return -1;
     }
@@ -335,7 +339,7 @@ static w_int32_t boot_set_app_param(void)
 {
     region_s *tmp;
     boot_param_s *bp = (boot_param_s *)boot_param_instance();
-    sys_notice("begin to set App params...");
+    wind_notice("begin to set App params...");
     sp_init_share_param();
     
     sp_set_app_rollback(1);
@@ -358,7 +362,7 @@ static w_int32_t boot_set_app_param(void)
     wind_printf("sysparam lenth:0x%x\r\n",g_sysparam_reg.size);
     sp_set_sysparam_param(&g_sysparam_reg);
     
-    sys_notice("set App params OK.");
+    wind_notice("set App params OK.");
     set_boot_status(BOOT_JUMP_TO_APP);
     return 0;
 }
@@ -370,13 +374,13 @@ static w_int32_t boot_error_handle(void)
     while(1)
     {
         if(0 == read_char_blocking(&ch))
-            sys_error("Some error occured in bootloader and system boot failed.");
+            wind_error("Some error occured in bootloader and system boot failed.");
     }
     return 0;
 }
 static w_int32_t boot_run_system(void)
 {
-	sys_notice("begin to jump to App space...");
+	wind_notice("begin to jump to App space...");
 	wind_printf("\r\n\r\n\r\n");
 	boot_jump_to_app();
 	return 0;
@@ -427,7 +431,7 @@ void boot_loop(void)
         {
             if(s_boot_status == g_status_handTB[i].status)
             {
-                sys_debug("step[%d] %s.",g_status_handTB[i].status+1,g_status_handTB[i].stepname);
+                wind_debug("step[%d] %s.",g_status_handTB[i].status+1,g_status_handTB[i].stepname);
                 ret = g_status_handTB[i].handle();
                 if(0 != ret)
                 {
@@ -438,7 +442,7 @@ void boot_loop(void)
         }
         if(i >= sizeof(g_status_handTB)/sizeof(boot_handle_TB))
         {
-            sys_error("unkown status %d.",s_boot_status);
+            wind_error("unkown status %d.",s_boot_status);
             set_boot_status(BOOT_ERROR);
         }
     }

@@ -13,7 +13,7 @@
 **********************************************************************************/
 #include "share_param.h"
 #include "boot_port.h"
-#include "sys_debug.h"
+#include "wind_debug.h"
 #include "wind_crc32.h"
 
 #ifdef __cplusplus
@@ -45,13 +45,13 @@ static void update_share_crc(void)
 {
     share_param_s *sp = (share_param_s *)(void*)mem_map_share_addr();
     w_uint32_t *crc = (w_uint32_t*)(sp+1);
-    *crc = wind_crc32(0xffffffff,(char*)sp,sizeof(share_param_s));
+    *crc = wind_crc32(0xffffffff,(w_uint8_t*)sp,sizeof(share_param_s));
 }
 
 static void copy_share_data(char *src,char *dest,w_int32_t len)
 {
     w_int32_t i;
-    //sys_notice("copy data from 0x%x to 0x%x,lenth %d",src,dest,len);
+    //wind_notice("copy data from 0x%x to 0x%x,lenth %d",src,dest,len);
     for(i = 0;i < len;i ++)
     {
         dest[i] = src[i];
@@ -66,18 +66,18 @@ static w_int32_t check_share_param(void)
     w_uint32_t *crc = (w_uint32_t*)(sp+1);
     if(sp->magic != SHARE_PARAM_MAGIC)
     {
-        sys_notice("share param block is invalid.");
+        wind_notice("share param block is invalid.");
         return -1;
     }
     if(sp->lenth != sizeof(share_param_s))
     {
-        sys_warn("share param block lenth is invalid.");
+        wind_warn("share param block lenth is invalid.");
         return -1;
     }
 
-    if(*crc != wind_crc32(0xffffffff,(char*)sp,sizeof(share_param_s)))
+    if(*crc != wind_crc32(0xffffffff,(w_uint8_t*)sp,sizeof(share_param_s)))
     {
-        sys_warn("share param block crc is invalid.");
+        wind_warn("share param block crc is invalid.");
         return -1;
     }
 

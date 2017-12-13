@@ -14,7 +14,7 @@
 #include "boot_config.h" 
 #include "boot_param.h"
 #include "boot_port.h"
-#include "sys_debug.h"
+#include "wind_debug.h"
 #include "wind_crc32.h"
 #include "mem_driver.h"
 
@@ -46,7 +46,7 @@ boot_param_s *boot_param_from_rom(void)
     ret = boot_param_read();
     if(0 != ret)
     {
-        sys_warn("get boot params failed.");
+        wind_warn("get boot params failed.");
         g_pbp = NULL;
         return NULL;
     }
@@ -73,7 +73,7 @@ void boot_param_reset(void)
     bp->map_size = bp->reg_count *sizeof(region_s);
     bp->lenth = sizeof(boot_param_s) + bp->map_size;
     mem_map_reset((region_s*)(sizeof(boot_param_s)+(w_uint32_t)bp));
-    sys_notice("init boot param OK.");
+    wind_notice("init boot param OK.");
 }
 
 
@@ -84,22 +84,22 @@ w_int32_t boot_param_check_valid(w_uint8_t *prmbuf)
     w_uint32_t *crc = (w_uint32_t*)&prmbuf[sizeof(boot_param_s)];
     if(bp->magic != BOOT_PARAM_MAGIC)
     {
-        sys_warn("param block is invalid.");
+        wind_warn("param block is invalid.");
         return -1;
     }
     if(bp->lenth != sizeof(boot_param_s)+bp->map_size)
     {
-        sys_warn("param block lenth is invalid.");
+        wind_warn("param block lenth is invalid.");
         return -1;
     }
-    if(*crc != wind_crc32(0xffffffff,(char*)bp,sizeof(boot_param_s)))
+    if(*crc != wind_crc32(0xffffffff,(w_uint8_t*)bp,sizeof(boot_param_s)))
     {
-        sys_warn("param block crc is invalid.");
+        wind_warn("param block crc is invalid.");
         return -1;
     }
     if(bp->version > BOOT_VERSION)
     {
-        sys_warn("param block version is not matched.");
+        wind_warn("param block version is not matched.");
         return -1;
     }
     return 0;
@@ -141,13 +141,13 @@ w_int32_t boot_param_read(void)
         }
         else
         {
-            sys_warn("read param %d fail.",i + 1);
+            wind_warn("read param %d fail.",i + 1);
             err ++;
         }
     }
     if(err >= 2)
     {
-        sys_warn("read both params failed.");
+        wind_warn("read both params failed.");
         return -1;
     }
     return 0;
@@ -178,17 +178,17 @@ w_int32_t boot_param_flush(void)
         if(j >= 3)
         {
             
-            sys_warn("write param %d fail.",i + 1);
+            wind_warn("write param %d fail.",i + 1);
             err ++;
         }
-        sys_debug("write param %d OK.",i + 1);
+        wind_debug("write param %d OK.",i + 1);
     }
     if(err >= 2)
     {
-        sys_warn("write both params failed.");
+        wind_warn("write both params failed.");
         return -1;
     }
-    sys_notice("write boot param complete.");
+    wind_notice("write boot param complete.");
     return 0;
 }
 

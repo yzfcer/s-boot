@@ -14,7 +14,7 @@
 #include "boot_config.h"
 #include "boot_check.h"
 #include "boot_param.h"
-#include "sys_debug.h"
+#include "wind_debug.h"
 #include "wind_crc32.h"
 #include "program_mgr.h"
 
@@ -24,17 +24,17 @@ w_int32_t repair_rom_space(region_s *src,region_s *dest)
     
     if(MEM_NORMAL != src->status)
     {
-        sys_error("can NOT find available source to repir program1.");
+        wind_error("can NOT find available source to repir program1.");
         src = NULL;
         return -1;
     }
     
-    sys_notice("repair program from \"%s\" to \"%s\"",
+    wind_notice("repair program from \"%s\" to \"%s\"",
                 src->name,dest->name);
     ret = mem_map_copy_data(src,dest);
     if(ret != 0)
     {
-        sys_error("repir space %s base 0x%x,lenth %d failed.",
+        wind_error("repir space %s base 0x%x,lenth %d failed.",
                     dest->name,dest->addr,dest->size);
         return -1;
     }
@@ -61,13 +61,13 @@ w_int32_t repair_running_space(void)
     
     if(NULL == src)
     {
-        sys_warn("can not find an available source for repairing.");
+        wind_warn("can not find an available source for repairing.");
         ret = -1;
     }
     else
     {
         //如果不是同一块sys_program1与运行区不是同一块，则数据需要先解密
-        sys_notice("repair program from \"%s\" to \"%s\"",src->name,dest->name);
+        wind_notice("repair program from \"%s\" to \"%s\"",src->name,dest->name);
         tmp = mem_map_get_reg("cache");
         mem_map_copy_data(src,tmp);
         src = mem_map_get_reg("cache");
@@ -94,7 +94,7 @@ static w_int32_t repair_program(boot_param_s *bp)
 {
     w_int32_t ret = 0;
     region_s *tmp1,*tmp2;
-    sys_notice("programs has errors,try to repair ...");
+    wind_notice("programs has errors,try to repair ...");
     tmp2 = mem_map_get_reg("romrun");
     if(MEM_ERROR == tmp2->status)
     {
@@ -150,14 +150,14 @@ w_int32_t check_rom_program(region_s *code)
     mem_map_copy_info(code,&prog);
     if(prog.status == MEM_NULL)
     {
-        sys_notice("region \"%s\" type %s base 0x%x lenth %d is empty.",
+        wind_notice("region \"%s\" type %s base 0x%x lenth %d is empty.",
                     prog.name,memtype_name(prog.type),prog.addr,prog.datalen);
         return 0;
     }
     
     if(prog.status != MEM_ERROR)
     {
-        sys_debug("check program base 0x%x,lenth %d",prog.addr,prog.datalen);
+        wind_debug("check program base 0x%x,lenth %d",prog.addr,prog.datalen);
         blocks = (prog.datalen + BLOCK_SIZE - 1) / BLOCK_SIZE;
         for(i = 0;i < blocks;i ++)
         {
@@ -165,7 +165,7 @@ w_int32_t check_rom_program(region_s *code)
             len = read_block(prog.type,prog.memidx,base,buff,1);
             if(len <= 0)
             {
-                sys_warn("read %s block base 0x%x,lenth %d failed.",
+                wind_warn("read %s block base 0x%x,lenth %d failed.",
                             memtype_name(prog.type),base,BLOCK_SIZE);
                 return -1;
             }
@@ -189,9 +189,9 @@ w_int32_t check_rom_program(region_s *code)
     
     if(MEM_ERROR == prog.status || cal_crc != prog.crc)
     {
-        sys_warn("check program CRC in %s base 0x%x,lenth %d failed.",
+        wind_warn("check program CRC in %s base 0x%x,lenth %d failed.",
                     memtype_name(prog.type),prog.addr,prog.datalen);
-        sys_debug("cal_crc:0x%x,crc:0x%x",cal_crc,prog.crc);
+        wind_debug("cal_crc:0x%x,crc:0x%x",cal_crc,prog.crc);
         code->status = MEM_ERROR;
         return -1;
     }
@@ -209,7 +209,7 @@ w_int32_t check_rom_programs(void)
     code[idx++] = mem_map_get_reg("img1");;
     code[idx++] = mem_map_get_reg("img2");
     code[idx++] = mem_map_get_reg("romrun");
-    sys_notice("begin to check programs...");
+    wind_notice("begin to check programs...");
     for(i = 0;i < sizeof(code)/sizeof(region_s*);i ++)
     {
         if(MEM_ERROR != code[i]->status)
@@ -222,7 +222,7 @@ w_int32_t check_rom_programs(void)
         else
         {
             
-            sys_warn("check program CRC in %s base 0x%x,lenth %d failed.",
+            wind_warn("check program CRC in %s base 0x%x,lenth %d failed.",
                         memtype_name(code[i]->type),code[i]->addr,code[i]->datalen);
             ret= 1;
         }
@@ -230,17 +230,17 @@ w_int32_t check_rom_programs(void)
 
     if(save_flag)
     {
-        sys_error("program space ERROR.");
+        wind_error("program space ERROR.");
         (void)boot_param_flush();
         ret = repair_program(bp);
         if(0 != ret)
         {
-            sys_error("repairing program failed");
+            wind_error("repairing program failed");
             return -1;
         }
         return ret;
     }
-    sys_notice("check programs OK.");
+    wind_notice("check programs OK.");
     return ret;
 }
 

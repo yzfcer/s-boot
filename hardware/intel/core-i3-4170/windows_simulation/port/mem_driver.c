@@ -48,36 +48,13 @@
 文件系统不是必须的，如果不用文件系统，将size定义成0
 ***************************************************************/
 
-#define BOOT_IDX  0
-#define BOOT_ADDR 0
 #define BOOT_SIZE 0xE000
-
-#define BT_PARA1_IDX  0
-#define BT_PARA1_ADDR 0xE000
 #define BT_PARA1_SIZE 0x1000
-
-#define BT_PARA2_IDX  0
-#define BT_PARA2_ADDR 0xf000
 #define BT_PARA2_SIZE 0x1000
-
-#define IMG1_IDX  0
-#define IMG1_ADDR 0x10000
 #define IMG1_SIZE 0x40000
-
-#define IMG2_IDX  0
-#define IMG2_ADDR 0x50000
 #define IMG2_SIZE 0x40000
-
-#define IMG_PARA_IDX  0
-#define IMG_PARA_ADDR 0x90000
 #define IMG_PARA_SIZE 0x2000
-
-#define FS_IDX  0
-#define FS_ADDR 0xA0000
 #define FS_SIZE 0
-
-#define RUN_IDX  IMG1_IDX
-#define RUN_ADDR IMG1_ADDR
 #define RUN_SIZE IMG1_SIZE
 
 /***************************************************************
@@ -111,31 +88,29 @@ phymem_s g_phymem[] =
     {2,MEM_TYPE_RAM,RAM1_BASE,RAM1_SIZE},
     {3,MEM_TYPE_RAM,RAM2_BASE,RAM2_SIZE}
 };
-w_int32_t phymem_get_count(void)
+
+
+void phy_mems_register(void)
 {
-    return sizeof(g_phymem)/sizeof(g_phymem[0]);
+    phymem_register(MEM_TYPE_ROM,ROM1_BASE,ROM1_SIZE);
+    phymem_register(MEM_TYPE_ROM,ROM2_BASE,ROM2_SIZE);
+    phymem_register(MEM_TYPE_RAM,RAM1_BASE,RAM1_SIZE);
+    phymem_register(MEM_TYPE_RAM,RAM2_BASE,RAM2_SIZE);
 }
 
-#define PART_DEF(name,title) {(char*)name,title##_IDX,title##_ADDR,title##_SIZE}
-part_s g_region_map[] = 
+void parts_create(void)
 {
-    PART_DEF("boot",BOOT),
-    PART_DEF("btpara1",BT_PARA1),
-    PART_DEF("btpara2",BT_PARA2),
-    PART_DEF("img1",IMG1),
-    PART_DEF("img2",IMG2),
-    PART_DEF("imgpara",IMG_PARA),
-    PART_DEF("ramrun",RAMRUN),
-    PART_DEF("romrun",RAMRUN),
-    PART_DEF("cache",CACHE),
-    PART_DEF("share",SHARE),
-};
-w_int32_t part_get_count(void)
-{
-    return sizeof(g_region_map)/sizeof(part_s);
+    part_create("boot",0,BOOT_SIZE);
+    part_create("btpara1",0,BT_PARA1_SIZE);
+    part_create("btpara2",0,BT_PARA2_SIZE);
+    part_create("img1",0,IMG1_SIZE);
+    part_create("img2",0,IMG2_SIZE);
+    part_create("imgpara",0,IMG_PARA_SIZE);
+    part_create("ramrun",2,RAMRUN_SIZE);
+    part_create("romrun",0,RAMRUN_SIZE);
+    part_create("cache",2,CACHE_SIZE);
+    part_create("share",2,SHARE_SIZE);
 }
-
-
 
 w_uint32_t mem_get_base(w_int32_t idx)
 {
