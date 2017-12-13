@@ -104,9 +104,6 @@ w_uint8_t g_ram2[RAM2_SIZE];
 w_uint8_t g_rom1[ROM1_SIZE];
 w_uint8_t g_rom2[ROM2_SIZE];
 
-
-
-
 phymem_s g_phymem[] = 
 {
     {0,MEM_TYPE_ROM,ROM1_BASE,ROM1_SIZE},

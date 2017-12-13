@@ -4,7 +4,7 @@
 **                                       yzfcer@163.com
 **
 **--------------文件信息--------------------------------------------------------------------------------
-**文   件   名: wind_crc16.h
+**文   件   名: wind_conv.h
 **创   建   人: Jason Zhou
 **最后修改日期: 2017.12.10
 **描        述: 
@@ -22,18 +22,17 @@
 **
 **------------------------------------------------------------------------------------------------------
 *******************************************************************************************************/
-#ifndef WIND_CRC16_H__
-#define WIND_CRC16_H__
+#ifndef WIND_CONV_H__
+#define WIND_CONV_H__
 #include "wind_type.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-w_uint16_t wind_crc16(unsigned char * data, int len);
+w_bool_t wind_atoi(char *str,w_int32_t *value);
+void wind_itoa(char *str,w_int32_t value);
 
+w_bool_t wind_atoui(char *str,w_uint32_t *value);
+void wind_uitoa(char *str,w_uint32_t value);
 
-#ifdef __cplusplus
-}
+w_bool_t wind_htoi(char *hex,w_uint32_t *value);
+void wind_itoh(char *hex,w_uint32_t value);
 #endif
 
-#endif
