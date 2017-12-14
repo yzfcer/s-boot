@@ -38,12 +38,13 @@ typedef struct __region
 {
     char name[REG_NAME_LEN];
     w_int8_t memidx;
-    w_int8_t type;
+    w_int8_t memtype;
     w_uint16_t status;
     w_uint32_t addr;
     w_int32_t size;
     w_int32_t datalen;
     w_uint32_t crc;
+    
 }region_s;
 
 region_s *mem_map_get_reg(char *name);

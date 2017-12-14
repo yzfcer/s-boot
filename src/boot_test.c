@@ -58,7 +58,7 @@ void destroy_code_space(region_s *code)
     {
         buff[i] = 0xff;
     }
-    write_block(code->type,code->memidx,code->addr,buff,1);
+    write_block(code->memtype,code->memidx,code->addr,buff,1);
 }
 
 void test_pro1_error(void)
@@ -97,7 +97,7 @@ void test_upgrade(void)
     g_upgrade_info.flag = 1;
     g_upgrade_info.addr = img->addr;
     g_upgrade_info.datalen = img->datalen;
-    g_upgrade_info.mem_type = img->type;
+    g_upgrade_info.mem_type = img->memtype;
     sp_set_upgrade_param(&g_upgrade_info);
     return;
 }

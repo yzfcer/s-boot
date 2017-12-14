@@ -202,7 +202,7 @@ w_int32_t check_img_valid(region_s *img)
 
 static w_bool_t region_equal(region_s *src,region_s *dest)
 {
-    if(src->type != dest->type)
+    if(src->memtype != dest->memtype)
         return B_FALSE;
     if(src->memidx != dest->memidx)
         return B_FALSE;
@@ -431,7 +431,7 @@ w_int32_t clean_program(void)
     {
         wind_notice("erase base 0x%x,lenth %d.",code[i]->addr,code[i]->datalen);
         blocknum = (code[i]->datalen + BLOCK_SIZE - 1) / BLOCK_SIZE;
-        erase_block(code[i]->type,code[i]->memidx,code[i]->addr,blocknum);
+        erase_block(code[i]->memtype,code[i]->memidx,code[i]->addr,blocknum);
     }
     wind_printf("clear program OK.\r\n");
     return 0;

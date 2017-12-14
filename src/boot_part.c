@@ -6,20 +6,24 @@
 #include "mem_driver.h"
 #include "wind_debug.h"
 #include "phy_mem.h"
-static w_int32_t ptidx = 0;
-static part_s g_part[PART_COUNT];
+#include "boot_param.h"
 
 static part_s *get_part(void)
 {
-    return g_part;
+    
+    boot_param_s *bp = boot_param_instance();
+    return (part_s*)(sizeof(boot_param_s)+sizeof(phymem_s)+bp->phymem_cnt + (w_uint32_t)bp);
 }
 static w_int32_t get_part_count(void)
 {
-    return ptidx;
+    boot_param_s *bp = boot_param_instance();
+    return bp->part_cnt;
 }
+
 static void set_part_count(w_int32_t count)
 {
-    ptidx = count;
+    boot_param_s *bp = boot_param_instance();
+    bp->part_cnt = count;
 }
 
 

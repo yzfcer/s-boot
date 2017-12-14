@@ -51,11 +51,7 @@ void print_boot_info(void)
 static w_int32_t boot_init(void)
 {
     print_boot_info();
-    mem_drv_init();
-    phy_mems_register();
-    parts_create();
-    //phymem_print_detail();
-    //part_print_detail();
+    boot_param_reset();
     boot_param_clear_buffer();
     go_to_next_step();
     wind_notice("bootloader init OK.");
@@ -176,7 +172,7 @@ static w_int32_t  boot_upgrade_check(void)
     img.size = tmp->size;
     img.addr = g_upgrade_info.addr;
     img.datalen = g_upgrade_info.datalen;
-    img.type = (w_int16_t)g_upgrade_info.mem_type;
+    img.memtype = (w_int16_t)g_upgrade_info.mem_type;
 
     ret = check_img_valid(&img);
     if(0 != ret)
@@ -185,7 +181,7 @@ static w_int32_t  boot_upgrade_check(void)
         return -1;
     }
     tmp = mem_map_get_reg("img1");
-    if(MEM_TYPE_ROM == tmp->type)
+    if(MEM_TYPE_ROM == tmp->memtype)
     {
         ret = flush_img_to_rom(&img);
     }
@@ -299,7 +295,7 @@ static w_int32_t boot_load_app(void)
         return -1;
     }
 	tmp = mem_map_get_reg("romrun");
-    if(MEM_TYPE_ROM == tmp->type)
+    if(MEM_TYPE_ROM == tmp->memtype)
     {
         if(MEM_NORMAL == tmp->status)
         {
@@ -321,7 +317,7 @@ static w_int32_t boot_load_app(void)
         return -1;
     }
 
-    if(MEM_TYPE_ROM == regi->type)
+    if(MEM_TYPE_ROM == regi->memtype)
     {
         wind_notice("need not load App to a NORFlash ROM.");
         set_boot_status(BOOT_SET_APP_PARAM);
@@ -348,7 +344,7 @@ static w_int32_t boot_set_app_param(void)
     g_upgrade_info.addr = tmp->addr;
     g_upgrade_info.flag = 0;
     g_upgrade_info.size = tmp->size;
-    g_upgrade_info.mem_type = tmp->type;
+    g_upgrade_info.mem_type = tmp->memtype;
     sp_set_upgrade_param(&g_upgrade_info);
     sp_get_upgrade_param(&g_upgrade_info);
     wind_printf("set upgrade params:\r\n");
@@ -357,7 +353,7 @@ static w_int32_t boot_set_app_param(void)
 	tmp = mem_map_get_reg("imgpara");
     g_sysparam_reg.addr = tmp->addr;
     g_sysparam_reg.size = tmp->size;
-    g_sysparam_reg.mem_type = tmp->type;
+    g_sysparam_reg.mem_type = tmp->memtype;
     wind_printf("set sysparam region params:\r\n");
     wind_printf("sysparam addr:0x%x\r\n",g_sysparam_reg.addr);
     wind_printf("sysparam lenth:0x%x\r\n",g_sysparam_reg.size);
@@ -426,6 +422,7 @@ void boot_loop(void)
 {
     w_int32_t i,ret;
     device_init();
+    mem_drv_init();
     while(1)
     {
         for(i = 0;i < sizeof(g_status_handTB)/sizeof(boot_handle_TB);i ++)

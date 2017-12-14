@@ -19,6 +19,7 @@
 #include "mem_driver.h"
 #include "boot_hw_if.h"
 #include "phy_mem.h"
+#include "boot_part.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,7 +39,10 @@ static void upate_bootparam_crc(w_uint8_t *prmbuf)
 boot_param_s *boot_param_instance(void)
 {
     if(NULL == g_pbp)
+    {
+        g_pbp = (boot_param_s *)&g_bootparam;
         g_pbp = (boot_param_s*)boot_param_from_rom();
+    }
     return (boot_param_s *)g_pbp;
 }
 
@@ -60,7 +64,8 @@ boot_param_s *boot_param_from_rom(void)
 void boot_param_reset(void)
 {   
     boot_param_s *bp = (boot_param_s*)g_bootparam;
-    part_print_detail();
+    
+    wind_memset(g_bootparam,0,BT_BUF_SIZE);
     bp->magic = BOOT_PARAM_MAGIC;
     bp->lenth = sizeof(boot_param_s);
 
@@ -71,7 +76,15 @@ void boot_param_reset(void)
     bp->encrypt_type = ENCRYPT_TYPE;
     bp->lock_en = MCU_LOCK_ENABLE;
 
-    bp->reg_count = part_get_count();
+    bp->phymem_max = PHYMEM_COUNT;
+    bp->lenth += sizeof(phymem_s) * bp->phymem_max;
+    bp->part_max = PART_COUNT;
+    bp->lenth += sizeof(part_s) * bp->part_max;
+    phy_mems_register();
+    parts_create();
+    bp->phymem_cnt = phymem_get_count();
+    //bp->part_cnt = part_get_count();
+    //bp->reg_count = part_get_count();
     bp->map_size = bp->reg_count *sizeof(region_s);
     bp->lenth = sizeof(boot_param_s) + bp->map_size;
     mem_map_reset((region_s*)(sizeof(boot_param_s)+(w_uint32_t)bp));

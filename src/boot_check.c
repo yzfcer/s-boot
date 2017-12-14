@@ -73,7 +73,7 @@ w_int32_t repair_running_space(void)
         src = mem_map_get_reg("cache");
         tmp = mem_map_get_reg("img1");
         tmp1 = mem_map_get_reg("romrun");
-        if((tmp->type != tmp1->type) ||
+        if((tmp->memtype != tmp1->memtype) ||
             (tmp->memidx != tmp1->memidx) ||
             (tmp->addr != tmp1->addr))
         {
@@ -105,7 +105,7 @@ static w_int32_t repair_program(boot_param_s *bp)
     if(MEM_ERROR == tmp1->status)
     {
         
-        if((tmp2->type != tmp1->type) ||
+        if((tmp2->memtype != tmp1->memtype) ||
             (tmp2->memidx != tmp1->memidx) ||
             (tmp2->addr != tmp1->addr))
         {
@@ -151,7 +151,7 @@ w_int32_t check_rom_program(region_s *code)
     if(prog.status == MEM_NULL)
     {
         wind_notice("region \"%s\" type %s base 0x%x lenth %d is empty.",
-                    prog.name,memtype_name(prog.type),prog.addr,prog.datalen);
+                    prog.name,memtype_name(prog.memtype),prog.addr,prog.datalen);
         return 0;
     }
     
@@ -162,11 +162,11 @@ w_int32_t check_rom_program(region_s *code)
         for(i = 0;i < blocks;i ++)
         {
             base = prog.addr + i * BLOCK_SIZE;
-            len = read_block(prog.type,prog.memidx,base,buff,1);
+            len = read_block(prog.memtype,prog.memidx,base,buff,1);
             if(len <= 0)
             {
                 wind_warn("read %s block base 0x%x,lenth %d failed.",
-                            memtype_name(prog.type),base,BLOCK_SIZE);
+                            memtype_name(prog.memtype),base,BLOCK_SIZE);
                 return -1;
             }
             len = (i == blocks - 1)?prog.datalen - i * BLOCK_SIZE:BLOCK_SIZE;
@@ -190,7 +190,7 @@ w_int32_t check_rom_program(region_s *code)
     if(MEM_ERROR == prog.status || cal_crc != prog.crc)
     {
         wind_warn("check program CRC in %s base 0x%x,lenth %d failed.",
-                    memtype_name(prog.type),prog.addr,prog.datalen);
+                    memtype_name(prog.memtype),prog.addr,prog.datalen);
         wind_debug("cal_crc:0x%x,crc:0x%x",cal_crc,prog.crc);
         code->status = MEM_ERROR;
         return -1;
@@ -223,7 +223,7 @@ w_int32_t check_rom_programs(void)
         {
             
             wind_warn("check program CRC in %s base 0x%x,lenth %d failed.",
-                        memtype_name(code[i]->type),code[i]->addr,code[i]->datalen);
+                        memtype_name(code[i]->memtype),code[i]->addr,code[i]->datalen);
             ret= 1;
         }
     }

@@ -164,7 +164,7 @@ void mem_map_print_status(void)
 void mem_map_copy_info(region_s *src,region_s *dest)
 {
 	wind_strcpy(dest->name,src->name);
-    dest->type = src->type;
+    dest->memtype = src->memtype;
     dest->memidx = src->memidx;
     dest->addr = src->addr;
     dest->size = src->size;
@@ -196,8 +196,8 @@ w_int32_t mem_map_copy_data(region_s *src,region_s *dest)
     wind_notice("copy data from \"%s\" to \"%s\" lenth %d.",
                 src->name,dest->name,src->datalen);
     wind_debug("source type %s,addr 0x%x,lenth %d dest type,%s,addr 0x%x,lenth %d.",
-                memtype_name(src->type),src->addr,src->datalen,
-                memtype_name(dest->type),dest->addr,dest->size);
+                memtype_name(src->memtype),src->addr,src->datalen,
+                memtype_name(dest->memtype),dest->addr,dest->size);
     
     blocks = (src->datalen + BLOCK_SIZE - 1) / BLOCK_SIZE;
     wind_printf("complete:");
@@ -212,7 +212,7 @@ w_int32_t mem_map_copy_data(region_s *src,region_s *dest)
                 for(j = 0;j < BLOCK_SIZE;j ++)
                     buff[j] = 0;
             }
-            len = read_block(src->type,src->memidx,addr,buff,1);
+            len = read_block(src->memtype,src->memidx,addr,buff,1);
             if(len > 0)
                 break;
         }
@@ -226,7 +226,7 @@ w_int32_t mem_map_copy_data(region_s *src,region_s *dest)
         for(times = 0;times < 3;times ++)
         {
             addr = dest->addr + i * BLOCK_SIZE;
-            len = write_block(dest->type,dest->memidx,addr,buff,1);
+            len = write_block(dest->memtype,dest->memidx,addr,buff,1);
             if(len > 0)
                 break;
         }
