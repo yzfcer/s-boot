@@ -20,7 +20,7 @@
             base.Dispose(disposing);
         }
 
-        #part Windows 窗体设计器生成的代码
+        #region Windows 窗体设计器生成的代码
 
         /// <summary>
         /// 设计器支持所需的方法 - 不要

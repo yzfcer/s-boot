@@ -23,9 +23,9 @@ namespace boot_img
         }
 
         //获取字符串的CRC32校验值
-        public static UInt32 calc_crc32(byte[] buff, w_int32_t offset,w_int32_t len, UInt32 crc)
+        public static UInt32 calc_crc32(byte[] buff, int offset,int len, UInt32 crc)
         {
-            w_int32_t i;
+            int i;
             if (!have_table)
                 make_table();
             //boot_debug("calculate CRC base 0x%x,len %d",buff,len);

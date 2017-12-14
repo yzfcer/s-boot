@@ -8,8 +8,8 @@ namespace boot_img
     class fileinfo
     {
         string path;
-        w_int32_t offset;
-        w_int32_t filelen;
+        int offset;
+        int filelen;
         byte[] data;
         public string Path
         {
@@ -22,7 +22,7 @@ namespace boot_img
                 this.path = value;
             }
         }
-        public w_int32_t  Offset
+        public int  Offset
         {
             get
             {
@@ -34,7 +34,7 @@ namespace boot_img
             }
         }
 
-        public w_int32_t Filelen
+        public int Filelen
         {
             get
             {
@@ -54,13 +54,13 @@ namespace boot_img
             }
         }
 
-        public w_int32_t read_file()
+        public int read_file()
         {
             try
             {
                 System.IO.FileStream fs = new System.IO.FileStream(path, System.IO.FileMode.Open);
                 data = new byte[fs.Length];
-                filelen = fs.Read(data, 0, (w_int32_t)fs.Length);
+                filelen = fs.Read(data, 0, (int)fs.Length);
                 fs.Close();
 
             }
