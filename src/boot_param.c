@@ -20,7 +20,7 @@
 #include "boot_hw_if.h"
 #include "phy_mem.h"
 #include "boot_part.h"
-
+#include "wind_string.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -85,9 +85,9 @@ void boot_param_reset(void)
     bp->phymem_cnt = phymem_get_count();
     //bp->part_cnt = part_get_count();
     //bp->reg_count = part_get_count();
-    bp->map_size = bp->reg_count *sizeof(region_s);
+    bp->map_size = bp->reg_count *sizeof(part_s);
     bp->lenth = sizeof(boot_param_s) + bp->map_size;
-    mem_map_reset((region_s*)(sizeof(boot_param_s)+(w_uint32_t)bp));
+    mem_map_reset((part_s*)(sizeof(boot_param_s)+(w_uint32_t)bp));
     wind_notice("init boot param OK.");
 }
 

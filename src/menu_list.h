@@ -35,7 +35,7 @@ extern menu_handle_TB g_menu_handleTB[];
 void run_menu(void);
 void print32_t_menu_list(void);
 w_int32_t get_menu_go_direction(void);
-w_int32_t flush_img_to_rom(region_s *code_region);
+w_int32_t flush_img_to_rom(part_s *code_region);
 
 #ifdef __cplusplus
 }

@@ -140,7 +140,7 @@ static w_int32_t boot_self_check(void)
 static w_int32_t  boot_upgrade_check(void)
 {
     w_int32_t ret;
-    region_s img,*tmp;
+    part_s img,*tmp;
     boot_param_s *bp = (boot_param_s *)boot_param_instance();
     
     if(NULL == bp)
@@ -267,7 +267,7 @@ static w_int32_t boot_menu_list(void)
 static w_int32_t boot_load_app(void)
 {
     mem_status_e mem_stat = MEM_ERROR;
-    region_s *regi = NULL,*tmp;
+    part_s *regi = NULL,*tmp;
     boot_param_s *bp = NULL; 
 
     wind_notice("begin to load App to running space...");
@@ -334,7 +334,7 @@ static w_int32_t boot_load_app(void)
 
 static w_int32_t boot_set_app_param(void)
 {
-    region_s *tmp;
+    part_s *tmp;
     boot_param_s *bp = (boot_param_s *)boot_param_instance();
     wind_notice("begin to set App params...");
     sp_init_share_param();

@@ -50,7 +50,7 @@ w_uint8_t get_error(w_uint8_t err_type)
 }
 
 
-void destroy_code_space(region_s *code)
+void destroy_code_space(part_s *code)
 {
     w_uint32_t i;
     w_uint8_t *buff = get_block_buffer();
@@ -63,25 +63,25 @@ void destroy_code_space(region_s *code)
 
 void test_pro1_error(void)
 {
-    region_s *reg = mem_map_get_reg("img1");
+    part_s *reg = mem_map_get_reg("img1");
     destroy_code_space(reg);
 }
 void test_probak_error(void)
 {
-    region_s *reg = mem_map_get_reg("img2");
+    part_s *reg = mem_map_get_reg("img2");
     destroy_code_space(reg);
 }
 
 
 void test_run_error(void)
 {
-    region_s *reg = mem_map_get_reg("romrun");
+    part_s *reg = mem_map_get_reg("romrun");
     destroy_code_space(reg);
 }
 
 void test_upgrade(void)
 {
-    region_s *img;
+    part_s *img;
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
 
     img = mem_map_get_reg("cache");

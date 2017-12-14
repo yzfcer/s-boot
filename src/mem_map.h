@@ -15,6 +15,7 @@
 #define MEM_MAP_H__
 #include "wind_type.h"
 #include "share_param.h"
+#include "boot_part.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -23,9 +24,6 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------
-
-//#define DEFAULT_MAP_INDEX 1
-
 typedef enum
 {
     MEM_NULL = 0,
@@ -34,29 +32,16 @@ typedef enum
 }mem_status_e;
 
 
-typedef struct __region
-{
-    char name[REG_NAME_LEN];
-    w_int8_t memidx;
-    w_int8_t memtype;
-    w_uint16_t status;
-    w_uint32_t addr;
-    w_int32_t size;
-    w_int32_t datalen;
-    w_uint32_t crc;
-    
-}region_s;
-
-region_s *mem_map_get_reg(char *name);
-region_s *mem_map_get_list(void);
+part_s *mem_map_get_reg(char *name);
+part_s *mem_map_get_list(void);
 w_int32_t mem_map_get_reg_count(void);
 void mem_map_print_status(void);
 
-w_int32_t mem_map_reset(region_s *map);
+w_int32_t mem_map_reset(part_s *map);
 w_int32_t mem_map_check(void);
 
-void mem_map_copy_info(region_s *src,region_s *dest);
-w_int32_t mem_map_copy_data(region_s *src,region_s *dest);
+void mem_map_copy_info(part_s *src,part_s *dest);
+w_int32_t mem_map_copy_data(part_s *src,part_s *dest);
 
 w_uint32_t mem_map_share_addr(void);
 char *memtype_name(w_int16_t type);

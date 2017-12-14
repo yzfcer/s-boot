@@ -18,7 +18,7 @@
 #include "wind_crc32.h"
 #include "program_mgr.h"
 #include "boot_hw_if.h"
-w_int32_t repair_rom_space(region_s *src,region_s *dest)
+w_int32_t repair_rom_space(part_s *src,part_s *dest)
 {
     w_int32_t ret;
     
@@ -44,8 +44,8 @@ w_int32_t repair_rom_space(region_s *src,region_s *dest)
 w_int32_t repair_running_space(void)
 {
     w_int32_t ret;
-    region_s *src,*dest,*tmp,*tmp1;
-    region_s bin;
+    part_s *src,*dest,*tmp,*tmp1;
+    part_s bin;
     boot_param_s *bp = (boot_param_s *)boot_param_instance();
     dest = mem_map_get_reg("romrun");
     do
@@ -93,7 +93,7 @@ w_int32_t repair_running_space(void)
 static w_int32_t repair_program(boot_param_s *bp)
 {
     w_int32_t ret = 0;
-    region_s *tmp1,*tmp2;
+    part_s *tmp1,*tmp2;
     wind_notice("programs has errors,try to repair ...");
     tmp2 = mem_map_get_reg("romrun");
     if(MEM_ERROR == tmp2->status)
@@ -138,12 +138,12 @@ static w_int32_t repair_program(boot_param_s *bp)
 
 
 //检查程序块的CRC的值是否正确，正确返回1，错误返回0
-w_int32_t check_rom_program(region_s *code)
+w_int32_t check_rom_program(part_s *code)
 {
     w_uint32_t cal_crc = 0;
     w_int32_t i,blocks,len;
     w_uint32_t base;
-    region_s prog;
+    part_s prog;
     img_head_s *head;
     w_uint8_t *buff = get_block_buffer();
 
@@ -202,7 +202,7 @@ w_int32_t check_rom_programs(void)
 {
     w_int32_t idx = 0;
     w_int32_t ret = 0;
-    region_s *code[3];
+    part_s *code[3];
     w_int32_t save_flag = 0,i;
     boot_param_s *bp = (boot_param_s *)boot_param_instance();
     
@@ -210,7 +210,7 @@ w_int32_t check_rom_programs(void)
     code[idx++] = mem_map_get_reg("img2");
     code[idx++] = mem_map_get_reg("romrun");
     wind_notice("begin to check programs...");
-    for(i = 0;i < sizeof(code)/sizeof(region_s*);i ++)
+    for(i = 0;i < sizeof(code)/sizeof(part_s*);i ++)
     {
         if(MEM_ERROR != code[i]->status)
         {

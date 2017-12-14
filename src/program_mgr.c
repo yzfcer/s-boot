@@ -26,7 +26,7 @@
 #include "mem_driver.h"
 #include "encrypt.h"
 #include "phy_mem.h"
-
+#include "wind_string.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -80,42 +80,20 @@ static w_int32_t head_endian_convert(img_head_s *head)
     return -1;        
 }
 
-w_int32_t memory_compare(w_uint8_t *dest,w_uint8_t *src,w_int32_t len)
-{
-    w_int32_t i;
-    for(i = 0;i < len;i ++)
-    {
-        if(dest[i] > src[i])
-            return 1;
-        else if(dest[i] < src[i])
-            return -1;
-    }
-    return 0;
-}
-
-w_int32_t string_len(const char *str)
-{
-    w_int32_t i = 0;
-    if(str == NULL)
-        return 0;
-    while(str[i])
-        i ++;
-    return i;
-}
 
 w_bool_t check_hardware_matched(img_head_s *head)
 {
-    if(0 != memory_compare(head->board_name,BOARD_NAME,string_len(BOARD_NAME)))
+    if(0 != wind_memcmp(head->board_name,BOARD_NAME,wind_strlen(BOARD_NAME)))
     {
         wind_notice("dest board name:%s",BOARD_NAME);
         return B_FALSE;
     }
-    if(0 != memory_compare(head->arch_name,ARCH_NAME,string_len(ARCH_NAME)))
+    if(0 != wind_memcmp(head->arch_name,ARCH_NAME,wind_strlen(ARCH_NAME)))
     {
         wind_notice("dest arch name:%s",ARCH_NAME);
         return B_FALSE;
     }
-    if(0 != memory_compare(head->cpu_name,CPU_NAME,string_len(CPU_NAME)))
+    if(0 != wind_memcmp(head->cpu_name,CPU_NAME,wind_strlen(CPU_NAME)))
     {
         wind_notice("dest cpu model:%s",CPU_NAME);
         return B_FALSE;
@@ -123,7 +101,7 @@ w_bool_t check_hardware_matched(img_head_s *head)
     return B_TRUE;    
 }
 
-w_int32_t decrypt_img_data(region_s *img,region_s *bin)
+w_int32_t decrypt_img_data(part_s *img,part_s *bin)
 {
     w_int32_t len;
     img_head_s *head;
@@ -150,7 +128,7 @@ w_int32_t decrypt_img_data(region_s *img,region_s *bin)
 }
 
 
-w_int32_t check_img_valid(region_s *img)
+w_int32_t check_img_valid(part_s *img)
 {
     w_uint32_t cal_crc,crc;
     img_head_s *head;
@@ -200,7 +178,7 @@ w_int32_t check_img_valid(region_s *img)
 
 
 
-static w_bool_t region_equal(region_s *src,region_s *dest)
+static w_bool_t region_equal(part_s *src,part_s *dest)
 {
     if(src->memtype != dest->memtype)
         return B_FALSE;
@@ -214,8 +192,8 @@ static w_bool_t region_equal(region_s *src,region_s *dest)
 w_int32_t roll_back_program(void)
 {
     w_int32_t ret;
-    region_s *src,*dest,*tmp1;
-    region_s bin;
+    part_s *src,*dest,*tmp1;
+    part_s bin;
     w_bool_t run_in_program1;
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
     
@@ -257,11 +235,11 @@ w_int32_t roll_back_program(void)
     return 0;
 }
 
-w_int32_t flush_img_to_ram(region_s *img)
+w_int32_t flush_img_to_ram(part_s *img)
 {
     w_int32_t ret;
-    region_s bin;
-    region_s *dest;
+    part_s bin;
+    part_s *dest;
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
     decrypt_img_data(img,&bin);
     //这里需要修改，不能直接使用img，因为会修改程序缓存的起始地址，
@@ -280,11 +258,11 @@ w_int32_t flush_img_to_ram(region_s *img)
 
 
 //先备份原来的程序，再烧录新程序到sys_program1和运行区
-w_int32_t flush_img_to_rom(region_s *img)
+w_int32_t flush_img_to_rom(part_s *img)
 {
     w_int32_t ret;
-    region_s *src,*dest;
-    region_s bin;
+    part_s *src,*dest;
+    part_s bin;
     img_head_s *head;
     w_bool_t run_in_program1;
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
@@ -347,7 +325,7 @@ w_int32_t flush_img_to_rom(region_s *img)
 }
 
 
-w_int32_t flush_img_file(w_int16_t type,region_s *img)
+w_int32_t flush_img_file(w_int16_t type,part_s *img)
 {
     w_int32_t ret;   
     switch(type)
@@ -377,7 +355,7 @@ w_int32_t flush_img_file(w_int16_t type,region_s *img)
 w_int32_t download_img_file(w_int16_t type)
 {
     w_int32_t ret,len;
-    region_s *img;
+    part_s *img;
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
 
     if(bp->debug_mode)
@@ -418,7 +396,7 @@ w_int32_t clean_program(void)
 {
     w_int32_t idx = 0;
     w_uint32_t i,blocknum;
-    region_s *code[5];
+    part_s *code[5];
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
     wind_printf("clearing program ...\r\n");
     code[idx++] = mem_map_get_reg("img1");

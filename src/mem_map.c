@@ -42,10 +42,10 @@ char *memtype_name(w_int16_t type)
 }
 
 
-region_s *mem_map_get_reg(char *name)
+part_s *mem_map_get_reg(char *name)
 {
     w_int32_t i;
-    region_s *reg = (region_s *)boot_param_mem_map();
+    part_s *reg = (part_s *)boot_param_mem_map();
     w_int32_t count = mem_map_get_reg_count();
     for(i = 0;i < count;i ++)
     {
@@ -53,13 +53,13 @@ region_s *mem_map_get_reg(char *name)
             return reg;
     }
     wind_error("find region %s failed.",name);
-    return (region_s *)NULL;
+    return (part_s *)NULL;
 }
 
-region_s *mem_map_get_list(void)
+part_s *mem_map_get_list(void)
 {
     boot_param_s *bp = boot_param_instance();
-    return (region_s*)(sizeof(boot_param_s)+(w_uint32_t)bp);
+    return (part_s*)(sizeof(boot_param_s)+(w_uint32_t)bp);
     
 }
 
@@ -70,10 +70,10 @@ w_int32_t mem_map_get_reg_count(void)
 }
 
 #if 1
-w_int32_t mem_map_reset(region_s *map)
+w_int32_t mem_map_reset(part_s *map)
 {
     w_int32_t i;
-    region_s *rg = map;
+    part_s *rg = map;
     part_s *entry = part_get_list();
     w_int32_t count = part_get_count();
     for(i = 0;i < count;i ++)
@@ -97,7 +97,7 @@ w_int32_t mem_map_reset(region_s *map)
 
 
 #if 0
-w_int32_t check_probuf_and_running(region_s *probuf,region_s *run)
+w_int32_t check_probuf_and_running(part_s *probuf,part_s *run)
 {
     if(probuf->type != run->type)
         return 0;
@@ -152,7 +152,7 @@ void mem_map_print_status(void)
                 (reg).datalen,(reg).name,(reg).size?((reg).datalen*100)/(reg).size:0
     w_int32_t i;
     w_int32_t count = mem_map_get_reg_count();
-    region_s *reg = mem_map_get_list();
+    part_s *reg = mem_map_get_list();
 
     wind_printf("%-15s%-8s%-12s%-11s%-11s%-9s%-8s\r\n","region","memidx","addr","size","datalen","type","usage");
     for(i = 0;i < count;i ++)
@@ -161,7 +161,7 @@ void mem_map_print_status(void)
     }
 }
 
-void mem_map_copy_info(region_s *src,region_s *dest)
+void mem_map_copy_info(part_s *src,part_s *dest)
 {
 	wind_strcpy(dest->name,src->name);
     dest->memtype = src->memtype;
@@ -180,7 +180,7 @@ static void print_copy_percents(w_int32_t numerator, w_int32_t denominator,w_int
         feed_watchdog();
 }
 
-w_int32_t mem_map_copy_data(region_s *src,region_s *dest)
+w_int32_t mem_map_copy_data(part_s *src,part_s *dest)
 {
     w_int32_t i,j,len,blocks,times;
     w_uint32_t addr;

@@ -24,13 +24,12 @@
 #include "program_mgr.h"
 #include "boot_test.h"
 #include "boot_hw_if.h"
-
+#include "wind_string.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 
-extern w_int32_t string_len(const char *str);
 static w_int32_t is_string_equal(char *str1,char *str2,w_int32_t len)
 {
     w_int32_t i;
@@ -81,7 +80,7 @@ static void download_img_to_rom(void)
 static void download_img_to_ram(void)
 {
     w_int32_t ret;
-    region_s *dest = mem_map_get_reg("ramrun");
+    part_s *dest = mem_map_get_reg("ramrun");
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
     if(dest->size <= 0)
     {
@@ -270,11 +269,11 @@ w_int32_t open_super_prio(void)
     char *prio2 = "sudo";
     w_uint8_t *buff = get_block_buffer();
     len = read_line_blockig((char*)buff,BLOCK_SIZE);
-    if(is_string_equal((char*)buff,prio1,string_len(prio1)))
+    if(is_string_equal((char*)buff,prio1,wind_strlen(prio1)))
     {
         prio = 1;
     }
-    else if(is_string_equal((char*)buff,prio2,string_len(prio2)))
+    else if(is_string_equal((char*)buff,prio2,wind_strlen(prio2)))
     {
         prio = 2;
     }
