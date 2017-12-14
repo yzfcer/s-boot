@@ -20,8 +20,8 @@
 extern "C" {
 #endif
 //¹²ÏíµØÖ·
-//#define mem_map_share_addr mem_map_share_addr()//0x2003F000
-extern w_uint32_t mem_map_share_addr (void);
+//#define part_share_addr part_share_addr()//0x2003F000
+extern w_uint32_t part_share_addr (void);
 
 #define SHARE_VERSION 0x0001
 typedef struct
@@ -43,7 +43,7 @@ typedef struct
 
 static void update_share_crc(void)
 {
-    share_param_s *sp = (share_param_s *)(void*)mem_map_share_addr();
+    share_param_s *sp = (share_param_s *)(void*)part_share_addr();
     w_uint32_t *crc = (w_uint32_t*)(sp+1);
     *crc = wind_crc32(0xffffffff,(w_uint8_t*)sp,sizeof(share_param_s));
 }
@@ -62,7 +62,7 @@ static void copy_share_data(char *src,char *dest,w_int32_t len)
 static w_int32_t check_share_param(void)
 {
     
-    share_param_s *sp = (share_param_s *)(void*)mem_map_share_addr();
+    share_param_s *sp = (share_param_s *)(void*)part_share_addr();
     w_uint32_t *crc = (w_uint32_t*)(sp+1);
     if(sp->magic != SHARE_PARAM_MAGIC)
     {
@@ -86,14 +86,14 @@ static w_int32_t check_share_param(void)
 
 void sp_set_app_rollback(w_uint8_t is_rollback)
 {
-    share_param_s * sp =(share_param_s *)(void*)mem_map_share_addr();
+    share_param_s * sp =(share_param_s *)(void*)part_share_addr();
     sp->rollback_flag = is_rollback;
     update_share_crc();
 }
 
 w_int32_t sp_get_app_rollback(w_uint8_t *is_rollback)
 {
-    share_param_s *sp = (share_param_s *)(void*)mem_map_share_addr();
+    share_param_s *sp = (share_param_s *)(void*)part_share_addr();
     if(check_share_param())
         return -1;
     *is_rollback = (w_uint8_t)sp->rollback_flag;
@@ -103,14 +103,14 @@ w_int32_t sp_get_app_rollback(w_uint8_t *is_rollback)
 
 void sp_set_upgrade_param(upgrade_info_s *upreg)
 {
-    share_param_s *sp = (share_param_s *)(void*)mem_map_share_addr();
+    share_param_s *sp = (share_param_s *)(void*)part_share_addr();
     copy_share_data((char*)upreg,(char*)&sp->upgrade_reg,sizeof(upgrade_info_s));
     update_share_crc();
 }
 
 w_int32_t sp_get_upgrade_param(upgrade_info_s *upreg)
 {
-    share_param_s *sp = (share_param_s *)(void*)mem_map_share_addr();
+    share_param_s *sp = (share_param_s *)(void*)part_share_addr();
     if(check_share_param())
         return -1;
     copy_share_data((char*)&sp->upgrade_reg,(char*)upreg,sizeof(upgrade_info_s));
@@ -119,14 +119,14 @@ w_int32_t sp_get_upgrade_param(upgrade_info_s *upreg)
 
 void sp_set_sysparam_param(sysparam_region_s *sysparam)
 {
-    share_param_s *sp = (share_param_s *)(void*)mem_map_share_addr();
+    share_param_s *sp = (share_param_s *)(void*)part_share_addr();
     copy_share_data((char*)sysparam,(char*)&sp->sysparam_reg,sizeof(sysparam_region_s));
     update_share_crc();
 }
 
 w_int32_t sp_get_sysparam_param(sysparam_region_s *sysparam)
 {
-    share_param_s *sp = (share_param_s *)(void*)mem_map_share_addr();
+    share_param_s *sp = (share_param_s *)(void*)part_share_addr();
     if(check_share_param())
         return -1;
     copy_share_data((char*)&sp->sysparam_reg,(char*)sysparam,sizeof(sysparam_region_s));
@@ -137,7 +137,7 @@ void sp_init_share_param(void)
 {
     w_int32_t i;
     char *mem;
-    share_param_s *sp = (share_param_s *)(void*)mem_map_share_addr();
+    share_param_s *sp = (share_param_s *)(void*)part_share_addr();
     mem = (char*)sp;
     for(i = 0;i < sizeof(share_param_s);i ++)
     {

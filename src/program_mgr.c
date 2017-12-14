@@ -21,7 +21,7 @@
 #include "wind_crc32.h"
 #include "share_param.h"
 #include "program_mgr.h"
-#include "mem_map.h"
+#include "boot_part.h"
 #include "boot_hw_if.h"
 #include "mem_driver.h"
 #include "encrypt.h"
@@ -106,7 +106,7 @@ w_int32_t decrypt_img_data(part_s *img,part_s *bin)
     w_int32_t len;
     img_head_s *head;
 
-    mem_map_copy_info(img,bin);
+    part_copy_info(img,bin);
 	head = (img_head_s*)bin->addr;
     bin->addr += head->head_len;
     bin->size = img->size - head->head_len;
@@ -198,33 +198,33 @@ w_int32_t roll_back_program(void)
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
     
     //先将原来的程序拷贝到备份空间    
-    dest = mem_map_get_reg("img2");
-    src = mem_map_get_reg("img1");
-    ret = mem_map_copy_data(src,dest);
+    dest = part_get_inst_name("img2");
+    src = part_get_inst_name("img1");
+    ret = part_copy_data(src,dest);
     if(0 != ret)
     {
         wind_warn("roll back program failed.");
         return -1;
     }
     
-    dest = mem_map_get_reg("romrun");
-    src = mem_map_get_reg("img1");
+    dest = part_get_inst_name("romrun");
+    src = part_get_inst_name("img1");
     run_in_program1 = region_equal(dest,src);
     if(run_in_program1)
     {
-        tmp1 = mem_map_get_reg("romrun");
+        tmp1 = part_get_inst_name("romrun");
         tmp1->status = MEM_NORMAL;
         tmp1->crc = src->crc;
         tmp1->datalen= src->datalen;
     }
     else
     {
-        dest = mem_map_get_reg("img1");
-        src = mem_map_get_reg("cache");
-        mem_map_copy_data(src,dest);
+        dest = part_get_inst_name("img1");
+        src = part_get_inst_name("cache");
+        part_copy_data(src,dest);
         decrypt_img_data(src,&bin);
-        dest = mem_map_get_reg("romrun");
-        ret = mem_map_copy_data(&bin,dest);
+        dest = part_get_inst_name("romrun");
+        ret = part_copy_data(&bin,dest);
         if(0 != ret)
         {
             wind_error("flush program to running space failed.");
@@ -246,8 +246,8 @@ w_int32_t flush_img_to_ram(part_s *img)
     //另外需要重新考虑程序运行在RAM中间时，程序因该怎样存储
     
     wind_notice("begin to copy code to memory...");
-    dest = mem_map_get_reg("ramrun");
-    ret = mem_map_copy_data(&bin,dest);
+    dest = part_get_inst_name("ramrun");
+    ret = part_copy_data(&bin,dest);
     if(0 != ret)
     {
         wind_warn("copy img to running space failed.");
@@ -269,10 +269,10 @@ w_int32_t flush_img_to_rom(part_s *img)
     wind_notice("begin to flush code to rom space...");
     
     //先将原来的程序拷贝到备份空间    
-    src = mem_map_get_reg("img1");
-    dest = mem_map_get_reg("img2");
+    src = part_get_inst_name("img1");
+    dest = part_get_inst_name("img2");
     
-    ret = mem_map_copy_data(src,dest);
+    ret = part_copy_data(src,dest);
     if(0 != ret)
     {
         wind_warn("backup old program failed.");
@@ -280,22 +280,22 @@ w_int32_t flush_img_to_rom(part_s *img)
     }
     
     head = (img_head_s*)img->addr;
-    src = mem_map_get_reg("img1");
-    dest = mem_map_get_reg("romrun");
+    src = part_get_inst_name("img1");
+    dest = part_get_inst_name("romrun");
     run_in_program1 = region_equal(src,dest);
     
     //烧录到sys_program1，如果同时也是运行空间，则先解密，在烧录
     if(run_in_program1)
     {
         decrypt_img_data(img,&bin);
-        dest = mem_map_get_reg("img1");
-        ret = mem_map_copy_data(&bin,dest);
+        dest = part_get_inst_name("img1");
+        ret = part_copy_data(&bin,dest);
         if(0 != ret)
         {
             wind_warn("flush new program failed.");
             return -1;
         }
-        dest = mem_map_get_reg("romrun");
+        dest = part_get_inst_name("romrun");
         dest->status = MEM_NORMAL;
         dest->crc = bin.crc;
         dest->datalen= bin.datalen;
@@ -304,16 +304,16 @@ w_int32_t flush_img_to_rom(part_s *img)
     }
     else
     {
-        dest = mem_map_get_reg("img1");
-        ret = mem_map_copy_data(img,dest);
+        dest = part_get_inst_name("img1");
+        ret = part_copy_data(img,dest);
         if(0 != ret)
         {
             wind_warn("flush new program failed.");
             return -1;
         }
         decrypt_img_data(img,&bin);
-        dest = mem_map_get_reg("romrun");
-        ret = mem_map_copy_data(&bin,dest);
+        dest = part_get_inst_name("romrun");
+        ret = part_copy_data(&bin,dest);
         if(0 != ret)
         {
             wind_error("write new program failed.");
@@ -363,7 +363,7 @@ w_int32_t download_img_file(w_int16_t type)
         wind_notice("device can NOT download in debug mode ,set it to normal mode first");
         return -1;
     }
-    img = mem_map_get_reg("cache");
+    img = part_get_inst_name("cache");
     wind_printf("begin to receive file data,please wait.\r\n");
     len = boot_receive_img(img->addr,img->size);
     if(len <= 0)
@@ -383,7 +383,7 @@ w_int32_t download_img_file(w_int16_t type)
     ret = flush_img_file(type,img);
     if(0 != ret)
     {
-        wind_warn("flush data to %s failed.",memtype_name(type));
+        wind_warn("flush data to %s failed.",phymem_type(type));
         return -1;
     }
     wind_notice("img flush OK.");
@@ -399,11 +399,11 @@ w_int32_t clean_program(void)
     part_s *code[5];
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
     wind_printf("clearing program ...\r\n");
-    code[idx++] = mem_map_get_reg("img1");
-    code[idx++] = mem_map_get_reg("img2");
-    code[idx++] = mem_map_get_reg("romrun");
-    code[idx++] = mem_map_get_reg("btpara1");
-    code[idx++] = mem_map_get_reg("btpara2");
+    code[idx++] = part_get_inst_name("img1");
+    code[idx++] = part_get_inst_name("img2");
+    code[idx++] = part_get_inst_name("romrun");
+    code[idx++] = part_get_inst_name("btpara1");
+    code[idx++] = part_get_inst_name("btpara2");
     
     for(i = 0;i < 5;i ++)
     {

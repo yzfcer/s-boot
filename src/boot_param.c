@@ -87,7 +87,7 @@ void boot_param_reset(void)
     //bp->reg_count = part_get_count();
     bp->map_size = bp->reg_count *sizeof(part_s);
     bp->lenth = sizeof(boot_param_s) + bp->map_size;
-    mem_map_reset((part_s*)(sizeof(boot_param_s)+(w_uint32_t)bp));
+    part_init_all((part_s*)(sizeof(boot_param_s)+(w_uint32_t)bp));
     wind_notice("init boot param OK.");
 }
 

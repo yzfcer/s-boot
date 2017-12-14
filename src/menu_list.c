@@ -80,7 +80,7 @@ static void download_img_to_rom(void)
 static void download_img_to_ram(void)
 {
     w_int32_t ret;
-    part_s *dest = mem_map_get_reg("ramrun");
+    part_s *dest = part_get_inst_name("ramrun");
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
     if(dest->size <= 0)
     {
@@ -170,7 +170,7 @@ static void unlock_mcu(void)
 static void show_program_status(void)
 {
     boot_param_s *bp = (boot_param_s *)boot_param_instance();
-    mem_map_print_status();
+    part_print_status();
 }
 
 #if BOOT_TEST_ENABLE

@@ -14,7 +14,6 @@
 #ifndef BOOT_PARAM_H__
 #define BOOT_PARAM_H__
 #include "wind_type.h"
-#include "mem_map.h"
 #include "boot_part.h"
 #ifdef __cplusplus
 extern "C" {

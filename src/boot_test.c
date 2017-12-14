@@ -15,7 +15,7 @@
 #include "boot_port.h"
 #include "wind_debug.h"
 #include "wind_crc32.h"
-#include "mem_map.h"
+#include "boot_part.h"
 #include "boot_test.h"
 #include "share_param.h"
 #include "boot_hw_if.h"
@@ -63,19 +63,19 @@ void destroy_code_space(part_s *code)
 
 void test_pro1_error(void)
 {
-    part_s *reg = mem_map_get_reg("img1");
+    part_s *reg = part_get_inst_name("img1");
     destroy_code_space(reg);
 }
 void test_probak_error(void)
 {
-    part_s *reg = mem_map_get_reg("img2");
+    part_s *reg = part_get_inst_name("img2");
     destroy_code_space(reg);
 }
 
 
 void test_run_error(void)
 {
-    part_s *reg = mem_map_get_reg("romrun");
+    part_s *reg = part_get_inst_name("romrun");
     destroy_code_space(reg);
 }
 
@@ -84,7 +84,7 @@ void test_upgrade(void)
     part_s *img;
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
 
-    img = mem_map_get_reg("cache");
+    img = part_get_inst_name("cache");
     wind_printf("begin to receive file data,please wait.\r\n");
     img->datalen = boot_receive_img(img->addr,img->size);
     if(img->datalen <= 0)

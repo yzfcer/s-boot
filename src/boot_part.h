@@ -4,6 +4,14 @@
 
 #define PART_NAME_LEN 12
 #define PART_COUNT 10
+#define INVALID_REAL_ADDR 0xffffffff
+
+typedef enum
+{
+    MEM_NULL = 0,
+    MEM_NORMAL=1,
+    MEM_ERROR=2,      
+}mem_status_e;
 
 //空间分区表
 typedef struct 
@@ -25,5 +33,12 @@ part_s *part_get_inst_name(char *name);
 part_s *part_get_inst_idx(w_int8_t memidx);
 part_s *part_get_list(void);
 void part_print_detail(void);
+
+
+void part_print_status(void);
+
+void part_copy_info(part_s *src,part_s *dest);
+w_int32_t part_copy_data(part_s *src,part_s *dest);
+w_uint32_t part_share_addr(void);
 
 #endif

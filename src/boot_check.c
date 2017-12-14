@@ -31,7 +31,7 @@ w_int32_t repair_rom_space(part_s *src,part_s *dest)
     
     wind_notice("repair program from \"%s\" to \"%s\"",
                 src->name,dest->name);
-    ret = mem_map_copy_data(src,dest);
+    ret = part_copy_data(src,dest);
     if(ret != 0)
     {
         wind_error("repir space %s base 0x%x,lenth %d failed.",
@@ -47,13 +47,13 @@ w_int32_t repair_running_space(void)
     part_s *src,*dest,*tmp,*tmp1;
     part_s bin;
     boot_param_s *bp = (boot_param_s *)boot_param_instance();
-    dest = mem_map_get_reg("romrun");
+    dest = part_get_inst_name("romrun");
     do
     {
-        src = mem_map_get_reg("img1");
+        src = part_get_inst_name("img1");
         if(MEM_NORMAL == src->status)
             break;
-        src = mem_map_get_reg("img2");
+        src = part_get_inst_name("img2");
         if(MEM_NORMAL == src->status)
             break;
         src = NULL;  
@@ -68,11 +68,11 @@ w_int32_t repair_running_space(void)
     {
         //如果不是同一块sys_program1与运行区不是同一块，则数据需要先解密
         wind_notice("repair program from \"%s\" to \"%s\"",src->name,dest->name);
-        tmp = mem_map_get_reg("cache");
-        mem_map_copy_data(src,tmp);
-        src = mem_map_get_reg("cache");
-        tmp = mem_map_get_reg("img1");
-        tmp1 = mem_map_get_reg("romrun");
+        tmp = part_get_inst_name("cache");
+        part_copy_data(src,tmp);
+        src = part_get_inst_name("cache");
+        tmp = part_get_inst_name("img1");
+        tmp1 = part_get_inst_name("romrun");
         if((tmp->memtype != tmp1->memtype) ||
             (tmp->memidx != tmp1->memidx) ||
             (tmp->addr != tmp1->addr))
@@ -81,7 +81,7 @@ w_int32_t repair_running_space(void)
         }
         else
         {
-            mem_map_copy_info(src,&bin);
+            part_copy_info(src,&bin);
         }
         ret = repair_rom_space(&bin,dest);
     }
@@ -95,13 +95,13 @@ static w_int32_t repair_program(boot_param_s *bp)
     w_int32_t ret = 0;
     part_s *tmp1,*tmp2;
     wind_notice("programs has errors,try to repair ...");
-    tmp2 = mem_map_get_reg("romrun");
+    tmp2 = part_get_inst_name("romrun");
     if(MEM_ERROR == tmp2->status)
     {
         if(0 != repair_running_space())
             ret = -1;
     }
-    tmp1 = mem_map_get_reg("img1");
+    tmp1 = part_get_inst_name("img1");
     if(MEM_ERROR == tmp1->status)
     {
         
@@ -109,25 +109,25 @@ static w_int32_t repair_program(boot_param_s *bp)
             (tmp2->memidx != tmp1->memidx) ||
             (tmp2->addr != tmp1->addr))
         {
-            tmp2 = mem_map_get_reg("img2");
+            tmp2 = part_get_inst_name("img2");
             if(0 != repair_rom_space(tmp2,tmp1))
                 ret = -1;
         }
         else
         {
-            tmp1 = mem_map_get_reg("img1");
-            tmp2 = mem_map_get_reg("romrun");
+            tmp1 = part_get_inst_name("img1");
+            tmp2 = part_get_inst_name("romrun");
             tmp1->addr = tmp2->addr;
             tmp1->datalen = tmp2->datalen;
             tmp1->crc = tmp2->crc;
             tmp1->status = MEM_NORMAL;
         }
     }
-    tmp1 = mem_map_get_reg("img2");
+    tmp1 = part_get_inst_name("img2");
     if(MEM_ERROR == tmp1->status)
     {
-        tmp1 = mem_map_get_reg("img1");
-        tmp2 = mem_map_get_reg("romrun");
+        tmp1 = part_get_inst_name("img1");
+        tmp2 = part_get_inst_name("romrun");
         if(0 != repair_rom_space(tmp1,tmp2))
             ret = -1;
     }
@@ -147,11 +147,11 @@ w_int32_t check_rom_program(part_s *code)
     img_head_s *head;
     w_uint8_t *buff = get_block_buffer();
 
-    mem_map_copy_info(code,&prog);
+    part_copy_info(code,&prog);
     if(prog.status == MEM_NULL)
     {
         wind_notice("region \"%s\" type %s base 0x%x lenth %d is empty.",
-                    prog.name,memtype_name(prog.memtype),prog.addr,prog.datalen);
+                    prog.name,phymem_type(prog.memtype),prog.addr,prog.datalen);
         return 0;
     }
     
@@ -166,7 +166,7 @@ w_int32_t check_rom_program(part_s *code)
             if(len <= 0)
             {
                 wind_warn("read %s block base 0x%x,lenth %d failed.",
-                            memtype_name(prog.memtype),base,BLOCK_SIZE);
+                            phymem_type(prog.memtype),base,BLOCK_SIZE);
                 return -1;
             }
             len = (i == blocks - 1)?prog.datalen - i * BLOCK_SIZE:BLOCK_SIZE;
@@ -190,7 +190,7 @@ w_int32_t check_rom_program(part_s *code)
     if(MEM_ERROR == prog.status || cal_crc != prog.crc)
     {
         wind_warn("check program CRC in %s base 0x%x,lenth %d failed.",
-                    memtype_name(prog.memtype),prog.addr,prog.datalen);
+                    phymem_type(prog.memtype),prog.addr,prog.datalen);
         wind_debug("cal_crc:0x%x,crc:0x%x",cal_crc,prog.crc);
         code->status = MEM_ERROR;
         return -1;
@@ -206,9 +206,9 @@ w_int32_t check_rom_programs(void)
     w_int32_t save_flag = 0,i;
     boot_param_s *bp = (boot_param_s *)boot_param_instance();
     
-    code[idx++] = mem_map_get_reg("img1");;
-    code[idx++] = mem_map_get_reg("img2");
-    code[idx++] = mem_map_get_reg("romrun");
+    code[idx++] = part_get_inst_name("img1");;
+    code[idx++] = part_get_inst_name("img2");
+    code[idx++] = part_get_inst_name("romrun");
     wind_notice("begin to check programs...");
     for(i = 0;i < sizeof(code)/sizeof(part_s*);i ++)
     {
@@ -223,7 +223,7 @@ w_int32_t check_rom_programs(void)
         {
             
             wind_warn("check program CRC in %s base 0x%x,lenth %d failed.",
-                        memtype_name(code[i]->memtype),code[i]->addr,code[i]->datalen);
+                        phymem_type(code[i]->memtype),code[i]->addr,code[i]->datalen);
             ret= 1;
         }
     }

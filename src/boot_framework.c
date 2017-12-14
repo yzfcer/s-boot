@@ -12,7 +12,6 @@
        Modification:
 **********************************************************************************/
 #include "boot_framework.h"
-#include "mem_map.h"
 #include "boot_param.h"
 #include "menu_list.h"
 #include "boot_port.h"
@@ -123,13 +122,6 @@ static w_int32_t boot_self_check(void)
 {
     w_int32_t ret;
     boot_param_s *bp = (boot_param_s *)boot_param_instance();
-    ret = mem_map_check();
-    if(ret)
-    {
-        wind_error("memory map params ERROR.");
-        set_boot_status(BOOT_ERROR);
-        return -1;        
-    }
     ret = check_rom_programs();
     go_to_next_step();
     return ret;
@@ -167,7 +159,7 @@ static w_int32_t  boot_upgrade_check(void)
     sp_set_upgrade_param(&g_upgrade_info);
     
     wind_notice("handling upgrade event,please wait...");
-    tmp = mem_map_get_reg("cache");
+    tmp = part_get_inst_name("cache");
     wind_strcpy(img.name,tmp->name);
     img.size = tmp->size;
     img.addr = g_upgrade_info.addr;
@@ -180,7 +172,7 @@ static w_int32_t  boot_upgrade_check(void)
         wind_error("check img file ERROR");
         return -1;
     }
-    tmp = mem_map_get_reg("img1");
+    tmp = part_get_inst_name("img1");
     if(MEM_TYPE_ROM == tmp->memtype)
     {
         ret = flush_img_to_rom(&img);
@@ -272,7 +264,7 @@ static w_int32_t boot_load_app(void)
 
     wind_notice("begin to load App to running space...");
     bp = (boot_param_s *)boot_param_instance();
-    regi = mem_map_get_reg("romrun");
+    regi = part_get_inst_name("romrun");
     
     if(NULL == bp)
     {
@@ -287,14 +279,14 @@ static w_int32_t boot_load_app(void)
         go_to_next_step();
         return 0;
     }
-    tmp = mem_map_get_reg("img1");
+    tmp = part_get_inst_name("img1");
     if(tmp->datalen <= 0)
     {
         wind_notice("program is NOT existing.");
         set_boot_status(BOOT_MENU_LIST);
         return -1;
     }
-	tmp = mem_map_get_reg("romrun");
+	tmp = part_get_inst_name("romrun");
     if(MEM_TYPE_ROM == tmp->memtype)
     {
         if(MEM_NORMAL == tmp->status)
@@ -304,7 +296,7 @@ static w_int32_t boot_load_app(void)
     }
     else 
     {
-        tmp = mem_map_get_reg("img1");
+        tmp = part_get_inst_name("img1");
         if(MEM_NORMAL == tmp->status)
         {
             mem_stat = MEM_NORMAL;
@@ -340,7 +332,7 @@ static w_int32_t boot_set_app_param(void)
     sp_init_share_param();
     
     sp_set_app_rollback(1);
-    tmp = mem_map_get_reg("cache");
+    tmp = part_get_inst_name("cache");
     g_upgrade_info.addr = tmp->addr;
     g_upgrade_info.flag = 0;
     g_upgrade_info.size = tmp->size;
@@ -350,7 +342,7 @@ static w_int32_t boot_set_app_param(void)
     wind_printf("set upgrade params:\r\n");
     wind_printf("buffer addr:0x%x\r\n",g_upgrade_info.addr);
     wind_printf("buffer lenth:0x%x\r\n",g_upgrade_info.datalen);
-	tmp = mem_map_get_reg("imgpara");
+	tmp = part_get_inst_name("imgpara");
     g_sysparam_reg.addr = tmp->addr;
     g_sysparam_reg.size = tmp->size;
     g_sysparam_reg.mem_type = tmp->memtype;

@@ -34,9 +34,6 @@
     <ClInclude Include="..\..\..\..\..\..\src\boot_test.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\mem_map.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\src\menu_list.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -91,9 +88,6 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\src\boot_test.c">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\src\mem_map.c">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\src\menu_list.c">

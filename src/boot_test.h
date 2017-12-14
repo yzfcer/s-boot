@@ -15,7 +15,7 @@
 #define BOOT_TEST_H__
 #include "wind_type.h"
 #include "boot_config.h"
-#include "mem_map.h"
+#include "boot_part.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
