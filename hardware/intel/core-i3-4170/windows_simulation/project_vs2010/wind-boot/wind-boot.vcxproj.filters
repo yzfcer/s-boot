@@ -73,6 +73,9 @@
     <ClInclude Include="..\..\..\..\..\..\comman\wind_string.h">
       <Filter>comman</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\src\phy_mem.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\port\mem_driver.c">
@@ -122,6 +125,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\comman\wind_string.c">
       <Filter>comman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\src\phy_mem.c">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

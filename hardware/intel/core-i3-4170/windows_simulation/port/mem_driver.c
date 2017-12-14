@@ -15,6 +15,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "boot_part.h"
+#include "phy_mem.h"
 
 //硬件RAM数量和基地址和空间大小定义
 #define RAM_COUNT 2

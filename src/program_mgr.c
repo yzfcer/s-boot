@@ -25,6 +25,7 @@
 #include "boot_hw_if.h"
 #include "mem_driver.h"
 #include "encrypt.h"
+#include "phy_mem.h"
 
 #ifdef __cplusplus
 extern "C" {

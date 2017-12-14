@@ -17,6 +17,7 @@
 #include "boot_param.h"
 #include "boot_framework.h"
 #include "wind_debug.h"
+#include "phy_mem.h"
 
 #include "wind_crc32.h"
 #include "share_param.h"

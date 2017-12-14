@@ -18,6 +18,8 @@
 #include "mem_driver.h"
 #include <stdarg.h>
 #include "boot_config.h"
+#include "phy_mem.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -215,7 +217,7 @@ w_int32_t boot_receive_img(w_uint32_t addr,w_uint32_t maxlen)
 }
 #endif
 
-static w_int32_t read_ram(w_uint32_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t lenth)
+static w_int32_t read_ram(w_int8_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t lenth)
 {
     w_int32_t i;
     w_uint8_t *src;
@@ -235,7 +237,7 @@ static w_int32_t read_ram(w_uint32_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int
     return lenth;
 }
 
-static w_int32_t write_ram(w_uint32_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t lenth)
+static w_int32_t write_ram(w_int8_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t lenth)
 {
     w_int32_t i;
     w_uint8_t *dest;
@@ -260,7 +262,7 @@ w_uint8_t *get_block_buffer(void)
 {
     return commbuffer;
 }
-w_int32_t read_block(w_uint16_t memtype,w_uint32_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t blkcount)
+w_int32_t read_block(w_uint16_t memtype,w_int8_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t blkcount)
 {
     w_int32_t len;
     //wind_notice("read block base:0x%x",addr);
@@ -282,7 +284,7 @@ w_int32_t read_block(w_uint16_t memtype,w_uint32_t memidx,w_uint32_t addr,w_uint
     return blkcount;
 }
 
-w_int32_t write_block(w_uint16_t memtype,w_uint32_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t blkcount)
+w_int32_t write_block(w_uint16_t memtype,w_int8_t memidx,w_uint32_t addr,w_uint8_t *buf,w_int32_t blkcount)
 {
     w_int32_t len; 
     //wind_notice("write block base:0x%x",addr);
@@ -304,7 +306,7 @@ w_int32_t write_block(w_uint16_t memtype,w_uint32_t memidx,w_uint32_t addr,w_uin
     return blkcount;
 }
 
-w_int32_t erase_block(w_uint16_t memtype,w_uint32_t memidx,w_uint32_t addr,w_int32_t blkcount)
+w_int32_t erase_block(w_uint16_t memtype,w_int8_t memidx,w_uint32_t addr,w_int32_t blkcount)
 {
     w_int32_t len; 
     switch(memtype)

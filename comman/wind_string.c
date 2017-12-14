@@ -103,7 +103,7 @@ char* wind_strchr(const char * s, w_uint32_t c)
 {
     for(; *s != (char) c; ++s)
         if (*s == '\0')
-            return NULL;
+            return (char*)NULL;
     return (char *) s;
 }
 
@@ -114,7 +114,7 @@ char * wind_strrchr(const char * s, w_uint32_t c)
        if (*p == (char)c)
            return (char *)p;
        } while (--p >= s);
-       return NULL;
+       return (char*)NULL;
 }
 
 
@@ -122,7 +122,7 @@ w_int32_t wind_strlen(const char *s)
 {
     const char *sc;
     for (sc = s; *sc != '\0'; ++sc);
-    return sc - s;
+    return (w_int32_t)(sc - s);
 }
 
 w_uint32_t wind_strnlen(const char * s, w_uint32_t count)

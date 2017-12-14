@@ -5,111 +5,24 @@
 #include "wind_string.h"
 #include "mem_driver.h"
 #include "wind_debug.h"
-
-static w_int32_t pmidx = 0;
-static phymem_s g_phymem[PHYMEM_COUNT];
+#include "phy_mem.h"
 static w_int32_t ptidx = 0;
 static part_s g_part[PART_COUNT];
 
-static phymem_s *get_phymem(void)
-{
-    return g_phymem;
-}
 static part_s *get_part(void)
 {
     return g_part;
-}
-static w_int32_t get_phymem_count(void)
-{
-    return pmidx;
 }
 static w_int32_t get_part_count(void)
 {
     return ptidx;
 }
-
-static w_int32_t set_phymem_count(w_int32_t count)
-{
-    pmidx = count;
-}
-static w_int32_t set_part_count(w_int32_t count)
+static void set_part_count(w_int32_t count)
 {
     ptidx = count;
 }
 
 
-phymem_s *phymem_get_list(void)
-{
-    return get_phymem();
-}
-
-phymem_s *phymem_get_instance(w_int32_t idx)
-{
-    phymem_s *pm;
-    if(idx >= phymem_get_count())
-        return (phymem_s *)NULL;
-    pm = get_phymem();
-    return &pm[idx];
-}
-
-
-
-w_bool_t phymem_register(w_int16_t mtype,w_uint32_t base,w_int32_t size)
-{
-    phymem_s *pm;
-    w_int32_t pmcnt = get_phymem_count();
-    if(pmcnt >= PHYMEM_COUNT)
-    {
-        wind_error("memidx out of range.");
-        return B_FALSE;
-    }
-    pm = get_phymem();
-    pm[pmcnt].memidx = pmcnt;
-    pm[pmcnt].type = mtype;
-    pm[pmcnt].base = base;
-    pm[pmcnt].size = size;
-    pm[pmcnt].used = 0;
-    pmcnt ++;
-    set_phymem_count(pmcnt);
-    return B_TRUE;
-}
-
-
-w_int32_t phymem_get_count(void)
-{
-    return get_phymem_count();
-}
-
-
-
-static char * get_mem_type(w_int16_t type)
-{
-    switch(type)
-    {
-        case MEM_TYPE_RAM:return "RAM";
-        case MEM_TYPE_ROM:return "ROM";
-        default:return "none";
-    }
-}
-void phymem_print_detail(void)
-{
-#define PHY_FORMAT "%-8d%-8s0x%-12x0x%-12X\r\n" 
-#define PHY_PARAM(mem) (mem).memidx,get_mem_type((mem).type),(mem).base,(mem).size
-        w_int32_t i,count;
-        phymem_s *pm = phymem_get_list();
-        wind_printf("physical memory details:\r\n");
-        wind_printf("------------------------------------------\r\n");
-        wind_printf("%-8s%-8s%-14s%-14s\r\n","index","type","base","size");
-        wind_printf("------------------------------------------\r\n");
-        //pm = phymem_get_list();
-        count = phymem_get_count();
-        for(i = 0;i < count;i ++)
-        {
-            wind_printf(PHY_FORMAT,PHY_PARAM(pm[i]));
-        }
-        wind_printf("------------------------------------------\r\n");
-        wind_printf("\r\n");
-}
 
 w_int32_t part_init_all(part_s *pt)
 {
@@ -130,7 +43,7 @@ w_bool_t part_create(char *name,w_int8_t midx,w_int32_t size)
         return B_FALSE;
     }
         
-    pm = get_phymem();
+    pm = phymem_get_list();
     if(pm[midx].size - pm[midx].used < size)
     {
         wind_error("has no enough space to create part.");

@@ -20,6 +20,8 @@
 #include "mem_driver.h"
 #include "wind_string.h"
 #include "boot_hw_if.h"
+#include "phy_mem.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

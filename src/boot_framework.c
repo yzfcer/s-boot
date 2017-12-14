@@ -23,6 +23,7 @@
 #include "boot_hw_if.h"
 #include "mem_driver.h"
 #include "boot_check.h"
+#include "phy_mem.h"
 #include "wind_string.h"
 #ifdef __cplusplus
 extern "C" {

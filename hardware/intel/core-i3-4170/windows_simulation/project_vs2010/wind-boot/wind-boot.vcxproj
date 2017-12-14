@@ -22,6 +22,7 @@
     <ClInclude Include="..\..\..\..\..\..\src\boot_test.h" />
     <ClInclude Include="..\..\..\..\..\..\src\mem_map.h" />
     <ClInclude Include="..\..\..\..\..\..\src\menu_list.h" />
+    <ClInclude Include="..\..\..\..\..\..\src\phy_mem.h" />
     <ClInclude Include="..\..\..\..\..\..\src\program_mgr.h" />
     <ClInclude Include="..\..\..\..\..\..\src\share_param.h" />
     <ClInclude Include="..\..\..\..\..\..\src\sys_debug.h" />
@@ -43,6 +44,7 @@
     <ClCompile Include="..\..\..\..\..\..\src\boot_test.c" />
     <ClCompile Include="..\..\..\..\..\..\src\mem_map.c" />
     <ClCompile Include="..\..\..\..\..\..\src\menu_list.c" />
+    <ClCompile Include="..\..\..\..\..\..\src\phy_mem.c" />
     <ClCompile Include="..\..\..\..\..\..\src\program_mgr.c" />
     <ClCompile Include="..\..\..\..\..\..\src\share_param.c" />
     <ClCompile Include="..\..\port\boot_port.c" />
