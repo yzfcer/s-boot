@@ -7,32 +7,29 @@
 #include "phy_mem.h"
 #include "boot_param.h"
 #include "boot_config.h"
+static w_int32_t ptcnt = 0;
+static part_s g_part[PART_COUNT];
+
 static part_s *get_part(void)
 {
-    
-    boot_param_s *bp = boot_param_instance();
-    return (part_s*)(sizeof(boot_param_s)+sizeof(phymem_s)+bp->phymem_cnt + (w_uint32_t)bp);
+    //boot_param_s *bp = boot_param_instance();
+    //return (part_s*)(sizeof(boot_param_s)+sizeof(phymem_s)+bp->phymem_cnt + (w_uint32_t)bp);
+    return g_part;
 }
 static w_int32_t get_part_count(void)
 {
-    boot_param_s *bp = boot_param_instance();
-    return bp->part_cnt;
+    //boot_param_s *bp = boot_param_instance();
+    //return bp->part_cnt;
+    return ptcnt;
 }
 
 static void set_part_count(w_int32_t count)
 {
-    boot_param_s *bp = boot_param_instance();
-    bp->part_cnt = count;
+    //boot_param_s *bp = boot_param_instance();
+    //bp->part_cnt = count;
+    ptcnt = count;
 }
 
-
-
-w_int32_t part_init_all(part_s *pt)
-{
-    wind_memset(pt,0,PART_COUNT*sizeof(part_s));
-    //parts_create();
-    return 0;
-}
 
 w_bool_t part_create(char *name,w_int8_t midx,w_int32_t size)
 {

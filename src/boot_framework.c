@@ -50,7 +50,10 @@ void print_boot_info(void)
 static w_int32_t boot_init(void)
 {
     print_boot_info();
-    boot_param_reset();
+    phymems_register();
+    phymem_print_detail();
+    parts_create();
+    part_print_detail();
     boot_param_clear_buffer();
     go_to_next_step();
     wind_notice("bootloader init OK.");

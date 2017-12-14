@@ -75,19 +75,19 @@ void boot_param_reset(void)
     bp->run_type = RUN_SPACE_TYPE;
     bp->encrypt_type = ENCRYPT_TYPE;
     bp->lock_en = MCU_LOCK_ENABLE;
-
-    bp->phymem_max = PHYMEM_COUNT;
-    bp->lenth += sizeof(phymem_s) * bp->phymem_max;
-    bp->part_max = PART_COUNT;
-    bp->lenth += sizeof(part_s) * bp->part_max;
-    phy_mems_register();
-    parts_create();
-    bp->phymem_cnt = phymem_get_count();
-    //bp->part_cnt = part_get_count();
-    //bp->reg_count = part_get_count();
-    bp->map_size = bp->reg_count *sizeof(part_s);
-    bp->lenth = sizeof(boot_param_s) + bp->map_size;
-    part_init_all((part_s*)(sizeof(boot_param_s)+(w_uint32_t)bp));
+    
+    if(phymem_get_count() == 0)
+    {
+        phymems_register();
+        bp->phymem_cnt = phymem_get_count();
+    }
+    if(part_get_count() == 0)
+    {
+        parts_create();
+        bp->part_cnt = part_get_count();
+    }
+    wind_memcpy(bp->phmem,phymem_get_list(),PHYMEM_COUNT*sizeof(phymem_s));
+    wind_memcpy(bp->part,part_get_list(),PART_COUNT*sizeof(part_s));
     wind_notice("init boot param OK.");
 }
 
@@ -102,7 +102,7 @@ w_int32_t boot_param_check_valid(w_uint8_t *prmbuf)
         wind_warn("param block is invalid.");
         return -1;
     }
-    if(bp->lenth != sizeof(boot_param_s)+bp->map_size)
+    if(bp->lenth != sizeof(boot_param_s))
     {
         wind_warn("param block lenth is invalid.");
         return -1;

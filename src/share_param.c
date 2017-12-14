@@ -61,7 +61,6 @@ static void copy_share_data(char *src,char *dest,w_int32_t len)
 
 static w_int32_t check_share_param(void)
 {
-    
     share_param_s *sp = (share_param_s *)(void*)part_share_addr();
     w_uint32_t *crc = (w_uint32_t*)(sp+1);
     if(sp->magic != SHARE_PARAM_MAGIC)

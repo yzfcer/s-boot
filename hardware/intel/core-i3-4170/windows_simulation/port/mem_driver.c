@@ -18,9 +18,8 @@
 #include "phy_mem.h"
 
 //硬件RAM数量和基地址和空间大小定义
-#define RAM_COUNT 2
 #define RAM1_BASE 0x20000000
-#define RAM1_SIZE 0x40000
+#define RAM1_SIZE 0x400000
 #define RAM2_BASE 0x60000000
 #define RAM2_SIZE 0x100000
 
@@ -65,16 +64,8 @@
 【系统程序RAM运行区】
 ***************************************************************/
 
-#define SHARE_IDX  0
-#define SHARE_ADDR 0x3F000
 #define SHARE_SIZE 0x1000
-
-#define CACHE_IDX  1
-#define CACHE_ADDR 0
 #define CACHE_SIZE 0x40000
-
-#define RAMRUN_IDX  1
-#define RAMRUN_ADDR 0x40000
 #define RAMRUN_SIZE 0xC0000
 
 w_uint8_t g_ram1[RAM1_SIZE];
@@ -91,7 +82,7 @@ phymem_s g_phymem[] =
 };
 
 
-void phy_mems_register(void)
+void phymems_register(void)
 {
     phymem_register(MEM_TYPE_ROM,ROM1_BASE,ROM1_SIZE);
     phymem_register(MEM_TYPE_ROM,ROM2_BASE,ROM2_SIZE);
@@ -104,10 +95,10 @@ void parts_create(void)
     part_create("boot",0,BOOT_SIZE);
     part_create("btpara1",0,BT_PARA1_SIZE);
     part_create("btpara2",0,BT_PARA2_SIZE);
-    part_create("img1",0,IMG1_SIZE);
-    part_create("img2",0,IMG2_SIZE);
+    part_create("img1",1,IMG1_SIZE);
+    part_create("img2",1,IMG2_SIZE);
     part_create("imgpara",0,IMG_PARA_SIZE);
-    part_create("ramrun",2,RAMRUN_SIZE);
+    part_create("ramrun",3,RAMRUN_SIZE);
     part_create("romrun",0,RAMRUN_SIZE);
     part_create("cache",2,CACHE_SIZE);
     part_create("share",2,SHARE_SIZE);

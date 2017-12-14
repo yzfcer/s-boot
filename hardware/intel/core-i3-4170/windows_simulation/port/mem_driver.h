@@ -16,7 +16,7 @@
 #include "wind_type.h"
 
 
-void phy_mems_register(void);
+void phymems_register(void);
 void parts_create(void);
 
 //´æ´¢Çý¶¯
