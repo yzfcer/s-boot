@@ -19,12 +19,11 @@
 #include "boot_param.h"
 #include "mem_driver.h"
 #include "wind_string.h"
-
+#include "boot_hw_if.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern part_s g_region_map[];
 w_uint32_t mem_map_share_addr(void)
 {
     part_s *entry = part_get_inst_name("share");
@@ -68,19 +67,7 @@ w_int32_t mem_map_get_reg_count(void)
     return bp->reg_count;
 }
 
-
-
-
-
-
-static void copy_reg_name(char *dest,char *src)
-{
-    int len = wind_strlen(dest);
-    len = len > PART_NAME_LEN-1?PART_NAME_LEN-1:len;
-    wind_memcpy(dest,src,len);
-}
-
-
+#if 1
 w_int32_t mem_map_reset(region_s *map)
 {
     w_int32_t i;
@@ -89,7 +76,7 @@ w_int32_t mem_map_reset(region_s *map)
     w_int32_t count = part_get_count();
     for(i = 0;i < count;i ++)
     {
-        copy_reg_name(rg[i].name,entry->name);
+        wind_strncpy(rg[i].name,entry->name,REG_NAME_LEN);
         rg[i].memidx = entry->memidx;
         rg[i].addr = entry->addr;
         rg[i].size = entry->size;
@@ -99,6 +86,7 @@ w_int32_t mem_map_reset(region_s *map)
     }
     return 0;
 }
+#endif
 
 
 

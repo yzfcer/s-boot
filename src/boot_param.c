@@ -17,6 +17,7 @@
 #include "wind_debug.h"
 #include "wind_crc32.h"
 #include "mem_driver.h"
+#include "boot_hw_if.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -18,7 +18,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#define REG_NAME_LEN 20
+#define REG_NAME_LEN 12
 #define INVALID_REAL_ADDR 0xffffffff
 
 
@@ -37,13 +37,13 @@ typedef enum
 typedef struct __region
 {
     char name[REG_NAME_LEN];
-    w_int16_t type;
-    w_int16_t memidx;
+    w_int8_t memidx;
+    w_int8_t type;
+    w_uint16_t status;
     w_uint32_t addr;
     w_int32_t size;
     w_int32_t datalen;
     w_uint32_t crc;
-    w_uint32_t status;
 }region_s;
 
 region_s *mem_map_get_reg(char *name);

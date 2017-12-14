@@ -11,17 +11,45 @@ static phymem_s g_phymem[PHYMEM_COUNT];
 static w_int32_t ptidx = 0;
 static part_s g_part[PART_COUNT];
 
+static phymem_s *get_phymem(void)
+{
+    return g_phymem;
+}
+static part_s *get_part(void)
+{
+    return g_part;
+}
+static w_int32_t get_phymem_count(void)
+{
+    return pmidx;
+}
+static w_int32_t get_part_count(void)
+{
+    return ptidx;
+}
+
+static w_int32_t set_phymem_count(w_int32_t count)
+{
+    pmidx = count;
+}
+static w_int32_t set_part_count(w_int32_t count)
+{
+    ptidx = count;
+}
+
 
 phymem_s *phymem_get_list(void)
 {
-    return g_phymem;
+    return get_phymem();
 }
 
 phymem_s *phymem_get_instance(w_int32_t idx)
 {
+    phymem_s *pm;
     if(idx >= phymem_get_count())
         return (phymem_s *)NULL;
-    return &g_phymem[idx];
+    pm = get_phymem();
+    return &pm[idx];
 }
 
 
@@ -29,26 +57,31 @@ phymem_s *phymem_get_instance(w_int32_t idx)
 w_bool_t phymem_register(w_int16_t mtype,w_uint32_t base,w_int32_t size)
 {
     phymem_s *pm;
-    if(pmidx >= PHYMEM_COUNT)
+    w_int32_t pmcnt = get_phymem_count();
+    if(pmcnt >= PHYMEM_COUNT)
     {
         wind_error("memidx out of range.");
         return B_FALSE;
     }
-    pm = g_phymem;
-    pm[pmidx].memidx = pmidx;
-    pm[pmidx].type = mtype;
-    pm[pmidx].base = base;
-    pm[pmidx].size = size;
-    pm[pmidx].used = 0;
-    pmidx ++;
+    pm = get_phymem();
+    pm[pmcnt].memidx = pmcnt;
+    pm[pmcnt].type = mtype;
+    pm[pmcnt].base = base;
+    pm[pmcnt].size = size;
+    pm[pmcnt].used = 0;
+    pmcnt ++;
+    set_phymem_count(pmcnt);
     return B_TRUE;
 }
 
 
 w_int32_t phymem_get_count(void)
 {
-    return pmidx;
+    return get_phymem_count();
 }
+
+
+
 static char * get_mem_type(w_int16_t type)
 {
     switch(type)
@@ -78,43 +111,52 @@ void phymem_print_detail(void)
         wind_printf("\r\n");
 }
 
+w_int32_t part_init_all(part_s *pt)
+{
+    wind_memset(pt,0,PART_COUNT*sizeof(part_s));
+    parts_create();
+    return 0;
+}
 
-w_bool_t part_create(char *name,w_int16_t midx,w_int32_t size)
+w_bool_t part_create(char *name,w_int8_t midx,w_int32_t size)
 {
     phymem_s *pm;
     part_s *pt;
-    if(midx >= pmidx)
+    w_int32_t ptcnt;
+    w_int32_t pmcnt = phymem_get_count();
+    if(midx >= pmcnt)
     {
         wind_error("memidx out of range.");
         return B_FALSE;
     }
         
-    pm = g_phymem;
+    pm = get_phymem();
     if(pm[midx].size - pm[midx].used < size)
     {
         wind_error("has no enough space to create part.");
         return B_FALSE;
     }
-        
-    if(ptidx >= PART_COUNT)
+    ptcnt = part_get_count();
+    if(ptcnt >= PART_COUNT)
     {
         wind_error("part idx out of range.");
         return B_FALSE;
     }
-    pt = g_part;
-    wind_strncpy(pt[ptidx].name,name,PART_NAME_LEN);
-    pt[ptidx].memidx = midx;
-    pt[ptidx].memtype = pm[midx].type;
-    pt[ptidx].addr = pm[midx].base + pm[midx].used;
-    pt[ptidx].size = size;
-    ptidx ++;
+    pt = get_part();
+    wind_strncpy(pt[ptcnt].name,name,PART_NAME_LEN);
+    pt[ptcnt].memidx = midx;
+    pt[ptcnt].memtype = pm[midx].type;
+    pt[ptcnt].addr = pm[midx].base + pm[midx].used;
+    pt[ptcnt].size = size;
+    ptcnt ++;
+    set_part_count(ptcnt);
     pm[midx].used += size;
     return B_TRUE;
 }
 
 w_int32_t part_get_count(void)
 {
-    return ptidx;
+    return get_part_count();
 }
 
 
@@ -123,47 +165,47 @@ part_s *part_get_inst_name(char *name)
     w_int32_t i;
     part_s *pt;
     w_int32_t count = part_get_count();
+    pt = get_part();
     for(i = 0;i < count;i ++)
     {
-        pt = &g_part[i];
-        if(wind_strcmp(pt->name,name) == 0)
+        if(wind_strcmp(pt[i].name,name) == 0)
             return pt;
     }
     wind_error("find region %s failed.",name);
     return NULL;
 }
 
-part_s *part_get_inst_idx(w_int16_t memidx)
+part_s *part_get_inst_idx(w_int8_t memidx)
 {
+    part_s *pt;
     if(memidx >= part_get_count())
         return NULL;
-    return &g_part[memidx];
+    pt = get_part();
+    return &pt[memidx];
 }
-
-
 
 part_s *part_get_list(void)
 {
-    return g_part;
+    return get_part();
 }
 
 void part_print_detail(void)
 {
-#define REGION_FORMAT "%-15s%-8d0x%-12x0x%-12x\r\n" 
-#define REGION_PARAM(part) (part).name,(part).memidx,(part).addr,(part).size,(part).name
+#define REGION_FORMAT "%-12s%-8d0x%-12x0x%-12x\r\n" 
+#define REGION_PARAM(pt) (pt).name,(pt).memidx,(pt).addr,(pt).size,(pt).name
     w_int32_t i,count;
-    part_s *part = part_get_list();
-    wind_printf("memory part details:\r\n");
-    wind_printf("------------------------------------------\r\n");
-    wind_printf("%-15s%-8s%-14s%-14s\r\n","part","memidx","addr","size");
-    wind_printf("------------------------------------------\r\n");
-    //part = part_get_list();
+    part_s *pt = part_get_list();
+    wind_printf("memory pt details:\r\n");
+    wind_printf("----------------------------------------------\r\n");
+    wind_printf("%-12s%-8s%-14s%-14s\r\n","pt","memidx","addr","size");
+    wind_printf("----------------------------------------------\r\n");
+    //pt = part_get_list();
     count = part_get_count();
     for(i = 0;i < count;i ++)
     {
-        wind_printf(REGION_FORMAT,REGION_PARAM(part[i]));
+        wind_printf(REGION_FORMAT,REGION_PARAM(pt[i]));
     }
-    wind_printf("------------------------------------------\r\n");
+    wind_printf("----------------------------------------------\r\n");
     wind_printf("\r\n");
 }
 

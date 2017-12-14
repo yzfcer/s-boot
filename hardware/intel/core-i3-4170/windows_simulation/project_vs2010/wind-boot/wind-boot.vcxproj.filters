@@ -17,9 +17,6 @@
     <Filter Include="comman">
       <UniqueIdentifier>{a2b2f458-be6a-45f3-b571-7251fcf587c7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="NewFilter1">
-      <UniqueIdentifier>{4e2dfc9c-7495-4b40-9305-fa730a57bafa}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\port\mem_driver.h">

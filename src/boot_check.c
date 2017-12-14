@@ -17,7 +17,7 @@
 #include "wind_debug.h"
 #include "wind_crc32.h"
 #include "program_mgr.h"
-
+#include "boot_hw_if.h"
 w_int32_t repair_rom_space(region_s *src,region_s *dest)
 {
     w_int32_t ret;
