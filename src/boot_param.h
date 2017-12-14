@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
 #define BOOT_PARAM_MAGIC 0X2561C5A0
-#define BOOT_VERSION 0x010000
+#define BOOT_VERSION 0x010006
 
 //存储于flash参数区的数据的整体结构，
 //这部分数据在内存中没有备份，在需要时从flash读出

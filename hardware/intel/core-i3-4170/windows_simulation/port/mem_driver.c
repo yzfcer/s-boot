@@ -72,7 +72,7 @@ w_uint8_t g_ram1[RAM1_SIZE];
 w_uint8_t g_ram2[RAM2_SIZE];
 w_uint8_t g_rom1[ROM1_SIZE];
 w_uint8_t g_rom2[ROM2_SIZE];
-
+#if 0
 phymem_s g_phymem[] = 
 {
     {0,MEM_TYPE_ROM,ROM1_BASE,ROM1_SIZE},
@@ -80,14 +80,14 @@ phymem_s g_phymem[] =
     {2,MEM_TYPE_RAM,RAM1_BASE,RAM1_SIZE},
     {3,MEM_TYPE_RAM,RAM2_BASE,RAM2_SIZE}
 };
-
+#endif
 
 void phymems_register(void)
 {
-    phymem_register(MEM_TYPE_ROM,ROM1_BASE,ROM1_SIZE);
-    phymem_register(MEM_TYPE_ROM,ROM2_BASE,ROM2_SIZE);
-    phymem_register(MEM_TYPE_RAM,RAM1_BASE,RAM1_SIZE);
-    phymem_register(MEM_TYPE_RAM,RAM2_BASE,RAM2_SIZE);
+    phymem_register(MEM_TYPE_ROM,g_rom1,ROM1_SIZE);
+    phymem_register(MEM_TYPE_ROM,g_rom2,ROM2_SIZE);
+    phymem_register(MEM_TYPE_RAM,g_ram1,RAM1_SIZE);
+    phymem_register(MEM_TYPE_RAM,g_ram2,RAM2_SIZE);
 }
 
 void parts_create(void)

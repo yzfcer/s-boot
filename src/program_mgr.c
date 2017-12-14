@@ -178,7 +178,7 @@ w_int32_t check_img_valid(part_s *img)
 
 
 
-static w_bool_t region_equal(part_s *src,part_s *dest)
+static w_bool_t part_equal(part_s *src,part_s *dest)
 {
     if(src->memtype != dest->memtype)
         return B_FALSE;
@@ -209,7 +209,7 @@ w_int32_t roll_back_program(void)
     
     dest = part_get_inst_name("romrun");
     src = part_get_inst_name("img1");
-    run_in_program1 = region_equal(dest,src);
+    run_in_program1 = part_equal(dest,src);
     if(run_in_program1)
     {
         tmp1 = part_get_inst_name("romrun");
@@ -282,7 +282,7 @@ w_int32_t flush_img_to_rom(part_s *img)
     head = (img_head_s*)img->addr;
     src = part_get_inst_name("img1");
     dest = part_get_inst_name("romrun");
-    run_in_program1 = region_equal(src,dest);
+    run_in_program1 = part_equal(src,dest);
     
     //烧录到sys_program1，如果同时也是运行空间，则先解密，在烧录
     if(run_in_program1)

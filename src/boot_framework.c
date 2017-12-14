@@ -31,7 +31,7 @@ extern "C" {
 static volatile w_int32_t s_boot_status = BOOT_INIT;
 
 upgrade_info_s g_upgrade_info;
-sysparam_region_s g_sysparam_reg;
+sysparam_part_s g_sysparam_reg;
 
 void print_boot_info(void)
 {
@@ -349,7 +349,7 @@ static w_int32_t boot_set_app_param(void)
     g_sysparam_reg.addr = tmp->addr;
     g_sysparam_reg.size = tmp->size;
     g_sysparam_reg.mem_type = tmp->memtype;
-    wind_printf("set sysparam region params:\r\n");
+    wind_printf("set sysparam part params:\r\n");
     wind_printf("sysparam addr:0x%x\r\n",g_sysparam_reg.addr);
     wind_printf("sysparam lenth:0x%x\r\n",g_sysparam_reg.size);
     sp_set_sysparam_param(&g_sysparam_reg);

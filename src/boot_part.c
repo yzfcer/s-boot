@@ -84,7 +84,7 @@ part_s *part_get_inst_name(char *name)
         if(wind_strcmp(pt[i].name,name) == 0)
             return pt;
     }
-    wind_error("find region %s failed.",name);
+    wind_error("find part %s failed.",name);
     return NULL;
 }
 
@@ -104,8 +104,8 @@ part_s *part_get_list(void)
 
 void part_print_detail(void)
 {
-#define REGION_FORMAT "%-12s%-8d0x%-12x0x%-12x\r\n" 
-#define REGION_PARAM(pt) (pt).name,(pt).memidx,(pt).addr,(pt).size,(pt).name
+#define PART_FORMAT "%-12s%-8d0x%-12x0x%-12x\r\n" 
+#define PART_PARAM(pt) (pt).name,(pt).memidx,(pt).addr,(pt).size,(pt).name
     w_int32_t i,count;
     part_s *pt = part_get_list();
     wind_printf("memory pt details:\r\n");
@@ -116,7 +116,7 @@ void part_print_detail(void)
     count = part_get_count();
     for(i = 0;i < count;i ++)
     {
-        wind_printf(REGION_FORMAT,REGION_PARAM(pt[i]));
+        wind_printf(PART_FORMAT,PART_PARAM(pt[i]));
     }
     wind_printf("----------------------------------------------\r\n");
     wind_printf("\r\n");
@@ -131,17 +131,17 @@ w_uint32_t part_share_addr(void)
 
 void part_print_status(void)
 {
-#define REGION_FORMAT1 "%-15s%-8d0x%-10x0x%-9x0x%-9x%-9s%4d%%\r\n" 
+#define PART_FORMAT1 "%-15s%-8d0x%-10x0x%-9x0x%-9x%-9s%4d%%\r\n" 
 #define REGION_PARAM1(reg) (reg).name,(reg).memidx,(reg).addr,(reg).size,\
                 (reg).datalen,(reg).name,(reg).size?((reg).datalen*100)/(reg).size:0
     w_int32_t i;
     w_int32_t count = part_get_count();
     part_s *reg = part_get_list();
 
-    wind_printf("%-15s%-8s%-12s%-11s%-11s%-9s%-8s\r\n","region","memidx","addr","size","datalen","type","usage");
+    wind_printf("%-15s%-8s%-12s%-11s%-11s%-9s%-8s\r\n","part","memidx","addr","size","datalen","type","usage");
     for(i = 0;i < count;i ++)
     {
-        wind_printf(REGION_FORMAT1,REGION_PARAM1(reg[i]));
+        wind_printf(PART_FORMAT1,REGION_PARAM1(reg[i]));
     }
 }
 

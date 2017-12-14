@@ -37,7 +37,7 @@ typedef struct
     upgrade_info_s upgrade_reg;
 
     //系统参数区，用于保留应用程序参数
-    sysparam_region_s sysparam_reg;
+    sysparam_part_s sysparam_reg;
         
 }share_param_s;
 
@@ -116,19 +116,19 @@ w_int32_t sp_get_upgrade_param(upgrade_info_s *upreg)
     return 0;
 }
 
-void sp_set_sysparam_param(sysparam_region_s *sysparam)
+void sp_set_sysparam_param(sysparam_part_s *sysparam)
 {
     share_param_s *sp = (share_param_s *)(void*)part_share_addr();
-    copy_share_data((char*)sysparam,(char*)&sp->sysparam_reg,sizeof(sysparam_region_s));
+    copy_share_data((char*)sysparam,(char*)&sp->sysparam_reg,sizeof(sysparam_part_s));
     update_share_crc();
 }
 
-w_int32_t sp_get_sysparam_param(sysparam_region_s *sysparam)
+w_int32_t sp_get_sysparam_param(sysparam_part_s *sysparam)
 {
     share_param_s *sp = (share_param_s *)(void*)part_share_addr();
     if(check_share_param())
         return -1;
-    copy_share_data((char*)&sp->sysparam_reg,(char*)sysparam,sizeof(sysparam_region_s));
+    copy_share_data((char*)&sp->sysparam_reg,(char*)sysparam,sizeof(sysparam_part_s));
     return 0;
 }
 

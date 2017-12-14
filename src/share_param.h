@@ -44,7 +44,7 @@ typedef struct
     w_uint32_t size;//保留空间的长度
     w_uint32_t mem_type;//保留空间的类型
     w_uint32_t pad;
-}sysparam_region_s;
+}sysparam_part_s;
 
 
 void sp_set_app_rollback(w_uint8_t is_rollback);
@@ -55,9 +55,9 @@ void sp_set_upgrade_param(upgrade_info_s *upreg);
 
 w_int32_t sp_get_upgrade_param(upgrade_info_s *upreg);
 
-void sp_set_sysparam_param(sysparam_region_s *sysparam);
+void sp_set_sysparam_param(sysparam_part_s *sysparam);
 
-w_int32_t sp_get_sysparam_param(sysparam_region_s *sysparam);
+w_int32_t sp_get_sysparam_param(sysparam_part_s *sysparam);
 
 void sp_init_share_param(void);
 

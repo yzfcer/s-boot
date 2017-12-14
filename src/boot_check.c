@@ -150,7 +150,7 @@ w_int32_t check_rom_program(part_s *code)
     part_copy_info(code,&prog);
     if(prog.status == MEM_NULL)
     {
-        wind_notice("region \"%s\" type %s base 0x%x lenth %d is empty.",
+        wind_notice("part \"%s\" type %s base 0x%x lenth %d is empty.",
                     prog.name,phymem_type(prog.memtype),prog.addr,prog.datalen);
         return 0;
     }
