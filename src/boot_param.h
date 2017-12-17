@@ -36,8 +36,6 @@ typedef struct
     w_uint8_t run_type;   //运行在RAM或Flash
     w_uint8_t encrypt_type;//程序加密使能
     w_uint8_t lock_en;     //芯片锁定使能
-    //w_int8_t phymem_max;
-    //w_int8_t part_max;
     w_int8_t phymem_cnt;
     w_int8_t part_cnt;
     char runreg[PART_NAME_LEN];
