@@ -52,9 +52,6 @@
     <ClInclude Include="..\..\..\..\..\..\src\boot_check.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\port\boo_port.h">
-      <Filter>port</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\port\boot_config.h">
       <Filter>port</Filter>
     </ClInclude>
@@ -72,6 +69,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\src\phy_mem.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\port\boot_port.h">
+      <Filter>port</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -23,9 +23,9 @@
 
 w_int32_t device_init(void);
 w_int32_t device_deinit(void);
-
-w_int32_t boot_output(char *buf,w_int32_t len);
-w_int32_t boot_getchar_noblocking(char *ch);
+void      wind_std_port_init(void);
+w_int32_t wind_std_output(w_uint8_t *buf,w_int32_t len);
+w_int32_t wind_std_input(w_uint8_t *ch,w_int32_t len);
 w_int32_t boot_receive_img(w_uint32_t addr,w_uint32_t maxlen);
 
 w_uint32_t boot_get_sys_ms(void);

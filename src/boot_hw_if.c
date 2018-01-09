@@ -47,7 +47,7 @@ w_int32_t wait_for_key_input(w_int32_t to_sec,char *ch,w_int32_t print_flag)
     while(1)
     {
         feed_watchdog();
-        ret = boot_getchar_noblocking(ch);
+        ret = wind_std_input(&ch,1);
         if(ret == 0)
         {
             ret = 0;
@@ -92,7 +92,7 @@ w_int32_t read_line_blockig(char *buff,w_int32_t len)
     char ch;
 	while(1)
     {
-        if(0 == boot_getchar_noblocking(&ch))
+        if(0 == wind_std_input(&ch))
         {
             if((ch == '\r') || 
                 (ch == '\n') ||
@@ -141,7 +141,7 @@ static void wait_file_send_compete(void)
         //ret = wait_for_key_input(3,&ch,0);
     	feed_watchdog();
     	boot_delay(100);
-    	ret = boot_getchar_noblocking(&ch);
+    	ret = wind_std_input(&ch);
     	if(0 == ret)
         {
         	g_recvstat.stat = boot_get_sys_ms();
@@ -177,7 +177,7 @@ w_int32_t boot_receive_img(w_uint32_t addr,w_uint32_t maxlen)
                 }
                 break;
             case RECV_HANDLE:
-                ret = boot_getchar_noblocking(&buf[g_recvstat.idx]);
+                ret = wind_std_input(&buf[g_recvstat.idx]);
                 if(0 == ret)
                 {
                     g_recvstat.idx ++;

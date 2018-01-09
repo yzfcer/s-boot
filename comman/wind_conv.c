@@ -36,7 +36,7 @@ w_bool_t wind_atoi(char *str,w_int32_t *value)
     for(;;i ++)
     {
         if(str[i] <= '9' && str[i] >= '0')
-            num = num * 10 + str[i] - '0';
+            num = num *10 + str[i] - '0';
         else if(str[i] != 0)
             return B_FALSE;
         else
