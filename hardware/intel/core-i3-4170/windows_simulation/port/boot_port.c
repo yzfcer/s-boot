@@ -47,7 +47,7 @@ w_int32_t wind_std_input(w_uint8_t *buff,w_int32_t len)
     c = _kbhit();
     if(c)
     {
-        *ch = getch();
+        c = getch();
         return 0;
     }
 	return -1;

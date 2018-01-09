@@ -92,7 +92,7 @@ w_int32_t read_line_blockig(char *buff,w_int32_t len)
     char ch;
 	while(1)
     {
-        if(0 == wind_std_input(&ch))
+        if(0 == wind_std_input(&ch,1))
         {
             if((ch == '\r') || 
                 (ch == '\n') ||
