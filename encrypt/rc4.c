@@ -14,7 +14,7 @@
 #include "wind_type.h"
 #include "encrypt.h"
 static w_uint8_t rc4_key[16] = ENCRYPT_KEY;
-static unsigned char rc4_sbox[256] = { 0 };
+static w_uint8_t rc4_sbox[256] = { 0 };
 
 static void rc4_init(w_uint8_t*sbox, w_uint8_t *key, w_int32_t Len)
 {
@@ -41,7 +41,7 @@ w_int32_t RC4_crypt(w_uint8_t *data, w_int32_t len)
     w_int32_t k = 0;
     w_uint8_t tmp;
     
-    rc4_init(rc4_sbox, (unsigned char*)rc4_key, 16);
+    rc4_init(rc4_sbox, (w_uint8_t*)rc4_key, 16);
     for (k = 0; k<len; k++)
     {
         i = (i + 1) % 256;

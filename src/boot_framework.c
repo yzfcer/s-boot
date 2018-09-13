@@ -84,7 +84,7 @@ static w_int32_t boot_first_check(void)
     boot_param_s *bp;
     wind_notice("begin to check first running time...");
     bp = (boot_param_s *)boot_param_instance();
-    if(NULL != bp)
+    if(W_NULL != bp)
     {
         go_to_next_step();
         wind_notice("find it is NOT the first running time.");
@@ -138,7 +138,7 @@ static w_int32_t  boot_upgrade_check(void)
     part_s img,*tmp;
     boot_param_s *bp = (boot_param_s *)boot_param_instance();
     
-    if(NULL == bp)
+    if(W_NULL == bp)
     {
         wind_warn("get boot params failed.");
         return -1;
@@ -146,7 +146,7 @@ static w_int32_t  boot_upgrade_check(void)
     ret = sp_get_upgrade_param(&g_upgrade_info);
     if(0 != ret)
     {
-        wind_notice("get upgrade params NULL.");
+        wind_notice("get upgrade params W_NULL.");
         sp_init_share_param();
         go_to_next_step();
         return 0;
@@ -215,7 +215,7 @@ static w_int32_t  boot_rollback_check(void)
     ret = sp_get_app_rollback(&roll_flag);
     if(0 != ret)
     {
-        wind_notice("get upgrade params NULL.");
+        wind_notice("get upgrade params W_NULL.");
         sp_init_share_param();
         go_to_next_step();
         return 0;
@@ -262,14 +262,14 @@ static w_int32_t boot_menu_list(void)
 static w_int32_t boot_load_app(void)
 {
     mem_status_e mem_stat = MEM_ERROR;
-    part_s *regi = NULL,*tmp;
-    boot_param_s *bp = NULL; 
+    part_s *regi = W_NULL,*tmp;
+    boot_param_s *bp = W_NULL; 
 
     wind_notice("begin to load App to running space...");
     bp = (boot_param_s *)boot_param_instance();
     regi = part_get_inst_name("romrun");
     
-    if(NULL == bp)
+    if(W_NULL == bp)
     {
         wind_error("get boot param failed.");
         set_boot_status(BOOT_ERROR);

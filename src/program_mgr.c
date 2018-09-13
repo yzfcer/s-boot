@@ -11,7 +11,7 @@
        Author:
        Modification:
 **********************************************************************************/
-#include "boot_config.h"
+#include "wind_config.h"
 #include "menu_list.h"
 #include "boot_port.h"
 #include "wind_debug.h"
@@ -121,7 +121,7 @@ w_int32_t decrypt_img_data(part_s *img,part_s *bin)
     }
     bin->datalen = len;
     
-    bin->crc = wind_crc32(0xffffffff,(w_uint8_t *)bin->addr,bin->datalen);
+    bin->crc = wind_crc32((w_uint8_t *)bin->addr,bin->datalen,0xffffffff);
     feed_watchdog();
     wind_notice("decrypt img file OK.");
     return 0;
@@ -141,7 +141,7 @@ w_int32_t check_img_valid(part_s *img)
         return -1;
     }
     
-    cal_crc = wind_crc32(0xffffffff,(w_uint8_t*)head,head->head_len - 4);
+    cal_crc = wind_crc32((w_uint8_t*)head,head->head_len - 4,0xffffffff);
     crc = head->head_crc;
     
     wind_debug("img file head crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
@@ -158,7 +158,7 @@ w_int32_t check_img_valid(part_s *img)
     }
     
     feed_watchdog();
-	crc = wind_crc32(0xffffffff,(w_uint8_t*)(img->addr+head->head_len),head->img_len - head->head_len);
+	crc = wind_crc32((w_uint8_t*)(img->addr+head->head_len),head->img_len - head->head_len,0xffffffff);
     cal_crc = head->bin_crc;
     
     wind_debug("bin file crc:0x%x,calc_crc:0x%x.",crc,cal_crc);

@@ -13,7 +13,7 @@
 **********************************************************************************/
 #include "share_param.h"
 #include "boot_port.h"
-#include "wind_debug.h"
+ #include "wind_debug.h"
 #include "wind_crc32.h"
 
 #ifdef __cplusplus
@@ -45,7 +45,7 @@ static void update_share_crc(void)
 {
     share_param_s *sp = (share_param_s *)(void*)part_share_addr();
     w_uint32_t *crc = (w_uint32_t*)(sp+1);
-    *crc = wind_crc32(0xffffffff,(w_uint8_t*)sp,sizeof(share_param_s));
+    *crc = wind_crc32((w_uint8_t*)sp,sizeof(share_param_s),0xffffffff);
 }
 
 static void copy_share_data(char *src,char *dest,w_int32_t len)
@@ -74,7 +74,7 @@ static w_int32_t check_share_param(void)
         return -1;
     }
 
-    if(*crc != wind_crc32(0xffffffff,(w_uint8_t*)sp,sizeof(share_param_s)))
+    if(*crc != wind_crc32((w_uint8_t*)sp,sizeof(share_param_s),0xffffffff))
     {
         wind_warn("share param block crc is invalid.");
         return -1;

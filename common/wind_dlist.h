@@ -7,7 +7,7 @@
 **文   件   名: wind_list.h
 **创   建   人: Jason Zhou
 **最后修改日期: 2017.12.10
-**描        述: 
+**描        述: 双向链表的实现方法
 **              
 **--------------历史版本信息----------------------------------------------------------------------------
 ** 创建人: 
@@ -25,102 +25,102 @@
 #ifndef __WIND_DLIST_H__
 #define __WIND_DLIST_H__
 #include "wind_type.h"
-typedef struct __dnode_s dnode_s;
-typedef struct __pri_dnode_s prinode_s;
-typedef struct __dlist_s dlist_s;
+typedef struct __w_dnode_s w_dnode_s;
+typedef struct __w_pridnode_s w_prinode_s;
+typedef struct __w_dlist_s w_dlist_s;
 
 //链表节点结构
-struct __dnode_s 
+struct __w_dnode_s 
 {
-    dnode_s *prev;
-    dnode_s *next;
+    w_dnode_s *prev;
+    w_dnode_s *next;
 };
 
 //带优先级链表节点结构
-struct __pri_dnode_s 
+struct __w_pridnode_s 
 {
-    dnode_s node;
+    w_dnode_s dnode;
     w_uint32_t prio;
 };
 
 
 //链表头部结构
-struct __dlist_s 
+struct __w_dlist_s 
 {
-    dnode_s *head;
-    dnode_s *tail;
+    w_dnode_s *head;
+    w_dnode_s *tail;
 };
 
 
 
-#define DNODE_INIT(dnode) {dnode.prev = NULL;dnode.next = NULL;}
-#define PRIO_DNODE_INIT(prionode) {prionode.node.prev = NULL;prionode.node.next = NULL;prionode.prio = 0;}
-#define DLIST_INIT(dlist) {dlist.head = NULL;dlist.tail = NULL;}
-#define FIND(type,e) ((w_uint32_t)&(((type*)0)->e))
-#define DLIST_OBJ(ptr,type,mbrnode) (void*)(((char*)(ptr))-((w_uint32_t)&(((type*)0)->mbrnode)))
-#define PRI_DLIST_OBJ(ptr,type,mbrnode) (void*)(((char*)(ptr))-((w_uint32_t)&(((type*)0)->mbrnode.node)))
+#define DNODE_INIT(dnode) {dnode.prev = W_NULL;dnode.next = W_NULL;}
+#define PRIO_DNODE_INIT(prionode) {prionode.dnode.prev = W_NULL;prionode.dnode.next = W_NULL;prionode.prio = 0;}
+#define DLIST_INIT(dlist) {dlist.head = W_NULL;dlist.tail = W_NULL;}
 
-#define foreach_node(node,list) for(node = dlist_head(list);node != NULL;node = dnode_next(node))
+#define DLIST_OBJ(ptr,type,mbrnode) (void*)(((char*)(ptr))-((w_uint32_t)&(((type*)0)->mbrnode)))
+#define PRI_DLIST_OBJ(ptr,type,mbrnode) (void*)(((char*)(ptr))-((w_uint32_t)&(((type*)0)->mbrnode.dnode)))
+
+#define foreach_node(dnode,list) for(dnode = dlist_head(list);dnode != W_NULL;dnode = dnode_next(dnode))
 
 //获取链表头部节点
 static __INLINE__ 
-dnode_s *dlist_head(dlist_s *dlist)
+w_dnode_s *dlist_head(w_dlist_s *dlist)
 {
     return dlist->head;
 }
 
 // 获取链表尾部节点
 static __INLINE__ 
-dnode_s *dlist_tail(dlist_s *dlist)
+w_dnode_s *dlist_tail(w_dlist_s *dlist)
 {
     return dlist->tail;
 }
 
 // 获取给定节点的下一个节点
 static __INLINE__ 
-dnode_s *dnode_next(dnode_s *node) 
+w_dnode_s *dnode_next(w_dnode_s *dnode) 
 {
-    return node->next;
+    return dnode->next;
 }
 
 // 获取给定节点的下一个节点
 static __INLINE__ 
-dnode_s *dnode_prev(dnode_s *node) 
+w_dnode_s *dnode_prev(w_dnode_s *dnode) 
 {
-    return node->prev;
+    return dnode->prev;
 }
 
 
 // 在链表头部插入一个节点
-void dlist_insert_head(dlist_s *dlist,dnode_s *node);
+void dlist_insert_head(w_dlist_s *dlist,w_dnode_s *dnode);
 
 //在链 表尾部插入一个节点
-void dlist_insert_tail(dlist_s *dlist,dnode_s *node);
+void dlist_insert_tail(w_dlist_s *dlist,w_dnode_s *dnode);
 
 // 在指定节点后插入一个节点
-void dlist_insert(dlist_s *dlist,dnode_s *lpAfter,dnode_s *node);
+void dlist_insert(w_dlist_s *dlist,w_dnode_s *lpAfter,w_dnode_s *dnode);
 
 // 从链表头部弹出一个节点
-dnode_s *dlist_remove_head(dlist_s *dlist);
+w_dnode_s *dlist_remove_head(w_dlist_s *dlist);
 
 // 从链表尾部弹出一个节点
-dnode_s *dlist_remove_tail(dlist_s *dlist);
+w_dnode_s *dlist_remove_tail(w_dlist_s *dlist);
 
 // 从链表中删除给定节点
-dnode_s *dlist_remove(dlist_s *dlist,dnode_s *node);
+w_dnode_s *dlist_remove(w_dlist_s *dlist,w_dnode_s *dnode);
 
 // 检查 链表是否为空
-w_bool_t dlist_is_empty(dlist_s *dlist);
+w_bool_t dlist_is_empty(w_dlist_s *dlist);
 
 // 获取链表中的节点数
-w_int32_t dlist_get_count(dlist_s *dlist);
+w_int32_t dlist_get_count(w_dlist_s *dlist);
 // 合并两个链表
-dlist_s *dlist_combine(dlist_s *dlist1,dlist_s *dlist2);
+w_dlist_s *dlist_combine(w_dlist_s *dlist1,w_dlist_s *dlist2);
 
 // 在链表插入一个带优先级节点
-void dlist_insert_prio(dlist_s *dlist,prinode_s *prinode,w_uint32_t prio);
+void dlist_insert_prio(w_dlist_s *dlist,w_prinode_s *prinode,w_uint32_t prio);
 
 // 从链表中删除给定带优先级节点
-prinode_s *dlist_remove_prio(dlist_s *dlist,prinode_s *prinode);
+w_prinode_s *dlist_remove_prio(w_dlist_s *dlist,w_prinode_s *prinode);
 
 #endif//__dlist_s_H__

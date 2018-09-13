@@ -1,12 +1,13 @@
 #include "boot_hw_if.h"
 #include "boot_part.h"
+#include "boot_port.h"
 #include "wind_debug.h"
 #include "wind_string.h"
 #include "mem_driver.h"
 #include "wind_debug.h"
 #include "phy_mem.h"
 #include "boot_param.h"
-#include "boot_config.h"
+#include "wind_config.h"
 static w_int32_t ptcnt = 0;
 static part_s g_part[PART_COUNT];
 
@@ -85,14 +86,14 @@ part_s *part_get_inst_name(char *name)
             return pt;
     }
     wind_error("find part %s failed.",name);
-    return NULL;
+    return W_NULL;
 }
 
 part_s *part_get_inst_idx(w_int8_t memidx)
 {
     part_s *pt;
     if(memidx >= part_get_count())
-        return NULL;
+        return W_NULL;
     pt = get_part();
     return &pt[memidx];
 }
@@ -161,7 +162,7 @@ static void print_copy_percents(w_int32_t numerator, w_int32_t denominator,w_int
     if(del)
         wind_printf("%c%c%c%c",8,8,8,8);
     wind_printf("%3d%%",numerator*100/denominator);
-        feed_watchdog();
+    feed_watchdog();
 }
 
 w_int32_t part_copy_data(part_s *src,part_s *dest)

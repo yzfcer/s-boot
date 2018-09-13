@@ -17,7 +17,7 @@
 #include "boot_param.h"
 #include "mem_driver.h"
 #include <stdarg.h>
-#include "boot_config.h"
+#include "wind_config.h"
 #include "phy_mem.h"
 
 #ifdef __cplusplus
@@ -47,7 +47,7 @@ w_int32_t wait_for_key_input(w_int32_t to_sec,char *ch,w_int32_t print_flag)
     while(1)
     {
         feed_watchdog();
-        ret = wind_std_input(&ch,1);
+        ret = wind_std_input(ch,1);
         if(ret == 0)
         {
             ret = 0;

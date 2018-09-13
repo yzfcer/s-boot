@@ -11,7 +11,7 @@
        Author:
        Modification:
 **********************************************************************************/
-#include "boot_config.h"
+#include "wind_config.h"
 #include "boot_check.h"
 #include "boot_param.h"
 #include "wind_debug.h"
@@ -25,7 +25,7 @@ w_int32_t repair_rom_space(part_s *src,part_s *dest)
     if(MEM_NORMAL != src->status)
     {
         wind_error("can NOT find available source to repir program1.");
-        src = NULL;
+        src = W_NULL;
         return -1;
     }
     
@@ -56,10 +56,10 @@ w_int32_t repair_running_space(void)
         src = part_get_inst_name("img2");
         if(MEM_NORMAL == src->status)
             break;
-        src = NULL;  
+        src = W_NULL;  
     }while(0);
     
-    if(NULL == src)
+    if(W_NULL == src)
     {
         wind_warn("can not find an available source for repairing.");
         ret = -1;
@@ -175,15 +175,15 @@ w_int32_t check_rom_program(part_s *code)
                 head = (img_head_s*)buff;
 				if(head->head_len > BLOCK_SIZE)
                 {
-                    cal_crc = wind_crc32(0xffffffff,buff,len);
+                    cal_crc = wind_crc32(buff,len,0xffffffff);
                 }            
-                else if(head->head_crc == wind_crc32(0xffffffff,buff,head->head_len-4))
-                    cal_crc = wind_crc32(0xffffffff,&buff[head->head_len],BLOCK_SIZE-head->head_len);
+                else if(head->head_crc == wind_crc32(buff,head->head_len-4,0xffffffff))
+                    cal_crc = wind_crc32(&buff[head->head_len],BLOCK_SIZE-head->head_len,0xffffffff);
                 else
-                    cal_crc = wind_crc32(cal_crc,buff,len);
+                    cal_crc = wind_crc32(buff,len,cal_crc);
             }
             else
-                cal_crc = wind_crc32(cal_crc,buff,len);
+                cal_crc = wind_crc32(buff,len,cal_crc);
         }
     }
     

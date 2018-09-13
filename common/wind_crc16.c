@@ -7,7 +7,7 @@
 **文   件   名: wind_crc16.c
 **创   建   人: Jason Zhou
 **最后修改日期: 2017.12.10
-**描        述: 
+**描        述: 16位CRC校验方法
 **              
 **--------------历史版本信息----------------------------------------------------------------------------
 ** 创建人: 
@@ -24,8 +24,8 @@
 *******************************************************************************************************/
 #include "wind_type.h"
 #include "wind_crc16.h"
-#if CRC_SUPPORT_EN 
-w_uint16_t code crc_tab_ccitt[256]={/* CRC 字节余式表 */  
+
+w_uint16_t crc_tab_ccitt[256]={/* CRC 字节余式表 */  
  0X0000, 0X1021, 0X2042, 0X3063, 0X4084, 0X50A5, 0X60C6, 0X70E7,
   0X8108, 0X9129, 0XA14A, 0XB16B, 0XC18C, 0XD1AD, 0XE1CE, 0XF1EF, 
  0X1231, 0X0210, 0X3273, 0X2252, 0X52B5, 0X4294, 0X72F7, 0X62D6,
@@ -62,16 +62,16 @@ w_uint16_t code crc_tab_ccitt[256]={/* CRC 字节余式表 */
   
 
 
-w_uint16_t wind_crc16(unsigned char *data, int len)
+w_uint16_t wind_crc16(const unsigned char *data, int len,w_uint16_t crc)
 {
-    w_uint16_t crc = 0x0000;    // 初始化
+    w_uint16_t crc1 = crc;//0x0000;    // 初始化
     while(len--)
     {
-        crc = (crc << 8) ^ crc_tab_ccitt[((crc>>8) ^ *data) & 0xff];
+        crc1 = (crc1 << 8) ^ crc_tab_ccitt[((crc1>>8) ^ *data) & 0xff];
         data++;
     }
-    return crc;    
+    return crc1;    
 }
 
-#endif
+
 

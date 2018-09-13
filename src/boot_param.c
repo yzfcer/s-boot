@@ -11,7 +11,7 @@
        Author:
        Modification:
 **********************************************************************************/
-#include "boot_config.h" 
+#include "wind_config.h" 
 #include "boot_param.h"
 #include "boot_port.h"
 #include "wind_debug.h"
@@ -26,19 +26,19 @@ extern "C" {
 #endif
 #define BT_BUF_SIZE 1024
 
-boot_param_s *g_pbp = NULL;
+boot_param_s *g_pbp = W_NULL;
 static w_uint8_t g_bootparam[BT_BUF_SIZE];
 
 
 static void upate_bootparam_crc(w_uint8_t *prmbuf)
 {
     w_uint32_t *crc = (w_uint32_t*)&prmbuf[sizeof(boot_param_s)];
-    *crc = wind_crc32(0xffffffff,prmbuf,sizeof(boot_param_s));
+    *crc = wind_crc32(prmbuf,sizeof(boot_param_s),0xffffffff);
 }
 
 boot_param_s *boot_param_instance(void)
 {
-    if(NULL == g_pbp)
+    if(W_NULL == g_pbp)
     {
         g_pbp = (boot_param_s *)&g_bootparam;
         g_pbp = (boot_param_s*)boot_param_from_rom();
@@ -53,8 +53,8 @@ boot_param_s *boot_param_from_rom(void)
     if(0 != ret)
     {
         wind_warn("get boot params failed.");
-        g_pbp = NULL;
-        return NULL;
+        g_pbp = W_NULL;
+        return W_NULL;
     }
     g_pbp = (boot_param_s *)&g_bootparam;
     return (boot_param_s*)g_pbp;
@@ -107,7 +107,7 @@ w_int32_t boot_param_check_valid(w_uint8_t *prmbuf)
         wind_warn("param block lenth is invalid.");
         return -1;
     }
-    if(*crc != wind_crc32(0xffffffff,(w_uint8_t*)bp,sizeof(boot_param_s)))
+    if(*crc != wind_crc32((w_uint8_t*)bp,sizeof(boot_param_s),0xffffffff))
     {
         wind_warn("param block crc is invalid.");
         return -1;
@@ -127,7 +127,7 @@ void boot_param_clear_buffer(void)
     {
         g_bootparam[i] = 0;
     }
-    g_pbp = NULL;
+    g_pbp = W_NULL;
 }
 
 w_int32_t boot_param_read(void)
@@ -210,7 +210,7 @@ w_int32_t boot_param_flush(void)
 w_int32_t boot_param_check_debug_mode(void)
 {
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
-    if(NULL == bp)
+    if(W_NULL == bp)
     {
         return 0;
     }

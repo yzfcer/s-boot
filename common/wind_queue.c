@@ -7,7 +7,7 @@
 **文   件   名: wind_queue.c
 **创   建   人: 周江村
 **最后修改日期: 2012.09.26
-**描        述: wind os的消息相关的代码
+**描        述: 基本FIFO队列的实现方法
 **              
 **--------------历史版本信息----------------------------------------------------------------------------
 ** 创建人: 周江村
@@ -30,21 +30,21 @@
 
 w_err_t wind_queue_create(void *mem,w_uint32_t size,w_uint16_t itemsize)
 {
-    queue_s *q;
-    WIND_ASSERT_RETURN(mem != NULL,ERR_NULL_POINTER);
-    WIND_ASSERT_RETURN(size > sizeof(queue_s),ERR_INVALID_PARAM);
-    WIND_ASSERT_RETURN(itemsize > 0,ERR_INVALID_PARAM);
+    w_queue_s *q;
+    WIND_ASSERT_RETURN(mem != W_NULL,W_ERR_PTR_NULL);
+    WIND_ASSERT_RETURN(size > sizeof(w_queue_s),W_ERR_INVALID);
+    WIND_ASSERT_RETURN(itemsize > 0,W_ERR_INVALID);
 
-    q = (queue_s *)mem;
+    q = (w_queue_s *)mem;
     q->magic = WIND_QUEUE_MAGIC;
     q->rd = q->buf;
     q->wr = q->buf;
     q->itemsize = itemsize;
     q->count = 0;
     
-    q->capacity = (size - MBR_OFFSET(queue_s,buf)) / q->itemsize;
+    q->capacity = (size - MBR_OFFSET(w_queue_s,buf)) / q->itemsize;
     q->end = q->buf + q->capacity *q->itemsize;               
-    return ERR_OK;
+    return W_ERR_OK;
 }
 
 
@@ -52,17 +52,17 @@ w_err_t wind_queue_create(void *mem,w_uint32_t size,w_uint16_t itemsize)
 w_int32_t wind_queue_read(void *queue,void *buf,w_uint32_t len)
 {
     w_uint32_t i;
-    queue_s *q;
+    w_queue_s *q;
     w_uint8_t *buff;
     w_uint32_t lenth;
     
-    q = (queue_s *)queue;
-    WIND_ASSERT_RETURN(buf != NULL,ERR_NULL_POINTER);
-    WIND_ASSERT_RETURN(queue != NULL,ERR_NULL_POINTER);
-    WIND_ASSERT_RETURN(len % q->itemsize == 0,ERR_INVALID_PARAM);
+    q = (w_queue_s *)queue;
+    WIND_ASSERT_RETURN(buf != W_NULL,W_ERR_PTR_NULL);
+    WIND_ASSERT_RETURN(queue != W_NULL,W_ERR_PTR_NULL);
+    WIND_ASSERT_RETURN(len % q->itemsize == 0,W_ERR_INVALID);
     
-    q = (queue_s *)queue;
-    WIND_ASSERT_RETURN(q->magic == WIND_QUEUE_MAGIC,ERR_INVALID_PARAM);
+    q = (w_queue_s *)queue;
+    WIND_ASSERT_RETURN(q->magic == WIND_QUEUE_MAGIC,W_ERR_INVALID);
     buff = buf;
     
     lenth = q->count * q->itemsize;
@@ -84,17 +84,17 @@ w_int32_t wind_queue_read(void *queue,void *buf,w_uint32_t len)
 w_int32_t wind_queue_write(void *queue,void *buf,w_uint32_t len)
 {
     w_uint32_t i;
-    queue_s *q;
+    w_queue_s *q;
     w_uint8_t *buff;
     w_uint32_t lenth;
 
-    q = (queue_s *)queue;
-    WIND_ASSERT_RETURN(buf != NULL,ERR_NULL_POINTER);
-    WIND_ASSERT_RETURN(queue != NULL,ERR_NULL_POINTER);
-    WIND_ASSERT_RETURN(len % q->itemsize == 0,ERR_INVALID_PARAM);
+    q = (w_queue_s *)queue;
+    WIND_ASSERT_RETURN(buf != W_NULL,W_ERR_PTR_NULL);
+    WIND_ASSERT_RETURN(queue != W_NULL,W_ERR_PTR_NULL);
+    WIND_ASSERT_RETURN(len % q->itemsize == 0,W_ERR_INVALID);
 
-    q = (queue_s *)queue;
-    WIND_ASSERT_RETURN(q->magic == WIND_QUEUE_MAGIC,ERR_INVALID_PARAM);
+    q = (w_queue_s *)queue;
+    WIND_ASSERT_RETURN(q->magic == WIND_QUEUE_MAGIC,W_ERR_INVALID);
     buff = buf;
 
     lenth = (q->capacity - q->count) *q->itemsize;
@@ -114,10 +114,10 @@ w_int32_t wind_queue_write(void *queue,void *buf,w_uint32_t len)
 
 w_int32_t wind_queue_data_count(void *queue)
 {
-    queue_s *q;
-    WIND_ASSERT_RETURN(queue != NULL,ERR_NULL_POINTER);
-    q = (queue_s *)queue;
-    WIND_ASSERT_RETURN(q->magic == WIND_QUEUE_MAGIC,ERR_INVALID_PARAM);
+    w_queue_s *q;
+    WIND_ASSERT_RETURN(queue != W_NULL,W_ERR_PTR_NULL);
+    q = (w_queue_s *)queue;
+    WIND_ASSERT_RETURN(q->magic == WIND_QUEUE_MAGIC,W_ERR_INVALID);
     return q->count;
 }
 
@@ -126,10 +126,10 @@ w_int32_t wind_queue_data_count(void *queue)
 
 w_int32_t wind_queue_max_count(void *queue)
 {
-    queue_s *q;
-    WIND_ASSERT_RETURN(queue != NULL,ERR_NULL_POINTER);
-    q = (queue_s *)queue;
-    WIND_ASSERT_RETURN(q->magic == WIND_QUEUE_MAGIC,ERR_INVALID_PARAM);
+    w_queue_s *q;
+    WIND_ASSERT_RETURN(queue != W_NULL,W_ERR_PTR_NULL);
+    q = (w_queue_s *)queue;
+    WIND_ASSERT_RETURN(q->magic == WIND_QUEUE_MAGIC,W_ERR_INVALID);
     return q->capacity;
 }
 
@@ -137,26 +137,26 @@ w_int32_t wind_queue_max_count(void *queue)
 
 w_err_t wind_queue_clean(void *queue)
 {
-    queue_s *q;
-    WIND_ASSERT_RETURN(queue != NULL,ERR_NULL_POINTER);
+    w_queue_s *q;
+    WIND_ASSERT_RETURN(queue != W_NULL,W_ERR_PTR_NULL);
 
-    q = (queue_s *)queue;
-    WIND_ASSERT_RETURN(q->magic == WIND_QUEUE_MAGIC,ERR_INVALID_PARAM);
+    q = (w_queue_s *)queue;
+    WIND_ASSERT_RETURN(q->magic == WIND_QUEUE_MAGIC,W_ERR_INVALID);
     q->rd = q->buf;
     q->wr = q->buf;
     q->count = 0;                                           /* 数据数目为0 */
-    return ERR_OK;
+    return W_ERR_OK;
 }
 
 w_err_t wind_queue_destory(void *queue)
 {
-    queue_s *q;
-    WIND_ASSERT_RETURN(queue != NULL,ERR_NULL_POINTER);
+    w_queue_s *q;
+    WIND_ASSERT_RETURN(queue != W_NULL,W_ERR_PTR_NULL);
 
-    q = (queue_s *)queue;
-    WIND_ASSERT_RETURN(q->magic == WIND_QUEUE_MAGIC,ERR_INVALID_PARAM);
+    q = (w_queue_s *)queue;
+    WIND_ASSERT_RETURN(q->magic == WIND_QUEUE_MAGIC,W_ERR_INVALID);
     q->magic = 0;
-    return ERR_OK;
+    return W_ERR_OK;
 }
 
 

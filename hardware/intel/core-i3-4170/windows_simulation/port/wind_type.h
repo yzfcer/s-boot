@@ -74,8 +74,8 @@ typedef float w_fp64_t;
 #endif
 
 
-#ifndef NULL
-#define NULL ((void *)0)
+#ifndef W_NULL
+#define W_NULL ((void *)0)
 #endif
 
 #ifndef w_bool_t
