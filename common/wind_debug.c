@@ -27,9 +27,6 @@
 #include <stdarg.h>
 #include "wind_type.h"
 #include "wind_debug.h"
-//#include "wind_core.h"
-
-
 
 #if WIND_DEBUG_SUPPORT
 #ifdef _USE_USER_PRINT
@@ -51,7 +48,6 @@ w_int32_t wind_printf(const char *fmt, ...)
 }
 
 #endif
-
 void wind_print_space(w_int32_t space8_cnt)
 {
     w_int32_t i;
@@ -59,7 +55,6 @@ void wind_print_space(w_int32_t space8_cnt)
         wind_printf("--------");
     wind_printf("\r\n");
 }
-
 #endif
 
 

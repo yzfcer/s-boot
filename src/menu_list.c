@@ -80,7 +80,7 @@ static void download_img_to_rom(void)
 static void download_img_to_ram(void)
 {
     w_int32_t ret;
-    part_s *dest = part_get_inst_name("ramrun");
+    w_part_s *dest = boot_part_get(PART_RAMRUN);
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
     if(dest->size <= 0)
     {
@@ -140,7 +140,7 @@ static void show_memmap(void)
 {
     boot_param_s *bp = (boot_param_s *)boot_param_instance();
     wind_printf("current memory map info:\r\n");
-    part_print_detail();
+    boot_part_print_detail();
 }
 
 static void lock_mcu(void)
@@ -170,7 +170,7 @@ static void unlock_mcu(void)
 static void show_program_status(void)
 {
     boot_param_s *bp = (boot_param_s *)boot_param_instance();
-    part_print_status();
+    boot_part_print_status();
 }
 
 #if BOOT_TEST_ENABLE
@@ -267,8 +267,8 @@ w_int32_t open_super_prio(void)
     w_int32_t prio = 0;
     char *prio1 = "test";
     char *prio2 = "sudo";
-    w_uint8_t *buff = get_block_buffer();
-    len = read_line_blockig((char*)buff,BLOCK_SIZE);
+    w_uint8_t *buff = get_common_buffer();
+    len = read_line_blockig((char*)buff,COMMBUF_SIZE);
     if(is_string_equal((char*)buff,prio1,wind_strlen(prio1)))
     {
         prio = 1;

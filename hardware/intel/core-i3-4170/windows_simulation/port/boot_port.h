@@ -31,6 +31,9 @@ w_int32_t boot_receive_img(w_uint32_t addr,w_uint32_t maxlen);
 w_uint32_t boot_get_sys_ms(void);
 void boot_jump_to_app(void);
 
+w_err_t boot_medias_register(void);
+w_err_t boot_parts_create(void);
+
 void feed_watchdog(void);
 w_bool_t is_chip_lock();
 void set_chip_lock(w_uint8_t lock_enable);

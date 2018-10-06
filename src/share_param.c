@@ -12,17 +12,16 @@
        Modification:
 **********************************************************************************/
 #include "share_param.h"
+#include "boot_config.h"
+#include "boot_part.h"
 #include "boot_port.h"
- #include "wind_debug.h"
+#include "wind_debug.h"
 #include "wind_crc32.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-//π≤œÌµÿ÷∑
-//#define part_share_addr part_share_addr()//0x2003F000
-extern w_uint32_t part_share_addr (void);
-
+ 
 #define SHARE_VERSION 0x0001
 typedef struct
 {
@@ -41,17 +40,18 @@ typedef struct
         
 }share_param_s;
 
+
+
 static void update_share_crc(void)
 {
-    share_param_s *sp = (share_param_s *)(void*)part_share_addr();
-    w_uint32_t *crc = (w_uint32_t*)(sp+1);
-    *crc = wind_crc32((w_uint8_t*)sp,sizeof(share_param_s),0xffffffff);
+    w_part_s *part = boot_part_get(PART_SHARE);
+    boot_part_calc_crc(part);
 }
 
 static void copy_share_data(char *src,char *dest,w_int32_t len)
 {
     w_int32_t i;
-    //wind_notice("copy data from 0x%x to 0x%x,lenth %d",src,dest,len);
+    
     for(i = 0;i < len;i ++)
     {
         dest[i] = src[i];
@@ -59,9 +59,8 @@ static void copy_share_data(char *src,char *dest,w_int32_t len)
 }
 
 
-static w_int32_t check_share_param(void)
+static w_int32_t check_share_param(share_param_s *sp)
 {
-    share_param_s *sp = (share_param_s *)(void*)part_share_addr();
     w_uint32_t *crc = (w_uint32_t*)(sp+1);
     if(sp->magic != SHARE_PARAM_MAGIC)
     {
@@ -83,60 +82,87 @@ static w_int32_t check_share_param(void)
     return 0;
 }
 
-void sp_set_app_rollback(w_uint8_t is_rollback)
+static share_param_s *get_share_data(void)
 {
-    share_param_s * sp =(share_param_s *)(void*)part_share_addr();
+    w_int32_t len;
+    share_param_s * sp;
+    w_uint8_t *buff = get_common_buffer();
+    w_part_s *part = boot_part_get(PART_SHARE);
+    part->offset = 0;
+    len = boot_part_read(part,buff,COMMBUF_SIZE);
+    WIND_ASSERT_RETURN(len > 0,W_NULL);
+    sp =(share_param_s *)buff;
+    if(check_share_param(sp) != 0)
+        return W_NULL;
+    return sp;
+}
+
+static w_err_t flush_share_data(share_param_s *sp)
+{
+    w_int32_t len;
+    w_part_s *part = boot_part_get(PART_SHARE);
+    update_share_crc();
+    len = boot_part_write(part,(w_uint8_t*)sp,COMMBUF_SIZE);
+    WIND_ASSERT_RETURN(len > 0,W_ERR_FAIL);
+    return W_ERR_OK;
+}
+
+
+w_err_t sp_set_app_rollback(w_uint8_t is_rollback)
+{
+    share_param_s *sp = get_share_data();
+    WIND_ASSERT_RETURN(sp != W_NULL,W_ERR_FAIL);
     sp->rollback_flag = is_rollback;
-    update_share_crc();
+    return flush_share_data(sp);
 }
 
-w_int32_t sp_get_app_rollback(w_uint8_t *is_rollback)
+w_err_t sp_get_app_rollback(w_uint8_t *is_rollback)
 {
-    share_param_s *sp = (share_param_s *)(void*)part_share_addr();
-    if(check_share_param())
-        return -1;
+    share_param_s *sp = get_share_data();
+    WIND_ASSERT_RETURN(sp != W_NULL,W_ERR_FAIL);
     *is_rollback = (w_uint8_t)sp->rollback_flag;
-    return 0;
+    return flush_share_data(sp);
 }
 
 
-void sp_set_upgrade_param(upgrade_info_s *upreg)
+w_err_t sp_set_upgrade_param(upgrade_info_s *upreg)
 {
-    share_param_s *sp = (share_param_s *)(void*)part_share_addr();
+    share_param_s *sp = get_share_data();
+    WIND_ASSERT_RETURN(sp != W_NULL,W_ERR_FAIL);
     copy_share_data((char*)upreg,(char*)&sp->upgrade_reg,sizeof(upgrade_info_s));
-    update_share_crc();
+    return flush_share_data(sp);
 }
 
-w_int32_t sp_get_upgrade_param(upgrade_info_s *upreg)
+w_err_t sp_get_upgrade_param(upgrade_info_s *upreg)
 {
-    share_param_s *sp = (share_param_s *)(void*)part_share_addr();
-    if(check_share_param())
-        return -1;
+    share_param_s *sp = get_share_data();
+    WIND_ASSERT_RETURN(sp != W_NULL,W_ERR_FAIL);
     copy_share_data((char*)&sp->upgrade_reg,(char*)upreg,sizeof(upgrade_info_s));
-    return 0;
+    return flush_share_data(sp);
 }
 
-void sp_set_sysparam_param(sysparam_part_s *sysparam)
+w_err_t sp_set_sysparam_param(sysparam_part_s *sysparam)
 {
-    share_param_s *sp = (share_param_s *)(void*)part_share_addr();
+    share_param_s *sp = get_share_data();
+    WIND_ASSERT_RETURN(sp != W_NULL,W_ERR_FAIL);
     copy_share_data((char*)sysparam,(char*)&sp->sysparam_reg,sizeof(sysparam_part_s));
-    update_share_crc();
+    return flush_share_data(sp);
 }
 
-w_int32_t sp_get_sysparam_param(sysparam_part_s *sysparam)
+w_err_t sp_get_sysparam_param(sysparam_part_s *sysparam)
 {
-    share_param_s *sp = (share_param_s *)(void*)part_share_addr();
-    if(check_share_param())
-        return -1;
+    share_param_s *sp = get_share_data();
+    WIND_ASSERT_RETURN(sp != W_NULL,W_ERR_FAIL);
     copy_share_data((char*)&sp->sysparam_reg,(char*)sysparam,sizeof(sysparam_part_s));
-    return 0;
+    return flush_share_data(sp);
 }
 
-void sp_init_share_param(void)
+w_err_t sp_init_share_param(void)
 {
     w_int32_t i;
     char *mem;
-    share_param_s *sp = (share_param_s *)(void*)part_share_addr();
+    share_param_s *sp = get_share_data();
+    WIND_ASSERT_RETURN(sp != W_NULL,W_ERR_FAIL);
     mem = (char*)sp;
     for(i = 0;i < sizeof(share_param_s);i ++)
     {
@@ -148,7 +174,7 @@ void sp_init_share_param(void)
     
     sp->rollback_flag = 0;
     sp->upgrade_reg.flag = 0;
-    update_share_crc();
+    return flush_share_data(sp);
 }
 
 #ifdef __cplusplus

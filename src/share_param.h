@@ -47,19 +47,19 @@ typedef struct
 }sysparam_part_s;
 
 
-void sp_set_app_rollback(w_uint8_t is_rollback);
+w_err_t sp_set_app_rollback(w_uint8_t is_rollback);
 
-w_int32_t sp_get_app_rollback(w_uint8_t *is_rollback);
+w_err_t sp_get_app_rollback(w_uint8_t *is_rollback);
 
-void sp_set_upgrade_param(upgrade_info_s *upreg);
+w_err_t sp_set_upgrade_param(upgrade_info_s *upreg);
 
-w_int32_t sp_get_upgrade_param(upgrade_info_s *upreg);
+w_err_t sp_get_upgrade_param(upgrade_info_s *upreg);
 
-void sp_set_sysparam_param(sysparam_part_s *sysparam);
+w_err_t sp_set_sysparam_param(sysparam_part_s *sysparam);
 
-w_int32_t sp_get_sysparam_param(sysparam_part_s *sysparam);
+w_err_t sp_get_sysparam_param(sysparam_part_s *sysparam);
 
-void sp_init_share_param(void);
+w_err_t sp_init_share_param(void);
 
 #ifdef __cplusplus
 }

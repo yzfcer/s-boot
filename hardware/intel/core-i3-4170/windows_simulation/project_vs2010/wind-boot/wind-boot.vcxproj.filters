@@ -19,9 +19,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\port\mem_driver.h">
-      <Filter>port</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\src\boot_framework.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -46,14 +43,8 @@
     <ClInclude Include="..\..\..\..\..\..\encrypt\encrypt.h">
       <Filter>encrypt</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\sys_debug.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\src\boot_check.h">
       <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\port\boot_config.h">
-      <Filter>port</Filter>
     </ClInclude>
     <ClInclude Include="..\..\port\wind_type.h">
       <Filter>port</Filter>
@@ -76,11 +67,11 @@
     <ClInclude Include="..\..\..\..\..\..\common\wind_debug.h">
       <Filter>comman</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\src\boot_media.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\port\mem_driver.c">
-      <Filter>port</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\src\boot_framework.c">
       <Filter>src</Filter>
     </ClCompile>
@@ -128,6 +119,21 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\common\wind_debug.c">
       <Filter>comman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\port\media_ram1.c">
+      <Filter>port</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\port\media_ram2.c">
+      <Filter>port</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\port\media_rom1.c">
+      <Filter>port</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\port\media_rom2.c">
+      <Filter>port</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\src\boot_media.c">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

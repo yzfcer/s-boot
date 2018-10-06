@@ -1,44 +1,67 @@
 #ifndef BOOT_PART_H__
 #define BOOT_PART_H__
 #include "wind_type.h"
+#include "boot_media.h"
 
 #define PART_NAME_LEN 12
-#define PART_COUNT 10
 #define INVALID_REAL_ADDR 0xffffffff
+
+//标准分区名称，
+#define PART_BOOT     "boot"
+#define PART_PARAM1   "param1"
+#define PART_PARAM2   "param2"
+#define PART_IMG1     "img1"
+#define PART_IMG2     "img2"
+#define PART_SHARE    "share"
+#define PART_FS       "fs"
+#define PART_ROMRUN   "romrun"
+#define PART_RAMRUN   "ramrun"
+#define PART_IMGPARA  "imgparam"
+#define PART_CACHE    "cache"
+
 
 typedef enum
 {
     MEM_NULL = 0,
     MEM_NORMAL=1,
     MEM_ERROR=2,      
-}mem_status_e;
+}w_mem_status_e;
 
 //空间分区表
 typedef struct 
 {
-    char name[PART_NAME_LEN];
-    w_int8_t memidx;
-    w_int8_t memtype;
+    const char *name;
+    w_media_s *media;
+    w_uint8_t mtype;
+    w_uint8_t used;
     w_uint16_t status;
-    w_uint32_t addr;
-    w_int32_t size;
-    w_int32_t datalen;
+    w_uint32_t base;
+    w_uint32_t size;
+    w_uint32_t blksize;
+    w_uint32_t datalen;
+    w_uint32_t offset;
     w_uint32_t crc;
-}part_s;
+}w_part_s;
+w_uint8_t *get_common_buffer(void);          
 
-w_bool_t  part_create(char *name,w_int8_t midx,w_int32_t size);
-w_int32_t part_get_count(void);
+w_err_t boot_part_init(void);
+w_bool_t  boot_part_create(const char *name,w_media_s *md,w_uint32_t size);
+w_part_s *boot_part_get(const char *name);
+w_err_t boot_part_change_offset(w_part_s *part,w_int32_t diff);
+w_err_t boot_part_calc_crc(w_part_s *part);
+w_int32_t  boot_part_read(w_part_s *part,w_uint8_t *data,w_uint32_t datalen);
+w_int32_t boot_part_write(w_part_s *part,w_uint8_t *data,w_uint32_t datalen);
+w_err_t boot_part_erase(w_part_s *part);
 
-part_s *part_get_inst_name(char *name);
-part_s *part_get_inst_idx(w_int8_t memidx);
-part_s *part_get_list(void);
-void part_print_detail(void);
+void boot_part_print_status(void);
+w_int32_t boot_part_get_count(void);
+w_part_s *boot_part_get_list(void);
+void boot_part_print_detail(void);
+void boot_part_copy_info(w_part_s *src,w_part_s *dest);
+w_int32_t boot_part_copy_data(w_part_s *src,w_part_s *dest);
+w_bool_t boot_part_equal(w_part_s *src,w_part_s *dest);
+w_bool_t boot_part_check(w_part_s *part);
 
 
-void part_print_status(void);
-
-void part_copy_info(part_s *src,part_s *dest);
-w_int32_t part_copy_data(part_s *src,part_s *dest);
-w_uint32_t part_share_addr(void);
-
+ 
 #endif

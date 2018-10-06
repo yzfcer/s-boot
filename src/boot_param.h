@@ -13,6 +13,7 @@
 **********************************************************************************/
 #ifndef BOOT_PARAM_H__
 #define BOOT_PARAM_H__
+#include "boot_config.h"
 #include "wind_type.h"
 #include "phy_mem.h"
 #include "boot_part.h"
@@ -39,9 +40,7 @@ typedef struct
     w_int8_t phymem_cnt;
     w_int8_t part_cnt;
     char runreg[PART_NAME_LEN];
-    
-    phymem_s phmem[PHYMEM_COUNT];
-    part_s part[PART_COUNT];
+    w_part_s part[PART_COUNT];
     
 
 }boot_param_s;

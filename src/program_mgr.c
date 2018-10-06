@@ -11,7 +11,7 @@
        Author:
        Modification:
 **********************************************************************************/
-#include "wind_config.h"
+#include "boot_config.h"
 #include "menu_list.h"
 #include "boot_port.h"
 #include "wind_debug.h"
@@ -23,7 +23,6 @@
 #include "program_mgr.h"
 #include "boot_part.h"
 #include "boot_hw_if.h"
-#include "mem_driver.h"
 #include "encrypt.h"
 #include "phy_mem.h"
 #include "wind_string.h"
@@ -101,19 +100,19 @@ w_bool_t check_hardware_matched(img_head_s *head)
     return B_TRUE;    
 }
 
-w_int32_t decrypt_img_data(part_s *img,part_s *bin)
+w_int32_t decrypt_img_data(w_part_s *img,w_part_s *bin)
 {
     w_int32_t len;
     img_head_s *head;
 
-    part_copy_info(img,bin);
-	head = (img_head_s*)bin->addr;
-    bin->addr += head->head_len;
+    boot_part_copy_info(img,bin);
+	head = (img_head_s*)bin->base;
+    bin->base += head->head_len;
     bin->size = img->size - head->head_len;
     bin->datalen = img->datalen - head->head_len;
     wind_notice("decrypt img file...");
-    wind_debug("decrypt_data base:0x%x,lenth:%d",bin->addr,bin->datalen);
-	len = decrypt_data(head->encry_type,(w_uint8_t *)bin->addr,bin->datalen);
+    wind_debug("decrypt_data base:0x%x,lenth:%d",bin->base,bin->datalen);
+	len = decrypt_data(head->encry_type,(w_uint8_t *)bin->base,bin->datalen);
     if(len < 0)
     {
         wind_warn("decrypt img file failed.");
@@ -121,20 +120,20 @@ w_int32_t decrypt_img_data(part_s *img,part_s *bin)
     }
     bin->datalen = len;
     
-    bin->crc = wind_crc32((w_uint8_t *)bin->addr,bin->datalen,0xffffffff);
+    bin->crc = wind_crc32((w_uint8_t *)bin->base,bin->datalen,0xffffffff);
     feed_watchdog();
     wind_notice("decrypt img file OK.");
     return 0;
 }
 
 
-w_int32_t check_img_valid(part_s *img)
+w_int32_t check_img_valid(w_part_s *img)
 {
     w_uint32_t cal_crc,crc;
     img_head_s *head;
 
     feed_watchdog();
-	head = (img_head_s*)img->addr;
+	head = (img_head_s*)img->base;
     if(0 != head_endian_convert(head))
     {
         wind_warn("img file head endian convert ERROR.");
@@ -158,7 +157,7 @@ w_int32_t check_img_valid(part_s *img)
     }
     
     feed_watchdog();
-	crc = wind_crc32((w_uint8_t*)(img->addr+head->head_len),head->img_len - head->head_len,0xffffffff);
+	crc = wind_crc32((w_uint8_t*)(img->base+head->head_len),head->img_len - head->head_len,0xffffffff);
     cal_crc = head->bin_crc;
     
     wind_debug("bin file crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
@@ -178,53 +177,44 @@ w_int32_t check_img_valid(part_s *img)
 
 
 
-static w_bool_t part_equal(part_s *src,part_s *dest)
-{
-    if(src->memtype != dest->memtype)
-        return B_FALSE;
-    if(src->memidx != dest->memidx)
-        return B_FALSE;
-    if(src->addr != dest->addr)
-        return B_FALSE;
-    return B_TRUE;
-}
+
 
 w_int32_t roll_back_program(void)
 {
     w_int32_t ret;
-    part_s *src,*dest,*tmp1;
-    part_s bin;
+    w_part_s *src,*dest,*tmp1;
+    w_part_s bin;
     w_bool_t run_in_program1;
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
     
     //先将原来的程序拷贝到备份空间    
-    dest = part_get_inst_name("img2");
-    src = part_get_inst_name("img1");
-    ret = part_copy_data(src,dest);
+    dest = boot_part_get(PART_IMG2);
+    src = boot_part_get(PART_IMG1);
+    ret = boot_part_copy_data(src,dest);
     if(0 != ret)
     {
         wind_warn("roll back program failed.");
         return -1;
     }
     
-    dest = part_get_inst_name("romrun");
-    src = part_get_inst_name("img1");
-    run_in_program1 = part_equal(dest,src);
+    dest = boot_part_get(PART_ROMRUN);
+    src = boot_part_get(PART_IMG1);
+    run_in_program1 = boot_part_equal(dest,src);
     if(run_in_program1)
     {
-        tmp1 = part_get_inst_name("romrun");
+        tmp1 = boot_part_get(PART_ROMRUN);
         tmp1->status = MEM_NORMAL;
         tmp1->crc = src->crc;
         tmp1->datalen= src->datalen;
     }
     else
     {
-        dest = part_get_inst_name("img1");
-        src = part_get_inst_name("cache");
-        part_copy_data(src,dest);
+        dest = boot_part_get(PART_IMG1);
+        src = boot_part_get(PART_CACHE);
+        boot_part_copy_data(src,dest);
         decrypt_img_data(src,&bin);
-        dest = part_get_inst_name("romrun");
-        ret = part_copy_data(&bin,dest);
+        dest = boot_part_get(PART_ROMRUN);
+        ret = boot_part_copy_data(&bin,dest);
         if(0 != ret)
         {
             wind_error("flush program to running space failed.");
@@ -235,19 +225,19 @@ w_int32_t roll_back_program(void)
     return 0;
 }
 
-w_int32_t flush_img_to_ram(part_s *img)
+w_int32_t flush_img_to_ram(w_part_s *img)
 {
     w_int32_t ret;
-    part_s bin;
-    part_s *dest;
+    w_part_s bin;
+    w_part_s *dest;
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
     decrypt_img_data(img,&bin);
     //这里需要修改，不能直接使用img，因为会修改程序缓存的起始地址，
     //另外需要重新考虑程序运行在RAM中间时，程序因该怎样存储
     
     wind_notice("begin to copy code to memory...");
-    dest = part_get_inst_name("ramrun");
-    ret = part_copy_data(&bin,dest);
+    dest = boot_part_get(PART_RAMRUN);
+    ret = boot_part_copy_data(&bin,dest);
     if(0 != ret)
     {
         wind_warn("copy img to running space failed.");
@@ -258,44 +248,44 @@ w_int32_t flush_img_to_ram(part_s *img)
 
 
 //先备份原来的程序，再烧录新程序到sys_program1和运行区
-w_int32_t flush_img_to_rom(part_s *img)
+w_int32_t flush_img_to_rom(w_part_s *img)
 {
     w_int32_t ret;
-    part_s *src,*dest;
-    part_s bin;
+    w_part_s *src,*dest;
+    w_part_s bin;
     img_head_s *head;
     w_bool_t run_in_program1;
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
     wind_notice("begin to flush code to rom space...");
     
     //先将原来的程序拷贝到备份空间    
-    src = part_get_inst_name("img1");
-    dest = part_get_inst_name("img2");
+    src = boot_part_get(PART_IMG1);
+    dest = boot_part_get(PART_IMG2);
     
-    ret = part_copy_data(src,dest);
+    ret = boot_part_copy_data(src,dest);
     if(0 != ret)
     {
         wind_warn("backup old program failed.");
         return -1;
     }
     
-    head = (img_head_s*)img->addr;
-    src = part_get_inst_name("img1");
-    dest = part_get_inst_name("romrun");
-    run_in_program1 = part_equal(src,dest);
+    head = (img_head_s*)img->base;
+    src = boot_part_get(PART_IMG1);
+    dest = boot_part_get(PART_ROMRUN);
+    run_in_program1 = boot_part_equal(src,dest);
     
     //烧录到sys_program1，如果同时也是运行空间，则先解密，在烧录
     if(run_in_program1)
     {
         decrypt_img_data(img,&bin);
-        dest = part_get_inst_name("img1");
-        ret = part_copy_data(&bin,dest);
+        dest = boot_part_get(PART_IMG1);
+        ret = boot_part_copy_data(&bin,dest);
         if(0 != ret)
         {
             wind_warn("flush new program failed.");
             return -1;
         }
-        dest = part_get_inst_name("romrun");
+        dest = boot_part_get(PART_ROMRUN);
         dest->status = MEM_NORMAL;
         dest->crc = bin.crc;
         dest->datalen= bin.datalen;
@@ -304,16 +294,16 @@ w_int32_t flush_img_to_rom(part_s *img)
     }
     else
     {
-        dest = part_get_inst_name("img1");
-        ret = part_copy_data(img,dest);
+        dest = boot_part_get(PART_IMG1);
+        ret = boot_part_copy_data(img,dest);
         if(0 != ret)
         {
             wind_warn("flush new program failed.");
             return -1;
         }
         decrypt_img_data(img,&bin);
-        dest = part_get_inst_name("romrun");
-        ret = part_copy_data(&bin,dest);
+        dest = boot_part_get(PART_ROMRUN);
+        ret = boot_part_copy_data(&bin,dest);
         if(0 != ret)
         {
             wind_error("write new program failed.");
@@ -325,7 +315,7 @@ w_int32_t flush_img_to_rom(part_s *img)
 }
 
 
-w_int32_t flush_img_file(w_int16_t type,part_s *img)
+w_int32_t flush_img_file(w_int16_t type,w_part_s *img)
 {
     w_int32_t ret;   
     switch(type)
@@ -355,7 +345,7 @@ w_int32_t flush_img_file(w_int16_t type,part_s *img)
 w_int32_t download_img_file(w_int16_t type)
 {
     w_int32_t ret,len;
-    part_s *img;
+    w_part_s *img;
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
 
     if(bp->debug_mode)
@@ -363,9 +353,9 @@ w_int32_t download_img_file(w_int16_t type)
         wind_notice("device can NOT download in debug mode ,set it to normal mode first");
         return -1;
     }
-    img = part_get_inst_name("cache");
+    img = boot_part_get(PART_CACHE);
     wind_printf("begin to receive file data,please wait.\r\n");
-    len = boot_receive_img(img->addr,img->size);
+    len = boot_receive_img(img->base,img->size);
     if(len <= 0)
     {
         wind_error("receive img data failed.");
@@ -395,21 +385,19 @@ w_int32_t download_img_file(w_int16_t type)
 w_int32_t clean_program(void)
 {
     w_int32_t idx = 0;
-    w_uint32_t i,blocknum;
-    part_s *code[5];
-    boot_param_s *bp = (boot_param_s*)boot_param_instance();
+    w_uint32_t i;
+    w_part_s *code[5];
     wind_printf("clearing program ...\r\n");
-    code[idx++] = part_get_inst_name("img1");
-    code[idx++] = part_get_inst_name("img2");
-    code[idx++] = part_get_inst_name("romrun");
-    code[idx++] = part_get_inst_name("btpara1");
-    code[idx++] = part_get_inst_name("btpara2");
+    code[idx++] = boot_part_get(PART_IMG1);
+    code[idx++] = boot_part_get(PART_IMG2);
+    code[idx++] = boot_part_get(PART_ROMRUN);
+    code[idx++] = boot_part_get(PART_PARAM1);
+    code[idx++] = boot_part_get(PART_PARAM2);
     
     for(i = 0;i < 5;i ++)
     {
-        wind_notice("erase base 0x%x,lenth %d.",code[i]->addr,code[i]->datalen);
-        blocknum = (code[i]->datalen + BLOCK_SIZE - 1) / BLOCK_SIZE;
-        erase_block(code[i]->memtype,code[i]->memidx,code[i]->addr,blocknum);
+        wind_notice("erase base 0x%x,lenth %d.",code[i]->base,code[i]->datalen);
+        boot_part_erase(code[i]);
     }
     wind_printf("clear program OK.\r\n");
     return 0;

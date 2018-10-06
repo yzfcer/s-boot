@@ -11,12 +11,11 @@
        Author:
        Modification:
 **********************************************************************************/
-#include "wind_config.h" 
+#include "boot_config.h" 
 #include "boot_param.h"
 #include "boot_port.h"
 #include "wind_debug.h"
 #include "wind_crc32.h"
-#include "mem_driver.h"
 #include "boot_hw_if.h"
 #include "phy_mem.h"
 #include "boot_part.h"
@@ -39,10 +38,7 @@ static void upate_bootparam_crc(w_uint8_t *prmbuf)
 boot_param_s *boot_param_instance(void)
 {
     if(W_NULL == g_pbp)
-    {
-        g_pbp = (boot_param_s *)&g_bootparam;
         g_pbp = (boot_param_s*)boot_param_from_rom();
-    }
     return (boot_param_s *)g_pbp;
 }
 
@@ -76,18 +72,12 @@ void boot_param_reset(void)
     bp->encrypt_type = ENCRYPT_TYPE;
     bp->lock_en = MCU_LOCK_ENABLE;
     
-    if(phymem_get_count() == 0)
+    if(boot_part_get_count() == 0)
     {
-        phymems_register();
-        bp->phymem_cnt = phymem_get_count();
+        boot_parts_create();
+        bp->part_cnt = boot_part_get_count();
     }
-    if(part_get_count() == 0)
-    {
-        parts_create();
-        bp->part_cnt = part_get_count();
-    }
-    wind_memcpy(bp->phmem,phymem_get_list(),PHYMEM_COUNT*sizeof(phymem_s));
-    wind_memcpy(bp->part,part_get_list(),PART_COUNT*sizeof(part_s));
+    wind_memcpy(bp->part,boot_part_get_list(),PART_COUNT*sizeof(w_part_s));
     wind_notice("init boot param OK.");
 }
 
@@ -134,20 +124,19 @@ w_int32_t boot_param_read(void)
 {
     w_uint32_t err = 0;
     w_int32_t i,j,len,ret;
-    part_s *part[2];
+    w_part_s *part[2];
     
-    part[0] = part_get_inst_name("btpara1");
-    part[1] = part_get_inst_name("btpara2");
+    part[0] = boot_part_get(PART_PARAM1);
+    part[1] = boot_part_get(PART_PARAM2);
     
     for(i = 0;i < 2;i ++)
     {
         for(j = 0;j < 3;j ++)
         {
-            len = read_block(MEM_TYPE_ROM,part[i]->memidx,part[i]->addr,g_bootparam,sizeof(g_bootparam) / BLOCK_SIZE);
-            if(len >= sizeof(g_bootparam) / BLOCK_SIZE)
-            {
+            part[i]->offset = 0;
+            len = boot_part_read(part[i],g_bootparam,sizeof(g_bootparam));
+            if(len >= sizeof(g_bootparam))
                 break;
-            }
         }
         ret = boot_param_check_valid(g_bootparam);
         if(0 == ret)
@@ -172,23 +161,19 @@ w_int32_t boot_param_read(void)
 w_int32_t boot_param_flush(void)
 {
     w_int32_t i,j,len,err = 0;
-    part_s *part[2];
+    w_part_s *part[2];
     boot_param_s *bp = (boot_param_s *)g_bootparam;
-    part[0] = part_get_inst_name("btpara1");
-    part[1] = part_get_inst_name("btpara2");
+    part[0] = boot_part_get(PART_PARAM1);
+    part[1] = boot_part_get(PART_PARAM2);
     
-    //part[0]->datalen = sizeof(boot_param_s) + bp->map_size;
-    //part[1]->datalen = sizeof(boot_param_s) + bp->map_size;
     upate_bootparam_crc((w_uint8_t*)bp);
     for(i = 0;i < 2;i ++)
     {
         for(j = 0;j < 3;j ++)
         {
-            len = write_block(MEM_TYPE_ROM,part[i]->memidx,part[i]->addr,(char*)g_bootparam,sizeof(g_bootparam) / BLOCK_SIZE);
-            if(len >=  sizeof(g_bootparam) / BLOCK_SIZE)
-            {
+            len = boot_part_write(part[i],g_bootparam,sizeof(g_bootparam));
+            if(len >=  sizeof(g_bootparam))
                 break;
-            }
         }
         if(j >= 3)
         {

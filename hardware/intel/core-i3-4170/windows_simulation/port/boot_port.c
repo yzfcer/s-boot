@@ -16,7 +16,10 @@
 #include <windows.h>
 #include <winbase.h>
 #include "boot_param.h"
+#include "boot_part.h"
+#include "boot_media.h"
 #include <conio.h>
+#include "wind_debug.h"
 
 w_int32_t device_init(void)
 {
@@ -31,6 +34,7 @@ void      wind_std_port_init(void)
 {
     
 }
+
 w_int32_t wind_std_output(w_uint8_t *buf,w_int32_t len)
 {
     w_int32_t i;
@@ -44,13 +48,18 @@ w_int32_t wind_std_output(w_uint8_t *buf,w_int32_t len)
 w_int32_t wind_std_input(w_uint8_t *buff,w_int32_t len)
 {
     char c;
-    c = _kbhit();
-    if(c)
+    w_int32_t i;
+    for(i = 0;i < len;i ++)
     {
-        c = getch();
-        return 0;
+        c = _kbhit();
+        if(c)
+        {
+            buff[i] = getch();
+        }
+        else
+            return i;
     }
-	return -1;
+	return len;
 }
 
 w_int32_t boot_receive_img(w_uint32_t addr,w_uint32_t maxlen)
@@ -69,6 +78,45 @@ w_uint32_t boot_get_sys_ms(void)
 {
 	return GetTickCount();
 }
+
+
+extern w_media_s media_ram1;
+extern w_media_s media_ram2;
+extern w_media_s media_rom1;
+extern w_media_s media_rom2;
+w_err_t boot_medias_register(void)
+{
+    boot_media_register(&media_ram1);
+    boot_media_register(&media_ram2);
+    boot_media_register(&media_rom1);
+    boot_media_register(&media_rom2);
+    boot_media_print();
+    return W_ERR_OK;
+}
+
+w_err_t boot_parts_create(void)
+{
+    w_media_s *media;
+    media = boot_media_get("rom1");
+    boot_part_create(PART_BOOT,media,BOOT_SIZE);
+    boot_part_create(PART_PARAM1,media,BT_PARA1_SIZE);
+    boot_part_create(PART_PARAM2,media,BT_PARA2_SIZE);
+    boot_part_create(PART_IMGPARA,media,IMG_PARA_SIZE);
+    boot_part_create(PART_ROMRUN,media,RAMRUN_SIZE);
+    media = boot_media_get("rom2");
+    boot_part_create(PART_IMG1,media,IMG1_SIZE);
+    boot_part_create(PART_IMG2,media,IMG2_SIZE);
+    media = boot_media_get("ram1");
+    boot_part_create(PART_CACHE,media,CACHE_SIZE);
+    boot_part_create(PART_SHARE,media,SHARE_SIZE);
+    media = boot_media_get("ram2");
+    boot_part_create(PART_RAMRUN,media,RAMRUN_SIZE);
+
+    boot_part_print_detail();
+    boot_part_print_status();
+    return W_ERR_OK;
+}
+
 
 void boot_jump_to_app(void)
 {

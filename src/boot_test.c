@@ -19,7 +19,6 @@
 #include "boot_test.h"
 #include "share_param.h"
 #include "boot_hw_if.h"
-#include "mem_driver.h"
 #include "program_mgr.h"
 
 #ifdef __cplusplus
@@ -50,43 +49,37 @@ w_uint8_t get_error(w_uint8_t err_type)
 }
 
 
-void destroy_code_space(part_s *code)
+void destroy_code_space(w_part_s *code)
 {
-    w_uint32_t i;
-    w_uint8_t *buff = get_block_buffer();
-    for(i = 0;i < BLOCK_SIZE;i ++)
-    {
-        buff[i] = 0xff;
-    }
-    write_block(code->memtype,code->memidx,code->addr,buff,1);
+    boot_part_erase(code);
 }
 
 void test_pro1_error(void)
 {
-    part_s *reg = part_get_inst_name("img1");
+    w_part_s *reg = boot_part_get(PART_IMG1);
     destroy_code_space(reg);
 }
 void test_probak_error(void)
 {
-    part_s *reg = part_get_inst_name("img2");
+    w_part_s *reg = boot_part_get(PART_IMG2);
     destroy_code_space(reg);
 }
 
 
 void test_run_error(void)
 {
-    part_s *reg = part_get_inst_name("romrun");
+    w_part_s *reg = boot_part_get(PART_ROMRUN);
     destroy_code_space(reg);
 }
 
 void test_upgrade(void)
 {
-    part_s *img;
+    w_part_s *img;
     boot_param_s *bp = (boot_param_s*)boot_param_instance();
 
-    img = part_get_inst_name("cache");
+    img = boot_part_get(PART_CACHE);
     wind_printf("begin to receive file data,please wait.\r\n");
-    img->datalen = boot_receive_img(img->addr,img->size);
+    img->datalen = boot_receive_img(img->base,img->size);
     if(img->datalen <= 0)
     {
         wind_error("receive img data failed.");
@@ -95,9 +88,9 @@ void test_upgrade(void)
     
     sp_init_share_param();
     g_upgrade_info.flag = 1;
-    g_upgrade_info.addr = img->addr;
+    g_upgrade_info.addr = img->base;
     g_upgrade_info.datalen = img->datalen;
-    g_upgrade_info.mem_type = img->memtype;
+    g_upgrade_info.mem_type = img->mtype;
     sp_set_upgrade_param(&g_upgrade_info);
     return;
 }
