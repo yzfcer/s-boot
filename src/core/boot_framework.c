@@ -23,7 +23,6 @@
 #include "program_mgr.h"
 #include "boot_hw_if.h"
 #include "boot_check.h"
-#include "phy_mem.h"
 #include "wind_string.h"
 #ifdef __cplusplus
 extern "C" {
@@ -176,7 +175,7 @@ static w_int32_t  boot_upgrade_check(void)
         return -1;
     }
     tmp = boot_part_get(PART_IMG1);
-    if(MEM_TYPE_ROM == tmp->mtype)
+    if(MEDIA_TYPE_ROM == tmp->mtype)
     {
         ret = flush_img_to_rom(&img);
     }
@@ -290,7 +289,7 @@ static w_int32_t boot_load_app(void)
         return -1;
     }
 	tmp = boot_part_get(PART_ROMRUN);
-    if(MEM_TYPE_ROM == tmp->mtype)
+    if(MEDIA_TYPE_ROM == tmp->mtype)
     {
         if(MEM_NORMAL == tmp->status)
         {
@@ -312,7 +311,7 @@ static w_int32_t boot_load_app(void)
         return -1;
     }
 
-    if(MEM_TYPE_ROM == regi->mtype)
+    if(MEDIA_TYPE_ROM == regi->mtype)
     {
         wind_notice("need not load App to a NORFlash ROM.");
         set_boot_status(BOOT_SET_APP_PARAM);

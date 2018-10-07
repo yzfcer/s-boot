@@ -62,16 +62,25 @@ w_int32_t wind_std_input(w_uint8_t *buff,w_int32_t len)
 	return len;
 }
 
-w_int32_t boot_receive_img(w_uint32_t addr,w_uint32_t maxlen)
+w_int32_t boot_receive_img(w_part_s *part)
 {
-    FILE *fil;
+    FILE *file;
     w_int32_t len;
-    fil = fopen("imgfile.none.img","rb");
-    if(!fil)
+    w_uint8_t *buff = get_common_buffer();
+    file = fopen("imgfile.none.img","rb");
+    if(!file)
         return -1;
-    len = fread((w_uint8_t*)addr,1,maxlen,fil);
-    fclose(fil);
-	return len;
+    boot_part_seek(part,0);
+    while(1)
+    {
+        len = fread((w_uint8_t*)buff,1,COMMBUF_SIZE,file);
+        if(len > 0)
+            boot_part_write(part,buff,len);
+        else
+            break;
+    }
+    fclose(file);
+	return part->datalen;
 }
 
 w_uint32_t boot_get_sys_ms(void)
@@ -90,7 +99,7 @@ w_err_t boot_medias_register(void)
     boot_media_register(&media_ram2);
     boot_media_register(&media_rom1);
     boot_media_register(&media_rom2);
-    boot_media_print();
+    //boot_media_print();
     return W_ERR_OK;
 }
 
@@ -98,24 +107,25 @@ w_err_t boot_parts_create(void)
 {
     w_media_s *media;
     media = boot_media_get("rom1");
+    boot_part_create(PART_BOOT,media,BOOT_SIZE);
     boot_part_create(PART_PARAM1,media,BT_PARA1_SIZE);
     boot_part_create(PART_PARAM2,media,BT_PARA2_SIZE);
     boot_part_create(PART_IMGPARA,media,IMG_PARA_SIZE);
     boot_part_create(PART_ROMRUN,media,RAMRUN_SIZE);
-
     
-    boot_part_create(PART_BOOT,media,BOOT_SIZE);
     media = boot_media_get("rom2");
     boot_part_create(PART_IMG1,media,IMG1_SIZE);
     boot_part_create(PART_IMG2,media,IMG2_SIZE);
+    
     media = boot_media_get("ram1");
     boot_part_create(PART_CACHE,media,CACHE_SIZE);
     boot_part_create(PART_SHARE,media,SHARE_SIZE);
+    
     media = boot_media_get("ram2");
     boot_part_create(PART_RAMRUN,media,RAMRUN_SIZE);
 
-    boot_part_print_detail();
-    boot_part_print_status();
+    //boot_part_print_detail();
+    //boot_part_print_status();
     return W_ERR_OK;
 }
 

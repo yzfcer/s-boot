@@ -17,7 +17,6 @@
 #include "boot_param.h"
 #include "boot_framework.h"
 #include "wind_debug.h"
-#include "phy_mem.h"
 
 #include "wind_crc32.h"
 #include "share_param.h"
@@ -74,7 +73,7 @@ w_int32_t get_menu_go_direction(void)
 
 static void download_img_to_rom(void)
 {
-    download_img_file(MEM_TYPE_ROM);    
+    download_img_file(MEDIA_TYPE_ROM);    
 }
 
 static void download_img_to_ram(void)
@@ -87,7 +86,7 @@ static void download_img_to_ram(void)
         wind_warn("img can not download to RAM,device NOT support.");
         return;
     }
-    ret = download_img_file(MEM_TYPE_RAM);
+    ret = download_img_file(MEDIA_TYPE_RAM);
     if(0 == ret)
     {
         g_go_ahead = 1;
@@ -136,11 +135,11 @@ static void set_debug_mode(void)
 }
 
 
-static void show_memmap(void)
+static void show_media_map(void)
 {
     boot_param_s *bp = (boot_param_s *)boot_param_instance();
     wind_printf("current memory map info:\r\n");
-    boot_part_print_detail();
+    boot_media_print();
 }
 
 static void lock_mcu(void)
@@ -219,7 +218,7 @@ static w_menu_tb_s g_menu_handleTB[] =
     {'1',0,0,"download img file to ROM",download_img_to_rom},
     {'2',0,0,"download img file to RAM",download_img_to_ram},
     {'3',0,0,"download file system",download_filesystem},
-    {'4',0,0,"show memory map",show_memmap},
+    {'4',0,0,"show media map",show_media_map},
     {'5',0,0,"show program status",show_program_status},
     {'b',2,2,"set debug mode",set_debug_mode},
     {'k',0,0,"lock MCU chip",lock_mcu},

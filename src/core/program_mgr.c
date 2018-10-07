@@ -24,7 +24,6 @@
 #include "boot_part.h"
 #include "boot_hw_if.h"
 #include "encrypt.h"
-#include "phy_mem.h"
 #include "wind_string.h"
 #ifdef __cplusplus
 extern "C" {
@@ -320,10 +319,10 @@ w_int32_t flush_img_file(w_int16_t type,w_part_s *img)
     w_int32_t ret;   
     switch(type)
     {
-        case MEM_TYPE_RAM:
+        case MEDIA_TYPE_RAM:
             ret = flush_img_to_ram(img);
             break;
-        case MEM_TYPE_ROM:
+        case MEDIA_TYPE_ROM:
             ret = flush_img_to_rom(img);
             break;
         default:
@@ -337,7 +336,7 @@ w_int32_t flush_img_file(w_int16_t type,w_part_s *img)
         (void)boot_param_from_rom();
         return ret;
     }
-    if(MEM_TYPE_ROM == type)
+    if(MEDIA_TYPE_ROM == type)
         (void)boot_param_flush();
     return ret;
 }
@@ -355,7 +354,7 @@ w_int32_t download_img_file(w_int16_t type)
     }
     img = boot_part_get(PART_CACHE);
     wind_printf("begin to receive file data,please wait.\r\n");
-    len = boot_receive_img(img->base,img->size);
+    len = boot_receive_img(img);
     if(len <= 0)
     {
         wind_error("receive img data failed.");
@@ -373,7 +372,7 @@ w_int32_t download_img_file(w_int16_t type)
     ret = flush_img_file(type,img);
     if(0 != ret)
     {
-        wind_warn("flush data to %s failed.",phymem_type(type));
+        wind_warn("flush data to %s failed.",img->name);
         return -1;
     }
     wind_notice("img flush OK.");

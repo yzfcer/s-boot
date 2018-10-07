@@ -1,7 +1,6 @@
-#include "phy_mem.h"
 #include "wind_debug.h"
 #include "boot_param.h"
-
+#if 0
 static w_int32_t pmcnt = 0;
 static phymem_s g_phymem[PHYMEM_COUNT];
 
@@ -27,10 +26,6 @@ static void set_phymem_count(w_int32_t count)
     pmcnt = count;
 }
 
-phymem_s *phymem_get_list(void)
-{
-    return get_phymem();
-}
 
 phymem_s *phymem_get_instance(w_int32_t idx)
 {
@@ -71,15 +66,23 @@ w_int32_t phymem_get_count(void)
 
 
 
+#if 0
+
+phymem_s *phymem_get_list(void)
+{
+    return get_phymem();
+}
+
 char * phymem_type(w_int16_t type)
 {
     switch(type)
     {
-        case MEM_TYPE_RAM:return "RAM";
-        case MEM_TYPE_ROM:return "ROM";
+        case MEDIA_TYPE_RAM:return "RAM";
+        case MEDIA_TYPE_ROM:return "ROM";
         default:return "none";
     }
 }
+
 void phymem_print_detail(void)
 {
 #define PHY_FORMAT "%-8d%-8s0x%-12x0x%-12X\r\n" 
@@ -98,5 +101,6 @@ void phymem_print_detail(void)
         }
         wind_printf("------------------------------------------\r\n");
         wind_printf("\r\n");
-}
+#endif
+#endif
 

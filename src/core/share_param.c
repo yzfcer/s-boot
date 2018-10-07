@@ -17,6 +17,7 @@
 #include "boot_port.h"
 #include "wind_debug.h"
 #include "wind_crc32.h"
+#include "wind_string.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -162,7 +163,6 @@ w_err_t sp_get_sysparam_param(sysparam_part_s *sysparam)
 
 w_err_t sp_init_share_param(void)
 {
-    w_int32_t i;
     share_param_s *sp = (share_param_s *)get_common_buffer();
 
     wind_memset((void *)sp,0,sizeof(share_param_s));

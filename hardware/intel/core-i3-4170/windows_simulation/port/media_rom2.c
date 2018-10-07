@@ -89,7 +89,7 @@ static w_media_ops_s ops =
 w_media_s media_rom2 = 
 {
     "rom2",
-    IRAM,
+    MEDIA_TYPE_RAM,
     0,
     ROM2_SIZE,
     ROM2_BLKSIZE,

@@ -59,7 +59,7 @@ static w_media_ops_s ops =
 w_media_s media_ram2 = 
 {
     "ram2",
-    IRAM,
+    MEDIA_TYPE_RAM,
     0,
     RAM2_SIZE,
     RAM2_BLKSIZE,

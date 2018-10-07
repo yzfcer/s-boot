@@ -15,7 +15,6 @@
 #define BOOT_PARAM_H__
 #include "boot_config.h"
 #include "wind_type.h"
-#include "phy_mem.h"
 #include "boot_part.h"
 #ifdef __cplusplus
 extern "C" {

@@ -7,7 +7,6 @@
 #include "wind_crc32.h"
 #include "wind_string.h"
 #include "wind_debug.h"
-#include "phy_mem.h"
 #include "boot_param.h"
 static w_part_s g_part[PART_COUNT];
 static w_uint8_t commbuffer[COMMBUF_SIZE];
@@ -36,7 +35,7 @@ w_err_t boot_part_init(void)
     return W_ERR_OK;
 }
 
-w_bool_t  boot_part_create(char *name,w_media_s *md,w_uint32_t size)
+w_bool_t  boot_part_create(const char *name,w_media_s *md,w_uint32_t size)
 {
     w_part_s *part;
     wind_notice("create part:%s",name);
@@ -260,9 +259,9 @@ w_int32_t boot_part_copy_data(w_part_s *src,w_part_s *dest)
     }
     wind_notice("copy data from \"%s\" to \"%s\" lenth %d.",
                 src->name,dest->name,src->datalen);
-    wind_debug("source type %s,addr 0x%x,lenth %d dest type,%s,addr 0x%x,lenth %d.",
-                phymem_type(src->mtype),src->base,src->datalen,
-                phymem_type(dest->mtype),dest->base,dest->size);
+    wind_debug("source part %s,addr 0x%x,lenth %d dest part,%s,addr 0x%x,lenth %d.",
+                src->name,src->base,src->datalen,
+                src->name,dest->base,dest->size);
     src->offset = 0;
     dest->offset = 0;
     blocks = (src->datalen + COMMBUF_SIZE - 1) / COMMBUF_SIZE;

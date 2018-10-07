@@ -14,6 +14,7 @@
 #ifndef BOOT_PORT_H__
 #define BOOT_PORT_H__
 #include "wind_type.h"
+#include "boot_part.h"
 #include <stdio.h>
 
 #define CPU_NAME "Intel core i3-4170"
@@ -26,7 +27,7 @@ w_int32_t device_deinit(void);
 void      wind_std_port_init(void);
 w_int32_t wind_std_output(w_uint8_t *buf,w_int32_t len);
 w_int32_t wind_std_input(w_uint8_t *buf,w_int32_t len);
-w_int32_t boot_receive_img(w_uint32_t addr,w_uint32_t maxlen);
+w_int32_t boot_receive_img(w_part_s *part);
 
 w_uint32_t boot_get_sys_ms(void);
 void boot_jump_to_app(void);

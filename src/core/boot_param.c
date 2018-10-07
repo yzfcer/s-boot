@@ -17,7 +17,6 @@
 #include "wind_debug.h"
 #include "wind_crc32.h"
 #include "boot_hw_if.h"
-#include "phy_mem.h"
 #include "boot_part.h"
 #include "wind_string.h"
 #ifdef __cplusplus
@@ -76,7 +75,7 @@ void boot_param_reset(void)
     {
         boot_media_init();
         boot_part_init();
-        bp->part_cnt = boot_part_get_count();
+        bp->part_cnt = (w_uint8_t)boot_part_get_count();
     }
     wind_memcpy(bp->part,boot_part_get_list(),PART_COUNT*sizeof(w_part_s));
     wind_notice("init boot param OK.");
@@ -130,7 +129,7 @@ w_int32_t boot_param_read(void)
     {
         for(j = 0;j < 3;j ++)
         {
-            boot_part_seek(part,0);
+            boot_part_seek(part[i],0);
             len = boot_part_read(part[i],buff,COMMBUF_SIZE);
             if(len >= sizeof(boot_param_s))
                 break;
@@ -171,7 +170,7 @@ w_int32_t boot_param_flush(void)
     {
         for(j = 0;j < 3;j ++)
         {
-            boot_part_seek(part,0);
+            boot_part_seek(part[i],0);
             len = boot_part_write(part[i],buff,COMMBUF_SIZE);
             if(len >=  sizeof(boot_param_s))
                 break;

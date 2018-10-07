@@ -21,8 +21,8 @@ extern "C" {
 
 typedef enum 
 {
-    IRAM = 0,
-    IROM = 1,
+    MEDIA_TYPE_RAM = 0,
+    MEDIA_TYPE_ROM = 1,
 }w_media_type_e;
 
 typedef struct __w_media_s w_media_s;

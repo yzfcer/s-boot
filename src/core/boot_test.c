@@ -79,7 +79,7 @@ void test_upgrade(void)
 
     img = boot_part_get(PART_CACHE);
     wind_printf("begin to receive file data,please wait.\r\n");
-    img->datalen = boot_receive_img(img->base,img->size);
+    img->datalen = boot_receive_img(img);
     if(img->datalen <= 0)
     {
         wind_error("receive img data failed.");
