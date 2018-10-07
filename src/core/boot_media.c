@@ -90,10 +90,11 @@ void boot_media_print(void)
     wind_print_space(8);
     for(i = 0;i < MEDIA_COUNT;i ++)
     {
+        md = g_media[i];
         if(md != W_NULL)
         {
-            wind_printf("%-12s %-8s 0x%-8x 0x%-8x 0x%-8x 0x%-10x\r\n",
-                md->name,get_mtype_name(md->mtype),md->base,md->size,md->blksize,md->offset);
+            wind_printf("%-12s %-8s 0x%-8x 0x%-8x 0x%-8x %-8d\r\n",
+                md->name,get_mtype_name(md->mtype),md->base,md->size,md->offset,md->blksize);
         }
     }
     wind_print_space(8);

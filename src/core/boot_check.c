@@ -145,7 +145,7 @@ w_int32_t check_rom_programs(void)
     w_bool_t is_ok;
     boot_param_s *bp = (boot_param_s *)boot_param_instance();
     
-    code[idx++] = boot_part_get(PART_IMG1);;
+    code[idx++] = boot_part_get(PART_IMG1);
     code[idx++] = boot_part_get(PART_IMG2);
     code[idx++] = boot_part_get(PART_ROMRUN);
     wind_notice("begin to check programs...");
