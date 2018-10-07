@@ -85,9 +85,9 @@ void boot_media_print(void)
     w_int32_t i;
     w_media_s *md = g_media[0];
     wind_printf("media infomation:\r\n");
-    wind_print_space(7);
+    wind_print_space(8);
     wind_printf("%-12s %-8s %-10s %-10s %-10s %-8s\r\n","name","type","base","size","used","blksize");
-    wind_print_space(7);
+    wind_print_space(8);
     for(i = 0;i < MEDIA_COUNT;i ++)
     {
         if(md != W_NULL)
@@ -96,7 +96,7 @@ void boot_media_print(void)
                 md->name,get_mtype_name(md->mtype),md->base,md->size,md->blksize,md->offset);
         }
     }
-    wind_print_space(7);
+    wind_print_space(8);
 }
 
 

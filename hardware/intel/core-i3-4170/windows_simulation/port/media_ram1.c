@@ -18,12 +18,13 @@
 #define RAM1_BASE 0x20000000
 #define RAM1_SIZE 0x400000
 #define RAM1_BLKSIZE 512
-w_uint8_t g_ram1[RAM1_SIZE];
+static w_uint8_t g_ram1[RAM1_SIZE];
 
 
 static w_err_t ram1_init(w_media_s *media)
 {
     wind_memset(g_ram1,0,RAM1_SIZE);
+    media->offset = 0;
     return W_ERR_OK;
 }
 static w_int32_t ram1_read_blk(w_media_s *media,w_uint32_t addr,w_uint8_t *data,w_int32_t blkcnt)

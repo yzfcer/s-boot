@@ -18,7 +18,7 @@
 //硬件RAM数量和基地址和空间大小定义
 #define ROM2_SIZE 0x400000
 #define ROM2_BLKSIZE 512
-w_uint8_t g_rom2[ROM2_SIZE];
+static w_uint8_t g_rom2[ROM2_SIZE];
 
 static void flush_rom_file(void)
 {
@@ -41,13 +41,14 @@ static w_err_t rom2_init(w_media_s *media)
 {
     
     FILE *file;
-    file = fopen("rom1.bin","rb");
+    file = fopen("rom2.bin","rb");
     if(file == W_NULL)
     {
-        file = fopen("rom1.bin","rb");
+        file = fopen("rom2.bin","wb+");
         WIND_ASSERT_RETURN(file != 0,W_ERR_FAIL);
     }
     fclose(file);
+    media->offset = 0;
     wind_memset(g_rom2,0,ROM2_BLKSIZE);
     return W_ERR_OK;
 }

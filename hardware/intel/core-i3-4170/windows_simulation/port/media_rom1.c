@@ -18,7 +18,7 @@
 //硬件RAM数量和基地址和空间大小定义
 #define ROM1_SIZE 0x400000
 #define ROM1_BLKSIZE 512
-w_uint8_t g_rom1[ROM1_SIZE];
+static w_uint8_t g_rom1[ROM1_SIZE];
 
 static void flush_rom_file(void)
 {
@@ -46,6 +46,7 @@ static w_err_t rom1_init(w_media_s *media)
         WIND_ASSERT_RETURN(file != 0,W_ERR_FAIL);
     }
     fclose(file);
+    media->offset = 0;
     wind_memset(g_rom1,0,ROM1_SIZE);
     return W_ERR_OK;
 }

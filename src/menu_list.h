@@ -29,9 +29,9 @@ typedef struct
     char prio_bak;//菜单权限的备份
     const char *menu_item;//菜单项
     Menu_handle handle;//处理的句柄
-}menu_handle_TB;
+}w_menu_tb_s;
 
-extern menu_handle_TB g_menu_handleTB[];
+extern w_menu_tb_s g_menu_handleTB[];
 void run_menu(void);
 void print32_t_menu_list(void);
 w_int32_t get_menu_go_direction(void);

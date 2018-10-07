@@ -24,8 +24,6 @@ w_int32_t read_char_blocking(char *ch);
 w_int32_t read_line_blockig(char *buff,w_int32_t len);
 w_int32_t wait_for_key_input(w_int32_t to_sec,char *ch,w_int32_t print32_t_flag);
 
-w_uint8_t *get_common_buffer(void);
-
 #ifdef __cplusplus
 }
 #endif

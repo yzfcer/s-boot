@@ -87,9 +87,11 @@ static share_param_s *get_share_data(void)
     w_int32_t len;
     share_param_s * sp;
     w_uint8_t *buff = get_common_buffer();
+    
     w_part_s *part = boot_part_get(PART_SHARE);
-    part->offset = 0;
-    len = boot_part_read(part,buff,COMMBUF_SIZE);
+    WIND_ASSERT_RETURN(COMMBUF_SIZE >= part->size,W_NULL);
+    boot_part_seek(part,0);
+    len = boot_part_read(part,buff,part->size);
     WIND_ASSERT_RETURN(len > 0,W_NULL);
     sp =(share_param_s *)buff;
     if(check_share_param(sp) != 0)
@@ -102,6 +104,7 @@ static w_err_t flush_share_data(share_param_s *sp)
     w_int32_t len;
     w_part_s *part = boot_part_get(PART_SHARE);
     update_share_crc();
+    boot_part_seek(part,0);
     len = boot_part_write(part,(w_uint8_t*)sp,COMMBUF_SIZE);
     WIND_ASSERT_RETURN(len > 0,W_ERR_FAIL);
     return W_ERR_OK;
@@ -160,14 +163,9 @@ w_err_t sp_get_sysparam_param(sysparam_part_s *sysparam)
 w_err_t sp_init_share_param(void)
 {
     w_int32_t i;
-    char *mem;
-    share_param_s *sp = get_share_data();
-    WIND_ASSERT_RETURN(sp != W_NULL,W_ERR_FAIL);
-    mem = (char*)sp;
-    for(i = 0;i < sizeof(share_param_s);i ++)
-    {
-        mem[i] = 0;
-    }
+    share_param_s *sp = (share_param_s *)get_common_buffer();
+
+    wind_memset((void *)sp,0,sizeof(share_param_s));
     sp->magic = SHARE_PARAM_MAGIC;
     sp->lenth = sizeof(share_param_s);
     sp->share_version = SHARE_VERSION;

@@ -26,7 +26,7 @@ extern "C" {
 #define BT_BUF_SIZE 1024
 
 boot_param_s *g_pbp = W_NULL;
-static w_uint8_t g_bootparam[BT_BUF_SIZE];
+static boot_param_s g_bootparam;
 
 
 static void upate_bootparam_crc(w_uint8_t *prmbuf)
@@ -49,8 +49,8 @@ boot_param_s *boot_param_from_rom(void)
     if(0 != ret)
     {
         wind_warn("get boot params failed.");
-        g_pbp = W_NULL;
-        return W_NULL;
+        g_pbp = (boot_param_s *)W_NULL;
+        return (boot_param_s *)W_NULL;
     }
     g_pbp = (boot_param_s *)&g_bootparam;
     return (boot_param_s*)g_pbp;
@@ -59,9 +59,9 @@ boot_param_s *boot_param_from_rom(void)
 
 void boot_param_reset(void)
 {   
-    boot_param_s *bp = (boot_param_s*)g_bootparam;
+    boot_param_s *bp = (boot_param_s*)&g_bootparam;
     
-    wind_memset(g_bootparam,0,BT_BUF_SIZE);
+    wind_memset(&g_bootparam,0,BT_BUF_SIZE);
     bp->magic = BOOT_PARAM_MAGIC;
     bp->lenth = sizeof(boot_param_s);
 
@@ -74,7 +74,8 @@ void boot_param_reset(void)
     
     if(boot_part_get_count() == 0)
     {
-        boot_parts_create();
+        boot_media_init();
+        boot_part_init();
         bp->part_cnt = boot_part_get_count();
     }
     wind_memcpy(bp->part,boot_part_get_list(),PART_COUNT*sizeof(w_part_s));
@@ -112,11 +113,7 @@ w_int32_t boot_param_check_valid(w_uint8_t *prmbuf)
 
 void boot_param_clear_buffer(void)
 {
-    w_int32_t i;
-    for(i = 0;i < sizeof(g_bootparam);i ++)
-    {
-        g_bootparam[i] = 0;
-    }
+    wind_memset((void*)&g_bootparam,0,sizeof(boot_param_s));
     g_pbp = W_NULL;
 }
 
@@ -125,22 +122,23 @@ w_int32_t boot_param_read(void)
     w_uint32_t err = 0;
     w_int32_t i,j,len,ret;
     w_part_s *part[2];
-    
+    w_uint8_t *buff;
     part[0] = boot_part_get(PART_PARAM1);
     part[1] = boot_part_get(PART_PARAM2);
-    
+    buff = get_common_buffer();
     for(i = 0;i < 2;i ++)
     {
         for(j = 0;j < 3;j ++)
         {
-            part[i]->offset = 0;
-            len = boot_part_read(part[i],g_bootparam,sizeof(g_bootparam));
-            if(len >= sizeof(g_bootparam))
+            boot_part_seek(part,0);
+            len = boot_part_read(part[i],buff,COMMBUF_SIZE);
+            if(len >= sizeof(boot_param_s))
                 break;
         }
-        ret = boot_param_check_valid(g_bootparam);
+        ret = boot_param_check_valid(buff);
         if(0 == ret)
         {
+            wind_memcpy(&g_bootparam,buff,sizeof(boot_param_s));
             break;
         }
         else
@@ -162,17 +160,20 @@ w_int32_t boot_param_flush(void)
 {
     w_int32_t i,j,len,err = 0;
     w_part_s *part[2];
-    boot_param_s *bp = (boot_param_s *)g_bootparam;
+    w_uint8_t *buff;
     part[0] = boot_part_get(PART_PARAM1);
     part[1] = boot_part_get(PART_PARAM2);
-    
-    upate_bootparam_crc((w_uint8_t*)bp);
+    buff = get_common_buffer();
+    wind_memset(buff,0,COMMBUF_SIZE);
+    wind_memcpy(buff,&g_bootparam,sizeof(boot_param_s));
+    upate_bootparam_crc(buff);
     for(i = 0;i < 2;i ++)
     {
         for(j = 0;j < 3;j ++)
         {
-            len = boot_part_write(part[i],g_bootparam,sizeof(g_bootparam));
-            if(len >=  sizeof(g_bootparam))
+            boot_part_seek(part,0);
+            len = boot_part_write(part[i],buff,COMMBUF_SIZE);
+            if(len >=  sizeof(boot_param_s))
                 break;
         }
         if(j >= 3)

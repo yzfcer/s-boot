@@ -98,11 +98,13 @@ w_err_t boot_parts_create(void)
 {
     w_media_s *media;
     media = boot_media_get("rom1");
-    boot_part_create(PART_BOOT,media,BOOT_SIZE);
     boot_part_create(PART_PARAM1,media,BT_PARA1_SIZE);
     boot_part_create(PART_PARAM2,media,BT_PARA2_SIZE);
     boot_part_create(PART_IMGPARA,media,IMG_PARA_SIZE);
     boot_part_create(PART_ROMRUN,media,RAMRUN_SIZE);
+
+    
+    boot_part_create(PART_BOOT,media,BOOT_SIZE);
     media = boot_media_get("rom2");
     boot_part_create(PART_IMG1,media,IMG1_SIZE);
     boot_part_create(PART_IMG2,media,IMG2_SIZE);

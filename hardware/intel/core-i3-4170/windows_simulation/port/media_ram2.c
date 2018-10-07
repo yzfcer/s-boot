@@ -17,11 +17,12 @@
 
 #define RAM2_SIZE 0x100000
 #define RAM2_BLKSIZE 512
-w_uint8_t g_ram2[RAM2_SIZE];
+static w_uint8_t g_ram2[RAM2_SIZE];
 
 static w_err_t ram2_init(w_media_s *media)
 {
     wind_memset(g_ram2,0,RAM2_SIZE);
+    media->offset = 0;
     return W_ERR_OK;
 }
 static w_int32_t ram2_read_blk(w_media_s *media,w_uint32_t addr,w_uint8_t *data,w_int32_t blkcnt)

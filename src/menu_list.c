@@ -214,7 +214,7 @@ static void exit_and_save(void)
 }
 
 
-static menu_handle_TB g_menu_handleTB[] = 
+static w_menu_tb_s g_menu_handleTB[] = 
 {
     {'1',0,0,"download img file to ROM",download_img_to_rom},
     {'2',0,0,"download img file to RAM",download_img_to_ram},
@@ -239,7 +239,7 @@ static void exit_menu(void)
     exit_menu_flag = 1;
     if(super_prio_flag)
     {
-        for(i = 0;i < sizeof(g_menu_handleTB)/sizeof(menu_handle_TB);i ++)
+        for(i = 0;i < sizeof(g_menu_handleTB)/sizeof(w_menu_tb_s);i ++)
         {
             g_menu_handleTB[i].prio = g_menu_handleTB[i].prio_bak;
         }
@@ -250,7 +250,7 @@ void print32_t_menu_list(void)
 {
     w_int32_t i;
     wind_printf("\r\n\r\nmenu list:\r\n");
-    for(i = 0;i < sizeof(g_menu_handleTB)/sizeof(menu_handle_TB);i ++)
+    for(i = 0;i < sizeof(g_menu_handleTB)/sizeof(w_menu_tb_s);i ++)
     {
         if(!g_menu_handleTB[i].prio)
         {
@@ -282,7 +282,7 @@ w_int32_t open_super_prio(void)
         return -1;
     }
     
-    for(i = 0;i < sizeof(g_menu_handleTB)/sizeof(menu_handle_TB);i ++)
+    for(i = 0;i < sizeof(g_menu_handleTB)/sizeof(w_menu_tb_s);i ++)
     {
         if(g_menu_handleTB[i].prio <= prio)
             g_menu_handleTB[i].prio = 0;
@@ -306,7 +306,7 @@ void run_menu(void)
             exit_menu();
             return;
         }
-        for(i = 0;i < sizeof(g_menu_handleTB)/sizeof(menu_handle_TB);i ++)
+        for(i = 0;i < sizeof(g_menu_handleTB)/sizeof(w_menu_tb_s);i ++)
         {
             if(ch == g_menu_handleTB[i].key && 0 == g_menu_handleTB[i].prio)
             {
@@ -314,7 +314,7 @@ void run_menu(void)
                 break;
             }
         }
-        if(i >= sizeof(g_menu_handleTB)/sizeof(menu_handle_TB))
+        if(i >= sizeof(g_menu_handleTB)/sizeof(w_menu_tb_s))
         {
             if(ch == '0')
             {
