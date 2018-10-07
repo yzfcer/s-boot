@@ -380,7 +380,7 @@ static w_int32_t boot_run_system(void)
 
 boot_handle_TB g_status_handTB[] = 
 {
-    {BOOT_INIT,"init",boot_init},
+    {BOOT_INIT,"boot init",boot_init},
     {BOOT_FIRST_CHECK,"first_check",boot_first_check},   
     {BOOT_APP_DEBUG_CHECK,"app_debug_check",boot_app_debug_check},
 
@@ -423,12 +423,9 @@ void boot_loop(void)
         {
             if(s_boot_status == g_status_handTB[i].status)
             {
-                wind_debug("step[%d] %s.",g_status_handTB[i].status+1,g_status_handTB[i].stepname);
                 ret = g_status_handTB[i].handle();
-                if(0 != ret)
-                {
-                    wind_printf("step[%d] %s captures some errors.\r\n",i + 1,g_status_handTB[i].stepname);
-                }
+                wind_printf("[step%-2d] %-48s [%s]\r\n",g_status_handTB[i].status+1,
+                            g_status_handTB[i].stepname,ret?"ERROR":"OK");
                 break;
             }
         }

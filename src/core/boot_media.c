@@ -38,6 +38,7 @@ w_err_t boot_media_init(void)
 w_err_t boot_media_register(w_media_s *media)
 {
     w_int32_t i;
+    wind_notice("register media:%s",media->name);
     WIND_ASSERT_RETURN(media != W_NULL,W_ERR_PTR_NULL);
     for(i = 0;i < MEDIA_COUNT;i ++)
     {

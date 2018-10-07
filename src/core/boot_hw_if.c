@@ -44,7 +44,6 @@ w_int32_t wait_for_key_input(w_int32_t to_sec,char *ch,w_int32_t print_flag)
     while(1)
     {
         feed_watchdog();
-        //ret = wind_std_input(ch,1);
         if(wind_std_input(ch,1) > 0)
         {
             ret = 0;

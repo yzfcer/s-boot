@@ -35,6 +35,11 @@ static w_uint32_t LE_TO_BE32(w_uint32_t x)
     return (((x)&0xff)<<24) + (((x>>8)&0xff)<<16) + (((x>>16)&0xff)<<8) + (((x>>24)&0xff));
 }
 
+static w_uint32_t endian_test(void)
+{
+    w_uint8_t test[2] = {0x12,0x34};
+    w_uint16_t *data = (w_uint16_t*)test;
+}
 
 
 static char *encty_type[] = 

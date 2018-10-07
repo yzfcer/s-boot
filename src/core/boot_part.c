@@ -145,8 +145,8 @@ w_int32_t boot_part_write(w_part_s *part,w_uint8_t *data,w_uint32_t datalen)
         datalen = part->blksize;
     blkcnt = datalen / part->blksize;
     blkcnt = part->media->ops->write_blk(part->media,part->base + part->offset,data,blkcnt);
+    WIND_ASSERT_RETURN(blkcnt > 0,W_ERR_FAIL);
     size = blkcnt * part->blksize;
-    WIND_ASSERT_RETURN(size == datalen,W_ERR_FAIL);
     part->offset += size;
     part->datalen = part->offset;
     return size;
