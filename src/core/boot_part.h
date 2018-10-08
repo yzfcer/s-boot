@@ -30,8 +30,9 @@ typedef enum
 //空间分区表
 typedef struct 
 {
-    const char *name;
-    w_media_s *media;
+    char name[PART_NAME_LEN];
+    //w_media_s *media;
+    char media_name[MEDIA_NAME_LEN];
     w_uint8_t mtype;
     w_uint8_t used;
     w_uint16_t status;
@@ -46,7 +47,6 @@ w_uint8_t *get_common_buffer(void);
 
 w_err_t boot_part_init(void);
 w_bool_t  boot_part_create(const char *name,w_media_s *md,w_uint32_t size);
-//w_err_t boot_part_update_from_param(w_part_s *part);
 w_part_s *boot_part_get(const char *name);
 w_err_t boot_part_seek(w_part_s *part,w_int32_t offset);
 w_err_t boot_part_calc_crc(w_part_s *part);

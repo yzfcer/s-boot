@@ -21,7 +21,7 @@ static w_part_s *get_null_part(void)
     w_int32_t i;
     for(i = 0;i < PART_COUNT;i ++)
     {
-        if(g_part[i].media == NULL)
+        if(!g_part[i].used)
             return &g_part[i];
     }
     return NULL;
@@ -40,13 +40,14 @@ w_bool_t  boot_part_create(const char *name,w_media_s *md,w_uint32_t size)
     w_part_s *part;
     wind_notice("create part:%s",name);
     WIND_ASSERT_RETURN(name != W_NULL,B_FALSE);
+    WIND_ASSERT_RETURN(wind_strlen(name) < PART_NAME_LEN,B_FALSE);
     WIND_ASSERT_RETURN(md != W_NULL,B_FALSE);
     WIND_ASSERT_RETURN(size < md->size,B_FALSE);
     WIND_ASSERT_RETURN(size + md->offset <= md->size,B_FALSE);
     part = get_null_part();
     WIND_ASSERT_RETURN(part != W_NULL,B_FALSE);
-    part->name = name;
-    part->media = md;
+    wind_strcpy(part->name,name);
+    wind_strcpy(part->media_name,md->name);
     part->mtype = md->mtype;
     part->used = 1;
     part->base = md->offset;
@@ -59,24 +60,6 @@ w_bool_t  boot_part_create(const char *name,w_media_s *md,w_uint32_t size)
     md->offset += size;
     return B_TRUE;
 }
-
-#if 0
-w_err_t boot_part_update_from_param(w_part_s *part)
-{
-    w_int32_t i;
-    WIND_ASSERT_RETURN(part != W_NULL,W_ERR_PTR_NULL);
-    for(i = 0;i < PART_COUNT;i ++)
-    {
-        if(g_part[i].used)
-        {
-            g_part[i].status = part[i].status;
-            g_part[i].datalen = part[i].datalen;
-            g_part[i].crc = part[i].crc;
-        }
-    }
-    return W_ERR_OK;
-}
-#endif
 
 
 w_part_s *boot_part_get(const char *name)
@@ -130,19 +113,19 @@ w_int32_t boot_part_read(w_part_s *part,w_uint8_t *data,w_uint32_t datalen)
 {
     w_uint32_t blkcnt;
     w_uint32_t size;
+    w_media_s *media;
     WIND_ASSERT_RETURN(part != W_NULL,W_ERR_PTR_NULL);
     WIND_ASSERT_RETURN(data != W_NULL,W_ERR_PTR_NULL);
     WIND_ASSERT_RETURN(datalen >= part->blksize,W_ERR_INVALID);
-    //WIND_ASSERT_RETURN(datalen <= part->size,W_ERR_INVALID);
-    //WIND_ASSERT_RETURN(datalen + part->datalen < part->size,W_ERR_INVALID);
     if(datalen > part->size)
         datalen = part->size;
     if(datalen + part->offset > part->size)
         datalen = part->size - part->offset;
     WIND_ASSERT_RETURN(datalen > 0,0);
     WIND_ASSERT_RETURN(datalen % part->blksize == 0,W_ERR_INVALID);
+    media = boot_media_get(part->media_name);
     blkcnt = datalen / part->blksize;
-    blkcnt = part->media->ops->read_blk(part->media,part->base + part->offset,data,blkcnt);
+    blkcnt = media->ops->read_blk(media,part->base + part->offset,data,blkcnt);
     WIND_ASSERT_RETURN(blkcnt > 0,W_ERR_FAIL);
     size = blkcnt * part->blksize;
     part->offset += size;
@@ -153,6 +136,7 @@ w_int32_t boot_part_write(w_part_s *part,w_uint8_t *data,w_uint32_t datalen)
 {
     w_uint32_t blkcnt;
     w_uint32_t size;
+    w_media_s *media;
     WIND_ASSERT_RETURN(part != W_NULL,W_ERR_PTR_NULL);
     WIND_ASSERT_RETURN(data != W_NULL,W_ERR_PTR_NULL);
     if(datalen > part->size)
@@ -162,8 +146,9 @@ w_int32_t boot_part_write(w_part_s *part,w_uint8_t *data,w_uint32_t datalen)
     WIND_ASSERT_RETURN(datalen > 0,0);
     if(datalen < part->blksize)
         datalen = part->blksize;
+    media = boot_media_get(part->media_name);
     blkcnt = datalen / part->blksize;
-    blkcnt = part->media->ops->write_blk(part->media,part->base + part->offset,data,blkcnt);
+    blkcnt = media->ops->write_blk(media,part->base + part->offset,data,blkcnt);
     WIND_ASSERT_RETURN(blkcnt > 0,W_ERR_FAIL);
     size = blkcnt * part->blksize;
     part->offset += size;
@@ -174,11 +159,13 @@ w_int32_t boot_part_write(w_part_s *part,w_uint8_t *data,w_uint32_t datalen)
 w_err_t boot_part_erase(w_part_s *part)
 {
     w_uint32_t blkcnt;
+    w_media_s *media;
     WIND_ASSERT_RETURN(part != NULL,W_ERR_PTR_NULL);
     WIND_ASSERT_RETURN(part->size > 0,W_ERR_INVALID);
     WIND_ASSERT_RETURN(part->blksize > 0,W_ERR_INVALID);
+    media = boot_media_get(part->media_name);
     blkcnt = part->size / part->blksize;
-    blkcnt = part->media->ops->erase_blk(part->media,part->base,blkcnt);
+    blkcnt = media->ops->erase_blk(media,part->base,blkcnt);
     WIND_ASSERT_RETURN(blkcnt > 0,W_ERR_FAIL);
     return W_ERR_OK;
 }
@@ -186,7 +173,7 @@ w_err_t boot_part_erase(w_part_s *part)
 void boot_part_print_status(void)
 {
 #define PART_FORMAT1 "%-15s%-8s0x%-10x0x%-9x0x%-9x%-9s%4d%%\r\n" 
-#define REGION_PARAM1(reg) (reg).name,(reg).media->name,(reg).base,(reg).size,\
+#define REGION_PARAM1(reg) (reg).name,(reg).media_name,(reg).base,(reg).size,\
                 (reg).datalen,(reg).name,(reg).size?((reg).datalen*100)/(reg).size:0
     w_int32_t i;
     w_int32_t count = boot_part_get_count();
@@ -209,7 +196,7 @@ w_int32_t boot_part_get_count(void)
     w_int32_t i;
     for(i = 0;i < PART_COUNT;i ++)
     {
-        if(g_part[i].media == NULL)
+        if(!g_part[i].used)
             return i;
     }
     return 0;
@@ -224,7 +211,7 @@ w_part_s *boot_part_get_list(void)
 void boot_part_print_detail(void)
 {
 #define PART_FORMAT "%-12s%-8s0x%-12x0x%-12x\r\n" 
-#define PART_PARAM(pt) (pt).name,(pt).media->name,(pt).base,(pt).size,(pt).name
+#define PART_PARAM(pt) (pt).name,(pt).media_name,(pt).base,(pt).size,(pt).name
     w_int32_t i,count;
     w_part_s *pt = boot_part_get_list();
     wind_printf("memory pt details:\r\n");
@@ -243,8 +230,8 @@ void boot_part_print_detail(void)
 
 void boot_part_copy_info(w_part_s *src,w_part_s *dest)
 {
-    dest->name = src->name;
-    dest->media = src->media;
+    wind_strcpy(dest->name,src->name);
+    wind_strcpy(dest->media_name,src->media_name);
     dest->mtype = src->mtype;
     dest->used = src->used;
     dest->status = src->status;
@@ -332,7 +319,7 @@ w_bool_t boot_part_equal(w_part_s *src,w_part_s *dest)
 {
     if(src->mtype != dest->mtype)
         return B_FALSE;
-    if(src->media != dest->media)
+    if(wind_strcmp(src->media_name,dest->media_name))
         return B_FALSE;
     if(src->base != dest->base)
         return B_FALSE;

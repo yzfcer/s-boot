@@ -181,7 +181,6 @@ static void do_clear_flash_data(w_uint8_t unlock)
     clean_program();
     boot_param_reset();
     (void)boot_param_flush();
-    boot_param_clear_buffer();
     if(unlock)
         set_chip_lock(0);
 }

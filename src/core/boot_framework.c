@@ -50,9 +50,9 @@ void print_boot_info(void)
 static w_int32_t boot_init(void)
 {
     print_boot_info();
+    boot_param_init();
     boot_media_init();
     boot_part_init();
-    boot_param_clear_buffer();
     go_to_next_step();
     wind_notice("bootloader init OK.");
     return 0;
@@ -155,7 +155,7 @@ static w_int32_t  boot_upgrade_check(void)
     wind_notice("handling upgrade event,please wait...");
     tmp = boot_part_get(PART_CACHE);
     
-	img.name = tmp->name;
+	wind_strcpy(img.name,tmp->name);
     img.size = tmp->size;
     img.base = g_upgrade_info.addr;
     img.datalen = g_upgrade_info.datalen;

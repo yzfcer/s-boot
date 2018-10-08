@@ -45,11 +45,9 @@ typedef struct
 
 boot_param_s *boot_param_get(void);
 boot_param_s *boot_param_from_rom(void);
-
+void      boot_param_init(void);
 void      boot_param_reset(void);
 w_err_t   boot_param_check_valid(w_uint8_t *prmbuf);
-w_int32_t boot_param_check_debug_mode(void);
-void      boot_param_clear_buffer(void);
 w_int32_t boot_param_read(void);
 w_int32_t boot_param_flush(void);
 

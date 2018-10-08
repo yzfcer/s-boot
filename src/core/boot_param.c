@@ -24,7 +24,6 @@ extern "C" {
 #endif
 #define BT_BUF_SIZE 1024
 
-boot_param_s *g_pbp = W_NULL;
 static boot_param_s g_bootparam;
 
 
@@ -35,6 +34,12 @@ static void upate_bootparam_crc(w_uint8_t *buff)
     crc = (w_uint32_t*)&buff[index];
     *crc = wind_crc32(buff,sizeof(boot_param_s),0xffffffff);
 }
+
+void  boot_param_init(void)
+{
+    wind_memset(&g_bootparam,0,sizeof(boot_param_s));
+}
+
 
 boot_param_s *boot_param_get(void)
 {
@@ -59,7 +64,7 @@ boot_param_s *boot_param_from_rom(void)
 void boot_param_reset(void)
 {   
     boot_param_s *bp = (boot_param_s*)&g_bootparam;
-    
+    wind_notice("reset boot param.");
     wind_memset(&g_bootparam,0,BT_BUF_SIZE);
     bp->magic = BOOT_PARAM_MAGIC;
     bp->lenth = sizeof(boot_param_s)+PART_COUNT*sizeof(w_part_s);
@@ -74,7 +79,6 @@ void boot_param_reset(void)
     boot_media_init();
     boot_part_init();
     bp->part = boot_part_get_list();
-    wind_notice("init boot param OK.");
 }
 
 
@@ -89,31 +93,27 @@ w_err_t boot_param_check_valid(w_uint8_t *buff)
     if(bp->magic != BOOT_PARAM_MAGIC)
     {
         wind_warn("param block is invalid.");
-        return -1;
+        return W_ERR_FAIL;
     }
-    if(bp->lenth != sizeof(boot_param_s))
+    if(bp->lenth != sizeof(boot_param_s)+PART_COUNT*sizeof(w_part_s))
     {
         wind_warn("param block lenth is invalid.");
-        return -1;
+        return W_ERR_FAIL;
     }
     if(*crc != wind_crc32((w_uint8_t*)bp,sizeof(boot_param_s),0xffffffff))
     {
         wind_warn("param block crc is invalid.");
-        return -1;
+        return W_ERR_FAIL;
     }
     if(bp->version > BOOT_VERSION)
     {
         wind_warn("param block version is not matched.");
-        return -1;
+        return W_ERR_FAIL;
     }
-    return 0;
+    return W_ERR_OK;
 }
 
-void boot_param_clear_buffer(void)
-{
-    wind_memset((void*)&g_bootparam,0,sizeof(boot_param_s));
-    //g_pbp = W_NULL;
-}
+
 
 w_int32_t boot_param_read(void)
 {

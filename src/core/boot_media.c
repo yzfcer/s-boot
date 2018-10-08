@@ -35,6 +35,7 @@ w_err_t boot_media_init(void)
     return err;
 }
 
+
 w_err_t boot_media_register(w_media_s *media)
 {
     w_int32_t i;

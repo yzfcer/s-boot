@@ -16,6 +16,7 @@
 #include "boot_param.h"
 #include "wind_debug.h"
 #include "wind_crc32.h"
+#include "wind_string.h"
 #include "program_mgr.h"
 #include "boot_hw_if.h"
 w_int32_t repair_rom_space(w_part_s *src,w_part_s *dest)
@@ -73,7 +74,7 @@ w_int32_t repair_running_space(void)
         tmp = boot_part_get(PART_IMG1);
         tmp1 = boot_part_get(PART_ROMRUN);
         if((tmp->mtype != tmp1->mtype) ||
-            (tmp->media != tmp1->media) ||
+            wind_strcmp(tmp->media_name,tmp1->media_name) ||
             (tmp->base != tmp1->base))
         {
             decrypt_img_data(src,&bin);
@@ -105,7 +106,7 @@ static w_int32_t repair_program(void)
     {
         
         if((tmp2->mtype != tmp1->mtype) ||
-            (tmp2->media != tmp1->media) ||
+            wind_strcmp(tmp2->media_name,tmp1->media_name) ||
             (tmp2->base != tmp1->base))
         {
             tmp2 = boot_part_get(PART_IMG2);

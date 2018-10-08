@@ -19,6 +19,7 @@
 extern "C" {
 #endif
 
+#define MEDIA_NAME_LEN 12
 typedef enum 
 {
     MEDIA_TYPE_RAM = 0,
@@ -40,7 +41,7 @@ struct __w_media_ops_s
 
 struct __w_media_s
 {
-    char *name;
+    char name[MEDIA_NAME_LEN];
     w_uint8_t mtype;
     w_uint32_t base;
     w_uint32_t size;
