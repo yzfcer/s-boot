@@ -42,7 +42,6 @@
     <ClCompile Include="..\..\..\..\..\..\src\core\boot_part.c" />
     <ClCompile Include="..\..\..\..\..\..\src\core\boot_test.c" />
     <ClCompile Include="..\..\..\..\..\..\src\core\menu_list.c" />
-    <ClCompile Include="..\..\..\..\..\..\src\core\phy_mem.c" />
     <ClCompile Include="..\..\..\..\..\..\src\core\program_mgr.c" />
     <ClCompile Include="..\..\..\..\..\..\src\core\share_param.c" />
     <ClCompile Include="..\..\..\..\..\..\src\encrypt\encrypt.c" />

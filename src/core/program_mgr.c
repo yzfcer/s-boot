@@ -189,7 +189,7 @@ w_int32_t roll_back_program(void)
     w_part_s *src,*dest,*tmp1;
     w_part_s bin;
     w_bool_t run_in_program1;
-    boot_param_s *bp = (boot_param_s*)boot_param_instance();
+    boot_param_s *bp = (boot_param_s*)boot_param_get();
     
     //先将原来的程序拷贝到备份空间    
     dest = boot_part_get(PART_IMG2);
@@ -234,7 +234,7 @@ w_int32_t flush_img_to_ram(w_part_s *img)
     w_int32_t ret;
     w_part_s bin;
     w_part_s *dest;
-    boot_param_s *bp = (boot_param_s*)boot_param_instance();
+    boot_param_s *bp = (boot_param_s*)boot_param_get();
     decrypt_img_data(img,&bin);
     //这里需要修改，不能直接使用img，因为会修改程序缓存的起始地址，
     //另外需要重新考虑程序运行在RAM中间时，程序因该怎样存储
@@ -259,7 +259,7 @@ w_int32_t flush_img_to_rom(w_part_s *img)
     w_part_s bin;
     img_head_s *head;
     w_bool_t run_in_program1;
-    boot_param_s *bp = (boot_param_s*)boot_param_instance();
+    boot_param_s *bp = (boot_param_s*)boot_param_get();
     wind_notice("begin to flush code to rom space...");
     
     //先将原来的程序拷贝到备份空间    
@@ -350,7 +350,7 @@ w_int32_t download_img_file(w_int16_t type)
 {
     w_int32_t ret,len;
     w_part_s *img;
-    boot_param_s *bp = (boot_param_s*)boot_param_instance();
+    boot_param_s *bp = (boot_param_s*)boot_param_get();
 
     if(bp->debug_mode)
     {

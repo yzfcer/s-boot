@@ -114,9 +114,6 @@
     <ClCompile Include="..\..\..\..\..\..\src\core\menu_list.c">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\src\core\phy_mem.c">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\src\core\program_mgr.c">
       <Filter>core</Filter>
     </ClCompile>

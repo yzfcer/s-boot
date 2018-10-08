@@ -46,7 +46,6 @@ w_int32_t repair_running_space(void)
     w_int32_t ret;
     w_part_s *src,*dest,*tmp,*tmp1;
     w_part_s bin;
-    boot_param_s *bp = (boot_param_s *)boot_param_instance();
     dest = boot_part_get(PART_ROMRUN);
     do
     {
@@ -90,7 +89,7 @@ w_int32_t repair_running_space(void)
 
 
 
-static w_int32_t repair_program(boot_param_s *bp)
+static w_int32_t repair_program(void)
 {
     w_int32_t ret = 0;
     w_part_s *tmp1,*tmp2;
@@ -143,7 +142,6 @@ w_int32_t check_rom_programs(void)
     w_part_s *code[3];
     w_int32_t save_flag = 0,i;
     w_bool_t is_ok;
-    boot_param_s *bp = (boot_param_s *)boot_param_instance();
     
     code[idx++] = boot_part_get(PART_IMG1);
     code[idx++] = boot_part_get(PART_IMG2);
@@ -163,7 +161,7 @@ w_int32_t check_rom_programs(void)
     {
         wind_error("program space ERROR.");
         (void)boot_param_flush();
-        ret = repair_program(bp);
+        ret = repair_program();
         if(0 != ret)
         {
             wind_error("repairing program failed");

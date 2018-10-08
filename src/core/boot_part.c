@@ -49,16 +49,35 @@ w_bool_t  boot_part_create(const char *name,w_media_s *md,w_uint32_t size)
     part->media = md;
     part->mtype = md->mtype;
     part->used = 1;
-    part->status = MEM_NULL;
     part->base = md->offset;
     part->size = size;
     part->blksize = md->blksize;
+    part->status = MEM_NULL;
     part->datalen = 0;
     part->offset = 0;
     part->crc = 0;
     md->offset += size;
     return B_TRUE;
 }
+
+#if 0
+w_err_t boot_part_update_from_param(w_part_s *part)
+{
+    w_int32_t i;
+    WIND_ASSERT_RETURN(part != W_NULL,W_ERR_PTR_NULL);
+    for(i = 0;i < PART_COUNT;i ++)
+    {
+        if(g_part[i].used)
+        {
+            g_part[i].status = part[i].status;
+            g_part[i].datalen = part[i].datalen;
+            g_part[i].crc = part[i].crc;
+        }
+    }
+    return W_ERR_OK;
+}
+#endif
+
 
 w_part_s *boot_part_get(const char *name)
 {

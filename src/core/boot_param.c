@@ -28,17 +28,19 @@ boot_param_s *g_pbp = W_NULL;
 static boot_param_s g_bootparam;
 
 
-static void upate_bootparam_crc(w_uint8_t *prmbuf)
+static void upate_bootparam_crc(w_uint8_t *buff)
 {
-    w_uint32_t *crc = (w_uint32_t*)&prmbuf[sizeof(boot_param_s)];
-    *crc = wind_crc32(prmbuf,sizeof(boot_param_s),0xffffffff);
+    w_uint32_t *crc;
+    w_int32_t index = sizeof(boot_param_s)+PART_COUNT*sizeof(w_part_s);
+    crc = (w_uint32_t*)&buff[index];
+    *crc = wind_crc32(buff,sizeof(boot_param_s),0xffffffff);
 }
 
-boot_param_s *boot_param_instance(void)
+boot_param_s *boot_param_get(void)
 {
-    if(W_NULL == g_pbp)
-        g_pbp = (boot_param_s*)boot_param_from_rom();
-    return (boot_param_s *)g_pbp;
+    if(g_bootparam.magic == BOOT_PARAM_MAGIC)
+        return &g_bootparam;
+    return NULL;
 }
 
 boot_param_s *boot_param_from_rom(void)
@@ -48,11 +50,9 @@ boot_param_s *boot_param_from_rom(void)
     if(0 != ret)
     {
         wind_warn("get boot params failed.");
-        g_pbp = (boot_param_s *)W_NULL;
-        return (boot_param_s *)W_NULL;
+        return (boot_param_s *)NULL;
     }
-    g_pbp = (boot_param_s *)&g_bootparam;
-    return (boot_param_s*)g_pbp;
+    return &g_bootparam;
 }
 
 
@@ -62,7 +62,7 @@ void boot_param_reset(void)
     
     wind_memset(&g_bootparam,0,BT_BUF_SIZE);
     bp->magic = BOOT_PARAM_MAGIC;
-    bp->lenth = sizeof(boot_param_s);
+    bp->lenth = sizeof(boot_param_s)+PART_COUNT*sizeof(w_part_s);
 
     bp->version = BOOT_VERSION;
     bp->debug_mode = 0;
@@ -70,23 +70,22 @@ void boot_param_reset(void)
     bp->run_type = RUN_SPACE_TYPE;
     bp->encrypt_type = ENCRYPT_TYPE;
     bp->lock_en = MCU_LOCK_ENABLE;
-    
-    if(boot_part_get_count() == 0)
-    {
-        boot_media_init();
-        boot_part_init();
-        bp->part_cnt = (w_uint8_t)boot_part_get_count();
-    }
-    wind_memcpy(bp->part,boot_part_get_list(),PART_COUNT*sizeof(w_part_s));
+    bp->part_cnt = PART_COUNT;
+    boot_media_init();
+    boot_part_init();
+    bp->part = boot_part_get_list();
     wind_notice("init boot param OK.");
 }
 
 
 //检查参数是否有效，有效返回1，无效返回0
-w_int32_t boot_param_check_valid(w_uint8_t *prmbuf)
+w_err_t boot_param_check_valid(w_uint8_t *buff)
 {
-    boot_param_s *bp = (boot_param_s *)prmbuf;
-    w_uint32_t *crc = (w_uint32_t*)&prmbuf[sizeof(boot_param_s)];
+    w_int32_t index;
+    w_uint32_t *crc;
+    boot_param_s *bp = (boot_param_s *)buff;
+    index = sizeof(boot_param_s)+PART_COUNT*sizeof(w_part_s);
+    crc = (w_uint32_t*)&buff[index];
     if(bp->magic != BOOT_PARAM_MAGIC)
     {
         wind_warn("param block is invalid.");
@@ -113,14 +112,14 @@ w_int32_t boot_param_check_valid(w_uint8_t *prmbuf)
 void boot_param_clear_buffer(void)
 {
     wind_memset((void*)&g_bootparam,0,sizeof(boot_param_s));
-    g_pbp = W_NULL;
+    //g_pbp = W_NULL;
 }
 
 w_int32_t boot_param_read(void)
 {
     w_uint32_t err = 0;
     w_int32_t i,j,len,ret;
-    w_part_s *part[2];
+    w_part_s *part[2],*pt;
     w_uint8_t *buff;
     part[0] = boot_part_get(PART_PARAM1);
     part[1] = boot_part_get(PART_PARAM2);
@@ -138,6 +137,8 @@ w_int32_t boot_param_read(void)
         if(0 == ret)
         {
             wind_memcpy(&g_bootparam,buff,sizeof(boot_param_s));
+            pt = boot_part_get_list();
+            wind_memcpy((void*)pt,&buff[sizeof(boot_param_s)],PART_COUNT*sizeof(w_part_s));
             break;
         }
         else
@@ -158,13 +159,19 @@ w_int32_t boot_param_read(void)
 w_int32_t boot_param_flush(void)
 {
     w_int32_t i,j,len,err = 0;
-    w_part_s *part[2];
+    w_part_s *part[2],*pt;
     w_uint8_t *buff;
     part[0] = boot_part_get(PART_PARAM1);
     part[1] = boot_part_get(PART_PARAM2);
     buff = get_common_buffer();
     wind_memset(buff,0,COMMBUF_SIZE);
     wind_memcpy(buff,&g_bootparam,sizeof(boot_param_s));
+    
+    part[0]->datalen = sizeof(boot_param_s)+4;
+    part[1]->datalen = sizeof(boot_param_s)+4;
+    pt = boot_part_get_list();
+    wind_memcpy(&buff[sizeof(boot_param_s)],(void*)pt,PART_COUNT*sizeof(w_part_s));
+    
     upate_bootparam_crc(buff);
     for(i = 0;i < 2;i ++)
     {
@@ -186,28 +193,13 @@ w_int32_t boot_param_flush(void)
     if(err >= 2)
     {
         wind_warn("write both params failed.");
+        part[0]->datalen = 0;
+        part[1]->datalen = 0;
         return -1;
     }
     wind_notice("write boot param complete.");
     return 0;
 }
-
-w_int32_t boot_param_check_debug_mode(void)
-{
-    boot_param_s *bp = (boot_param_s*)boot_param_instance();
-    if(W_NULL == bp)
-    {
-        return 0;
-    }
-    return bp->debug_mode;
-}
-
-void *boot_param_mem_map(void)
-{
-    boot_param_s *bp = boot_param_instance();
-    return (void*)(sizeof(boot_param_s)+(w_uint32_t)bp);
-}
-
 
 
 #ifdef __cplusplus

@@ -14,7 +14,7 @@
 #ifndef BOOT_CHECK_H__
 #define BOOT_CHECK_H__
 #include "boot_part.h"
-w_int32_t check_rom_program(w_part_s *code);
+w_int32_t check_rom_program(void);
 w_int32_t check_rom_programs(void);
 
 #endif

@@ -21,12 +21,12 @@
 #include <conio.h>
 #include "wind_debug.h"
 
-w_int32_t device_init(void)
+w_int32_t boot_enter_main_hook(void)
 {
 	return 0;
 }
 
-w_int32_t device_deinit(void)
+w_int32_t boot_exit_hook(void)
 {
 	return 0;
 }

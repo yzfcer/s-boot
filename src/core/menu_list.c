@@ -80,7 +80,6 @@ static void download_img_to_ram(void)
 {
     w_int32_t ret;
     w_part_s *dest = boot_part_get(PART_RAMRUN);
-    boot_param_s *bp = (boot_param_s*)boot_param_instance();
     if(dest->size <= 0)
     {
         wind_warn("img can not download to RAM,device NOT support.");
@@ -109,7 +108,7 @@ static void set_debug_mode(void)
         "Normal",
         "Debug",
     };
-    boot_param_s *bp = (boot_param_s*)boot_param_instance();
+    boot_param_s *bp = (boot_param_s*)boot_param_get();
     while(1)
     {
         wind_printf("set debug mode options:\r\n");
@@ -137,14 +136,11 @@ static void set_debug_mode(void)
 
 static void show_media_map(void)
 {
-    boot_param_s *bp = (boot_param_s *)boot_param_instance();
-    wind_printf("current memory map info:\r\n");
     boot_media_print();
 }
 
 static void lock_mcu(void)
 {
-    boot_param_s *bp = (boot_param_s *)boot_param_instance();
     if(is_chip_lock())
     {
         wind_notice("MCU has been locked before.");
@@ -156,7 +152,6 @@ static void lock_mcu(void)
 
 static void unlock_mcu(void)
 {
-    boot_param_s *bp = (boot_param_s *)boot_param_instance();
     if(!is_chip_lock())
     {
         wind_notice("MCU has NOT been locked before.");
@@ -168,7 +163,6 @@ static void unlock_mcu(void)
 
 static void show_program_status(void)
 {
-    boot_param_s *bp = (boot_param_s *)boot_param_instance();
     boot_part_print_status();
 }
 
@@ -187,7 +181,6 @@ static void do_clear_flash_data(w_uint8_t unlock)
     clean_program();
     boot_param_reset();
     (void)boot_param_flush();
-    
     boot_param_clear_buffer();
     if(unlock)
         set_chip_lock(0);

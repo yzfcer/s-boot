@@ -22,8 +22,8 @@
 #define BOARD_NAME "windows simulation"
 
 
-w_int32_t device_init(void);
-w_int32_t device_deinit(void);
+w_int32_t boot_enter_main_hook(void);
+w_int32_t boot_exit_hook(void);
 void      wind_std_port_init(void);
 w_int32_t wind_std_output(w_uint8_t *buf,w_int32_t len);
 w_int32_t wind_std_input(w_uint8_t *buf,w_int32_t len);

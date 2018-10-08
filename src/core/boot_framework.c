@@ -60,8 +60,8 @@ static w_int32_t boot_init(void)
 
 static w_int32_t boot_app_debug_check(void)
 {
-    w_int32_t dbg_mode = boot_param_check_debug_mode();
-    if(dbg_mode)
+    boot_param_s *bp = boot_param_get();
+    if(bp->debug_mode)
     {
         wind_warn("bootloader mode:DEBUG");
         set_boot_status(BOOT_WAIT_KEY_PRESS);
@@ -81,7 +81,7 @@ static w_int32_t boot_first_check(void)
     w_int32_t ret;
     boot_param_s *bp;
     wind_notice("begin to check first running time...");
-    bp = (boot_param_s *)boot_param_instance();
+    bp = boot_param_from_rom();
     if(W_NULL != bp)
     {
         go_to_next_step();
@@ -122,7 +122,6 @@ static w_int32_t boot_chip_lock_check(void)
 static w_int32_t boot_self_check(void)
 {
     w_int32_t ret;
-    boot_param_s *bp = (boot_param_s *)boot_param_instance();
     ret = check_rom_programs();
     go_to_next_step();
     return ret;
@@ -134,13 +133,7 @@ static w_int32_t  boot_upgrade_check(void)
 {
     w_int32_t ret;
     w_part_s img,*tmp;
-    boot_param_s *bp = (boot_param_s *)boot_param_instance();
-    
-    if(W_NULL == bp)
-    {
-        wind_warn("get boot params failed.");
-        return -1;
-    }
+
     ret = sp_get_upgrade_param(&g_upgrade_info);
     if(0 != ret)
     {
@@ -208,8 +201,7 @@ static w_int32_t  boot_rollback_check(void)
 {
     w_uint8_t roll_flag;
     w_int32_t ret;
-    boot_param_s *bp = (boot_param_s *)boot_param_instance();
-    
+
     wind_notice("begin to check app roll back status...");
     ret = sp_get_app_rollback(&roll_flag);
     if(0 != ret)
@@ -236,7 +228,7 @@ static w_int32_t boot_wait_key_press(void)
 {
     char ch = 0;
 
-    boot_param_s *bp = (boot_param_s *)boot_param_instance();
+    boot_param_s *bp = (boot_param_s *)boot_param_get();
     wind_printf("press any key to enter menu list:");
     if(0 == wait_for_key_input(bp->wait_sec,&ch,1))
     {
@@ -265,7 +257,7 @@ static w_int32_t boot_load_app(void)
     boot_param_s *bp = W_NULL; 
 
     wind_notice("begin to load App to running space...");
-    bp = (boot_param_s *)boot_param_instance();
+    bp = (boot_param_s *)boot_param_get();
     regi = boot_part_get(PART_ROMRUN);
     
     if(W_NULL == bp)
@@ -329,7 +321,6 @@ static w_int32_t boot_load_app(void)
 static w_int32_t boot_set_app_param(void)
 {
     w_part_s *tmp;
-    boot_param_s *bp = (boot_param_s *)boot_param_instance();
     wind_notice("begin to set App params...");
     sp_init_share_param();
     
@@ -373,6 +364,7 @@ static w_int32_t boot_run_system(void)
 {
 	wind_notice("begin to jump to App space...");
 	wind_printf("\r\n\r\n\r\n");
+    boot_exit_hook();
 	boot_jump_to_app();
 	return 0;
 }
@@ -415,8 +407,8 @@ void go_to_next_step(void)
 void boot_loop(void)
 {
     w_int32_t i,ret;
-    device_init();
-    //mem_drv_init();
+    boot_enter_main_hook();
+    
     while(1)
     {
         for(i = 0;i < sizeof(g_status_handTB)/sizeof(boot_handle_TB);i ++)

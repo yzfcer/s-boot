@@ -75,7 +75,7 @@ void test_run_error(void)
 void test_upgrade(void)
 {
     w_part_s *img;
-    boot_param_s *bp = (boot_param_s*)boot_param_instance();
+    boot_param_s *bp = (boot_param_s*)boot_param_get();
 
     img = boot_part_get(PART_CACHE);
     wind_printf("begin to receive file data,please wait.\r\n");

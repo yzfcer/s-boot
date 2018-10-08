@@ -39,21 +39,20 @@ typedef struct
     w_int8_t phymem_cnt;
     w_int8_t part_cnt;
     char runreg[PART_NAME_LEN];
-    w_part_s part[PART_COUNT];
-    
-
+    //w_part_s part[PART_COUNT];
+    w_part_s *part;
 }boot_param_s;
 
-boot_param_s *boot_param_instance(void);
+boot_param_s *boot_param_get(void);
 boot_param_s *boot_param_from_rom(void);
 
 void      boot_param_reset(void);
-w_int32_t boot_param_check_valid(w_uint8_t *prmbuf);
+w_err_t   boot_param_check_valid(w_uint8_t *prmbuf);
 w_int32_t boot_param_check_debug_mode(void);
 void      boot_param_clear_buffer(void);
 w_int32_t boot_param_read(void);
 w_int32_t boot_param_flush(void);
-void *boot_param_mem_map(void);
+
 #ifdef __cplusplus
 }
 #endif
