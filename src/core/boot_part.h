@@ -54,10 +54,9 @@ w_int32_t boot_part_read(w_part_s *part,w_uint8_t *data,w_uint32_t datalen);
 w_int32_t boot_part_write(w_part_s *part,w_uint8_t *data,w_uint32_t datalen);
 w_err_t boot_part_erase(w_part_s *part);
 
-void boot_part_print_status(void);
+void boot_part_print(void);
 w_int32_t boot_part_get_count(void);
 w_part_s *boot_part_get_list(void);
-void boot_part_print_detail(void);
 void boot_part_copy_info(w_part_s *src,w_part_s *dest);
 w_int32_t boot_part_copy_data(w_part_s *src,w_part_s *dest);
 w_bool_t boot_part_equal(w_part_s *src,w_part_s *dest);

@@ -170,21 +170,19 @@ w_err_t boot_part_erase(w_part_s *part)
     return W_ERR_OK;
 }
 
-void boot_part_print_status(void)
+void boot_part_print(void)
 {
-#define PART_FORMAT1 "%-15s%-8s0x%-10x0x%-9x0x%-9x%-9s%4d%%\r\n" 
-#define REGION_PARAM1(reg) (reg).name,(reg).media_name,(reg).base,(reg).size,\
-                (reg).datalen,(reg).name,(reg).size?((reg).datalen*100)/(reg).size:0
     w_int32_t i;
     w_int32_t count = boot_part_get_count();
-    w_part_s *reg = boot_part_get_list();
+    w_part_s *part = boot_part_get_list();
     wind_printf("system part infomation:\r\n");
     wind_print_space(9);
     wind_printf("%-15s%-8s%-12s%-11s%-11s%-9s%-8s\r\n","part","media","addr","size","datalen","type","usage");
     wind_print_space(9);
     for(i = 0;i < count;i ++)
     {
-        wind_printf(PART_FORMAT1,REGION_PARAM1(reg[i]));
+        wind_printf("%-15s%-8s0x%-10x0x%-9x0x%-9x%-9s%4d%%\r\n",part[i].name,part[i].media_name,part[i].base,part[i].size,\
+                part[i].datalen,part[i].name,part[i].size?(part[i].datalen*100)/part[i].size:0);
     }
     wind_print_space(9);
 }
@@ -207,26 +205,6 @@ w_part_s *boot_part_get_list(void)
 {
     return g_part;
 }
-
-void boot_part_print_detail(void)
-{
-#define PART_FORMAT "%-12s%-8s0x%-12x0x%-12x\r\n" 
-#define PART_PARAM(pt) (pt).name,(pt).media_name,(pt).base,(pt).size,(pt).name
-    w_int32_t i,count;
-    w_part_s *pt = boot_part_get_list();
-    wind_printf("memory pt details:\r\n");
-    wind_print_space(6);
-    wind_printf("%-12s%-8s%-14s%-14s\r\n","pt","media","addr","size");
-    wind_print_space(6);
-    count = boot_part_get_count();
-    for(i = 0;i < count;i ++)
-    {
-        wind_printf(PART_FORMAT,PART_PARAM(pt[i]));
-    }
-    wind_print_space(6);
-    wind_printf("\r\n");
-}
-
 
 void boot_part_copy_info(w_part_s *src,w_part_s *dest)
 {

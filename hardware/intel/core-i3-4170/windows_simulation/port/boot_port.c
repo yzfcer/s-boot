@@ -125,7 +125,7 @@ w_err_t boot_parts_create(void)
     boot_part_create(PART_RAMRUN,media,RAMRUN_SIZE);
 
     //boot_part_print_detail();
-    //boot_part_print_status();
+    //boot_part_print();
     return W_ERR_OK;
 }
 

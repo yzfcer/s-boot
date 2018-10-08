@@ -31,7 +31,7 @@ extern "C" {
 static volatile w_int32_t s_boot_status = BOOT_INIT;
 
 upgrade_info_s g_upgrade_info;
-sysparam_part_s g_sysparam_reg;
+sysparam_part_s g_sysparam_part;
 
 void print_boot_info(void)
 {
@@ -253,12 +253,12 @@ static w_int32_t boot_menu_list(void)
 static w_int32_t boot_load_app(void)
 {
     w_mem_status_e mem_stat = MEM_ERROR;
-    w_part_s *regi = W_NULL,*tmp;
+    w_part_s *part = W_NULL,*tmp;
     boot_param_s *bp = W_NULL; 
 
     wind_notice("begin to load App to running space...");
     bp = (boot_param_s *)boot_param_get();
-    regi = boot_part_get(PART_ROMRUN);
+    part = boot_part_get(PART_ROMRUN);
     
     if(W_NULL == bp)
     {
@@ -303,7 +303,7 @@ static w_int32_t boot_load_app(void)
         return -1;
     }
 
-    if(MEDIA_TYPE_ROM == regi->mtype)
+    if(MEDIA_TYPE_ROM == part->mtype)
     {
         wind_notice("need not load App to a NORFlash ROM.");
         set_boot_status(BOOT_SET_APP_PARAM);
@@ -336,13 +336,13 @@ static w_int32_t boot_set_app_param(void)
     wind_printf("buffer addr:0x%x\r\n",g_upgrade_info.addr);
     wind_printf("buffer lenth:0x%x\r\n",g_upgrade_info.datalen);
 	tmp = boot_part_get(PART_IMGPARA);
-    g_sysparam_reg.addr = tmp->base;
-    g_sysparam_reg.size = tmp->size;
-    g_sysparam_reg.mem_type = tmp->mtype;
+    g_sysparam_part.addr = tmp->base;
+    g_sysparam_part.size = tmp->size;
+    g_sysparam_part.mem_type = tmp->mtype;
     wind_printf("set sysparam part params:\r\n");
-    wind_printf("sysparam addr:0x%x\r\n",g_sysparam_reg.addr);
-    wind_printf("sysparam lenth:0x%x\r\n",g_sysparam_reg.size);
-    sp_set_sysparam_param(&g_sysparam_reg);
+    wind_printf("sysparam addr:0x%x\r\n",g_sysparam_part.addr);
+    wind_printf("sysparam lenth:0x%x\r\n",g_sysparam_part.size);
+    sp_set_sysparam_param(&g_sysparam_part);
     
     wind_notice("set App params OK.");
     set_boot_status(BOOT_JUMP_TO_APP);

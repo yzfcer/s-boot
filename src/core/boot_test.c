@@ -56,20 +56,20 @@ void destroy_code_space(w_part_s *code)
 
 void test_pro1_error(void)
 {
-    w_part_s *reg = boot_part_get(PART_IMG1);
-    destroy_code_space(reg);
+    w_part_s *part = boot_part_get(PART_IMG1);
+    destroy_code_space(part);
 }
 void test_probak_error(void)
 {
-    w_part_s *reg = boot_part_get(PART_IMG2);
-    destroy_code_space(reg);
+    w_part_s *part = boot_part_get(PART_IMG2);
+    destroy_code_space(part);
 }
 
 
 void test_run_error(void)
 {
-    w_part_s *reg = boot_part_get(PART_ROMRUN);
-    destroy_code_space(reg);
+    w_part_s *part = boot_part_get(PART_ROMRUN);
+    destroy_code_space(part);
 }
 
 void test_upgrade(void)

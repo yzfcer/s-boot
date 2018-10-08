@@ -163,7 +163,7 @@ static void unlock_mcu(void)
 
 static void show_program_status(void)
 {
-    boot_part_print_status();
+    boot_part_print();
 }
 
 #if BOOT_TEST_ENABLE

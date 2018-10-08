@@ -34,10 +34,10 @@ typedef struct
     w_uint32_t rollback_flag;//应用程序在异常时设置位1，正常为0
 
     //升级参数区
-    upgrade_info_s upgrade_reg;
+    upgrade_info_s upgrade_part;
 
     //系统参数区，用于保留应用程序参数
-    sysparam_part_s sysparam_reg;
+    sysparam_part_s sysparam_part;
         
 }share_param_s;
 
@@ -129,19 +129,19 @@ w_err_t sp_get_app_rollback(w_uint8_t *is_rollback)
 }
 
 
-w_err_t sp_set_upgrade_param(upgrade_info_s *upreg)
+w_err_t sp_set_upgrade_param(upgrade_info_s *part)
 {
     share_param_s *sp = get_share_data();
     WIND_ASSERT_RETURN(sp != W_NULL,W_ERR_FAIL);
-    copy_share_data((char*)upreg,(char*)&sp->upgrade_reg,sizeof(upgrade_info_s));
+    copy_share_data((char*)part,(char*)&sp->upgrade_part,sizeof(upgrade_info_s));
     return flush_share_data(sp);
 }
 
-w_err_t sp_get_upgrade_param(upgrade_info_s *upreg)
+w_err_t sp_get_upgrade_param(upgrade_info_s *part)
 {
     share_param_s *sp = get_share_data();
     WIND_ASSERT_RETURN(sp != W_NULL,W_ERR_FAIL);
-    copy_share_data((char*)&sp->upgrade_reg,(char*)upreg,sizeof(upgrade_info_s));
+    copy_share_data((char*)&sp->upgrade_part,(char*)part,sizeof(upgrade_info_s));
     return flush_share_data(sp);
 }
 
@@ -149,7 +149,7 @@ w_err_t sp_set_sysparam_param(sysparam_part_s *sysparam)
 {
     share_param_s *sp = get_share_data();
     WIND_ASSERT_RETURN(sp != W_NULL,W_ERR_FAIL);
-    copy_share_data((char*)sysparam,(char*)&sp->sysparam_reg,sizeof(sysparam_part_s));
+    copy_share_data((char*)sysparam,(char*)&sp->sysparam_part,sizeof(sysparam_part_s));
     return flush_share_data(sp);
 }
 
@@ -157,7 +157,7 @@ w_err_t sp_get_sysparam_param(sysparam_part_s *sysparam)
 {
     share_param_s *sp = get_share_data();
     WIND_ASSERT_RETURN(sp != W_NULL,W_ERR_FAIL);
-    copy_share_data((char*)&sp->sysparam_reg,(char*)sysparam,sizeof(sysparam_part_s));
+    copy_share_data((char*)&sp->sysparam_part,(char*)sysparam,sizeof(sysparam_part_s));
     return flush_share_data(sp);
 }
 
@@ -171,7 +171,7 @@ w_err_t sp_init_share_param(void)
     sp->share_version = SHARE_VERSION;
     
     sp->rollback_flag = 0;
-    sp->upgrade_reg.flag = 0;
+    sp->upgrade_part.flag = 0;
     return flush_share_data(sp);
 }
 

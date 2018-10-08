@@ -38,7 +38,7 @@ typedef struct
     w_uint8_t lock_en;     //Ð¾Æ¬Ëø¶¨Ê¹ÄÜ
     w_int8_t phymem_cnt;
     w_int8_t part_cnt;
-    char runreg[PART_NAME_LEN];
+    char run_part[PART_NAME_LEN];
     //w_part_s part[PART_COUNT];
     w_part_s *part;
 }boot_param_s;

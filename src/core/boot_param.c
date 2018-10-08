@@ -26,11 +26,14 @@ extern "C" {
 
 static boot_param_s g_bootparam;
 
-
+static w_int32_t param_lenth(void)
+{
+    return sizeof(boot_param_s)+PART_COUNT*sizeof(w_part_s);
+}
 static void upate_bootparam_crc(w_uint8_t *buff)
 {
     w_uint32_t *crc;
-    w_int32_t index = sizeof(boot_param_s)+PART_COUNT*sizeof(w_part_s);
+    w_int32_t index = param_lenth();
     crc = (w_uint32_t*)&buff[index];
     *crc = wind_crc32(buff,sizeof(boot_param_s),0xffffffff);
 }
@@ -67,7 +70,7 @@ void boot_param_reset(void)
     wind_notice("reset boot param.");
     wind_memset(&g_bootparam,0,BT_BUF_SIZE);
     bp->magic = BOOT_PARAM_MAGIC;
-    bp->lenth = sizeof(boot_param_s)+PART_COUNT*sizeof(w_part_s);
+    bp->lenth = param_lenth();
 
     bp->version = BOOT_VERSION;
     bp->debug_mode = 0;
@@ -88,14 +91,14 @@ w_err_t boot_param_check_valid(w_uint8_t *buff)
     w_int32_t index;
     w_uint32_t *crc;
     boot_param_s *bp = (boot_param_s *)buff;
-    index = sizeof(boot_param_s)+PART_COUNT*sizeof(w_part_s);
+    index = param_lenth();
     crc = (w_uint32_t*)&buff[index];
     if(bp->magic != BOOT_PARAM_MAGIC)
     {
         wind_warn("param block is invalid.");
         return W_ERR_FAIL;
     }
-    if(bp->lenth != sizeof(boot_param_s)+PART_COUNT*sizeof(w_part_s))
+    if(bp->lenth != param_lenth())
     {
         wind_warn("param block lenth is invalid.");
         return W_ERR_FAIL;
@@ -167,8 +170,8 @@ w_int32_t boot_param_flush(void)
     wind_memset(buff,0,COMMBUF_SIZE);
     wind_memcpy(buff,&g_bootparam,sizeof(boot_param_s));
     
-    part[0]->datalen = sizeof(boot_param_s)+4;
-    part[1]->datalen = sizeof(boot_param_s)+4;
+    part[0]->datalen = param_lenth()+4;
+    part[1]->datalen = param_lenth()+4;
     pt = boot_part_get_list();
     wind_memcpy(&buff[sizeof(boot_param_s)],(void*)pt,PART_COUNT*sizeof(w_part_s));
     
