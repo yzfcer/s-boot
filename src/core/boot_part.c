@@ -16,6 +16,12 @@ w_uint8_t *get_common_buffer(void)
     return commbuffer;
 }
 
+static char *get_mtype_name(w_media_type_e mtype)
+{
+    char *name[2] = {"RAM","ROM"};
+    return name[mtype];
+}
+
 static w_part_s *get_null_part(void)
 {
     w_int32_t i;
@@ -182,7 +188,7 @@ void boot_part_print(void)
     for(i = 0;i < count;i ++)
     {
         wind_printf("%-15s%-8s0x%-10x0x%-9x0x%-9x%-9s%4d%%\r\n",part[i].name,part[i].media_name,part[i].base,part[i].size,\
-                part[i].datalen,part[i].name,part[i].size?(part[i].datalen*100)/part[i].size:0);
+                part[i].datalen,get_mtype_name(part[i].mtype),part[i].size?(part[i].datalen*100)/part[i].size:0);
     }
     wind_print_space(9);
 }
