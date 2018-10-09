@@ -76,23 +76,7 @@ static void download_img_to_rom(void)
     download_img_file(MEDIA_TYPE_ROM);    
 }
 
-static void download_img_to_ram(void)
-{
-    w_int32_t ret;
-    w_part_s *dest = boot_part_get(PART_RAMRUN);
-    if(dest->size <= 0)
-    {
-        wind_warn("img can not download to RAM,device NOT support.");
-        return;
-    }
-    ret = download_img_file(MEDIA_TYPE_RAM);
-    if(0 == ret)
-    {
-        g_go_ahead = 1;
-    }
-    set_boot_status(BOOT_SET_APP_PARAM);
-    exit_menu();
-}
+
 
 static void download_filesystem(void)
 {
@@ -208,10 +192,9 @@ static void exit_and_save(void)
 static w_menu_tb_s g_menu_handleTB[] = 
 {
     {'1',0,0,"download img file to ROM",download_img_to_rom},
-    {'2',0,0,"download img file to RAM",download_img_to_ram},
-    {'3',0,0,"download file system",download_filesystem},
-    {'4',0,0,"show media map",show_media_map},
-    {'5',0,0,"show program status",show_program_status},
+    {'2',0,0,"download file system",download_filesystem},
+    {'3',0,0,"show media map",show_media_map},
+    {'4',0,0,"show program status",show_program_status},
     {'b',2,2,"set debug mode",set_debug_mode},
     {'k',0,0,"lock MCU chip",lock_mcu},
     {'r',2,2,"clear boot params",clear_boot_param},

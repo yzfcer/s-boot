@@ -68,7 +68,7 @@ void test_probak_error(void)
 
 void test_run_error(void)
 {
-    w_part_s *part = boot_part_get(PART_ROMRUN);
+    w_part_s *part = boot_part_get(PART_SYSRUN);
     destroy_code_space(part);
 }
 
@@ -94,17 +94,13 @@ void test_upgrade(void)
     return;
 }
 
-void test_rollback(void)
-{
-    sp_set_app_rollback(1);
-}
+
 boot_test_s g_boottest[] = 
 {
     {'1',"test program1 error",test_pro1_error},
     {'2',"test program bak error",test_probak_error},
     {'3',"test running program error",test_run_error},
     {'4',"test upgrade program",test_upgrade},
-    {'5',"test rollback program",test_rollback},
 };
 
 void print32_t_boottest(void)

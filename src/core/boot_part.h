@@ -14,8 +14,8 @@
 #define PART_IMG2     "img2"
 #define PART_SHARE    "share"
 #define PART_FS       "fs"
-#define PART_ROMRUN   "romrun"
-#define PART_RAMRUN   "ramrun"
+#define PART_SYSRUN   "sysrun"
+//#define PART_RAMRUN   "ramrun"
 #define PART_IMGPARA  "imgparam"
 #define PART_CACHE    "cache"
 

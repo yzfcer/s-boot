@@ -197,32 +197,6 @@ static w_int32_t  boot_upgrade_check(void)
     
 }
 
-static w_int32_t  boot_rollback_check(void)
-{
-    w_uint8_t roll_flag;
-    w_int32_t ret;
-
-    wind_notice("begin to check app roll back status...");
-    ret = sp_get_app_rollback(&roll_flag);
-    if(0 != ret)
-    {
-        wind_notice("get upgrade params W_NULL.");
-        sp_init_share_param();
-        go_to_next_step();
-        return 0;
-    }
-    if(!roll_flag)
-    {
-        wind_notice("roll back flag is invalid,need NOT to roll back.");
-        go_to_next_step();
-        return 0;
-    }
-    wind_notice("begin to roll back...");
-    ret = roll_back_program();
-    sp_set_app_rollback(0);
-    return ret;
-}
-
 
 static w_int32_t boot_wait_key_press(void)
 {
@@ -258,7 +232,7 @@ static w_int32_t boot_load_app(void)
 
     wind_notice("begin to load App to running space...");
     bp = (boot_param_s *)boot_param_get();
-    part = boot_part_get(PART_ROMRUN);
+    part = boot_part_get(PART_SYSRUN);
     
     if(W_NULL == bp)
     {
@@ -280,7 +254,7 @@ static w_int32_t boot_load_app(void)
         set_boot_status(BOOT_MENU_LIST);
         return -1;
     }
-	tmp = boot_part_get(PART_ROMRUN);
+	tmp = boot_part_get(PART_SYSRUN);
     if(MEDIA_TYPE_ROM == tmp->mtype)
     {
         if(MEM_NORMAL == tmp->status)
@@ -324,7 +298,6 @@ static w_int32_t boot_set_app_param(void)
     wind_notice("begin to set App params...");
     sp_init_share_param();
     
-    sp_set_app_rollback(1);
     tmp = boot_part_get(PART_CACHE);
     g_upgrade_info.addr = tmp->base;
     g_upgrade_info.flag = 0;
@@ -379,7 +352,6 @@ boot_handle_TB g_status_handTB[] =
     {BOOT_CHIP_LOCK_CHECK,"chip_lock_check",boot_chip_lock_check},
     {BOOT_SELF_CHECK,"self_check",boot_self_check},
     {BOOT_UPGRADE_CHECK,"upgrade_check",boot_upgrade_check},
-    {BOOT_ROLLBACK_CHECK,"rollback_check",boot_rollback_check},
     
     {BOOT_WAIT_KEY_PRESS,"wait_key_press",boot_wait_key_press},
     {BOOT_MENU_LIST,"menu_list",boot_menu_list},

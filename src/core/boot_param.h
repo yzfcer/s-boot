@@ -20,8 +20,8 @@
 extern "C" {
 #endif
 
-#define BOOT_PARAM_MAGIC 0X2561C5A0
-#define BOOT_VERSION 0x010006
+#define BOOT_PARAM_MAGIC 0x4A586D32
+#define BOOT_VERSION 0x0101
 
 //存储于flash参数区的数据的整体结构，
 //这部分数据在内存中没有备份，在需要时从flash读出
@@ -36,10 +36,8 @@ typedef struct
     w_uint8_t run_type;   //运行在RAM或Flash
     w_uint8_t encrypt_type;//程序加密使能
     w_uint8_t lock_en;     //芯片锁定使能
-    w_int8_t phymem_cnt;
     w_int8_t part_cnt;
     char run_part[PART_NAME_LEN];
-    //w_part_s part[PART_COUNT];
     w_part_s *part;
 }boot_param_s;
 

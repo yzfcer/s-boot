@@ -47,9 +47,6 @@ typedef struct
 }sysparam_part_s;
 
 
-w_err_t sp_set_app_rollback(w_uint8_t is_rollback);
-
-w_err_t sp_get_app_rollback(w_uint8_t *is_rollback);
 
 w_err_t sp_set_upgrade_param(upgrade_info_s *part);
 

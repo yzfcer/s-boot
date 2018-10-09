@@ -47,7 +47,7 @@ w_int32_t repair_running_space(void)
     w_int32_t ret;
     w_part_s *src,*dest,*tmp,*tmp1;
     w_part_s bin;
-    dest = boot_part_get(PART_ROMRUN);
+    dest = boot_part_get(PART_SYSRUN);
     do
     {
         src = boot_part_get(PART_IMG1);
@@ -72,7 +72,7 @@ w_int32_t repair_running_space(void)
         boot_part_copy_data(src,tmp);
         src = boot_part_get(PART_CACHE);
         tmp = boot_part_get(PART_IMG1);
-        tmp1 = boot_part_get(PART_ROMRUN);
+        tmp1 = boot_part_get(PART_SYSRUN);
         if((tmp->mtype != tmp1->mtype) ||
             wind_strcmp(tmp->media_name,tmp1->media_name) ||
             (tmp->base != tmp1->base))
@@ -95,7 +95,7 @@ static w_int32_t repair_program(void)
     w_int32_t ret = 0;
     w_part_s *tmp1,*tmp2;
     wind_notice("programs has errors,try to repair ...");
-    tmp2 = boot_part_get(PART_ROMRUN);
+    tmp2 = boot_part_get(PART_SYSRUN);
     if(MEM_ERROR == tmp2->status)
     {
         if(0 != repair_running_space())
@@ -116,7 +116,7 @@ static w_int32_t repair_program(void)
         else
         {
             tmp1 = boot_part_get(PART_IMG1);
-            tmp2 = boot_part_get(PART_ROMRUN);
+            tmp2 = boot_part_get(PART_SYSRUN);
             tmp1->base = tmp2->base;
             tmp1->datalen = tmp2->datalen;
             tmp1->crc = tmp2->crc;
@@ -127,7 +127,7 @@ static w_int32_t repair_program(void)
     if(MEM_ERROR == tmp1->status)
     {
         tmp1 = boot_part_get(PART_IMG1);
-        tmp2 = boot_part_get(PART_ROMRUN);
+        tmp2 = boot_part_get(PART_SYSRUN);
         if(0 != repair_rom_space(tmp1,tmp2))
             ret = -1;
     }
@@ -146,10 +146,12 @@ w_int32_t check_rom_programs(void)
     
     code[idx++] = boot_part_get(PART_IMG1);
     code[idx++] = boot_part_get(PART_IMG2);
-    code[idx++] = boot_part_get(PART_ROMRUN);
+    code[idx++] = boot_part_get(PART_SYSRUN);
     wind_notice("begin to check programs...");
     for(i = 0;i < sizeof(code)/sizeof(w_part_s*);i ++)
     {
+        if(!code[idx++])
+            continue;
         is_ok = boot_part_check(code[i]);
         if(!is_ok && (MEM_ERROR != code[i]->status))
         {

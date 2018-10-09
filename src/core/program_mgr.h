@@ -44,7 +44,6 @@ w_int32_t decrypt_img_data(w_part_s *img,w_part_s *bin);
 w_int32_t download_img_file(w_int16_t type);
 w_int32_t change_boot_app(w_int32_t index);
 w_int32_t check_img_valid(w_part_s *img);
-w_int32_t roll_back_program(void);
 
 w_int32_t clean_program(void);
 

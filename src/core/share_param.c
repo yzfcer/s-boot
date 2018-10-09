@@ -30,9 +30,6 @@ typedef struct
     w_uint32_t lenth;
     w_uint32_t share_version;
 
-    //回滚标记
-    w_uint32_t rollback_flag;//应用程序在异常时设置位1，正常为0
-
     //升级参数区
     upgrade_info_s upgrade_part;
 
@@ -112,23 +109,6 @@ static w_err_t flush_share_data(share_param_s *sp)
 }
 
 
-w_err_t sp_set_app_rollback(w_uint8_t is_rollback)
-{
-    share_param_s *sp = get_share_data();
-    WIND_ASSERT_RETURN(sp != W_NULL,W_ERR_FAIL);
-    sp->rollback_flag = is_rollback;
-    return flush_share_data(sp);
-}
-
-w_err_t sp_get_app_rollback(w_uint8_t *is_rollback)
-{
-    share_param_s *sp = get_share_data();
-    WIND_ASSERT_RETURN(sp != W_NULL,W_ERR_FAIL);
-    *is_rollback = (w_uint8_t)sp->rollback_flag;
-    return flush_share_data(sp);
-}
-
-
 w_err_t sp_set_upgrade_param(upgrade_info_s *part)
 {
     share_param_s *sp = get_share_data();
@@ -170,7 +150,6 @@ w_err_t sp_init_share_param(void)
     sp->lenth = sizeof(share_param_s);
     sp->share_version = SHARE_VERSION;
     
-    sp->rollback_flag = 0;
     sp->upgrade_part.flag = 0;
     return flush_share_data(sp);
 }

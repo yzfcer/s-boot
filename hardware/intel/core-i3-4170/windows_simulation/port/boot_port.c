@@ -99,7 +99,6 @@ w_err_t boot_medias_register(void)
     boot_media_register(&media_ram2);
     boot_media_register(&media_rom1);
     boot_media_register(&media_rom2);
-    //boot_media_print();
     return W_ERR_OK;
 }
 
@@ -111,7 +110,7 @@ w_err_t boot_parts_create(void)
     boot_part_create(PART_PARAM1,media,BT_PARA1_SIZE);
     boot_part_create(PART_PARAM2,media,BT_PARA2_SIZE);
     boot_part_create(PART_IMGPARA,media,IMG_PARA_SIZE);
-    boot_part_create(PART_ROMRUN,media,RAMRUN_SIZE);
+    boot_part_create(PART_SYSRUN,media,RAMRUN_SIZE);
     
     media = boot_media_get("rom2");
     boot_part_create(PART_IMG1,media,IMG1_SIZE);
@@ -121,11 +120,6 @@ w_err_t boot_parts_create(void)
     boot_part_create(PART_CACHE,media,CACHE_SIZE);
     boot_part_create(PART_SHARE,media,SHARE_SIZE);
     
-    media = boot_media_get("ram2");
-    boot_part_create(PART_RAMRUN,media,RAMRUN_SIZE);
-
-    //boot_part_print_detail();
-    //boot_part_print();
     return W_ERR_OK;
 }
 

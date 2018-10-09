@@ -53,7 +53,6 @@ static char *encty_type[] =
 static void print_img_head(img_head_s *head)
 {
     wind_printf("img head info:\r\n");
-	//wind_printf("board index:%d\r\n",(w_uint32_t)(&head->board_name)-(w_uint32_t)(&head->magic));
     wind_printf("board name     : %s\r\n",(char*)head->board_name);
     wind_printf("cpu arch       : %s\r\n",(char*)head->arch_name);
     wind_printf("CPU model      : %s\r\n",(char*)head->cpu_name);
@@ -177,57 +176,7 @@ w_int32_t check_img_valid(w_part_s *img)
 }
 
 
-
-
-
-
-
-
-w_int32_t roll_back_program(void)
-{
-    w_int32_t ret;
-    w_part_s *src,*dest,*tmp1;
-    w_part_s bin;
-    w_bool_t run_in_program1;
-    
-    //先将原来的程序拷贝到备份空间    
-    dest = boot_part_get(PART_IMG2);
-    src = boot_part_get(PART_IMG1);
-    ret = boot_part_copy_data(src,dest);
-    if(0 != ret)
-    {
-        wind_warn("roll back program failed.");
-        return -1;
-    }
-    
-    dest = boot_part_get(PART_ROMRUN);
-    src = boot_part_get(PART_IMG1);
-    run_in_program1 = boot_part_equal(dest,src);
-    if(run_in_program1)
-    {
-        tmp1 = boot_part_get(PART_ROMRUN);
-        tmp1->status = MEM_NORMAL;
-        tmp1->crc = src->crc;
-        tmp1->datalen= src->datalen;
-    }
-    else
-    {
-        dest = boot_part_get(PART_IMG1);
-        src = boot_part_get(PART_CACHE);
-        boot_part_copy_data(src,dest);
-        decrypt_img_data(src,&bin);
-        dest = boot_part_get(PART_ROMRUN);
-        ret = boot_part_copy_data(&bin,dest);
-        if(0 != ret)
-        {
-            wind_error("flush program to running space failed.");
-            return -1;
-        }
-    }
-    boot_param_flush();
-    return 0;
-}
-
+#if 0
 w_int32_t flush_img_to_ram(w_part_s *img)
 {
     w_int32_t ret;
@@ -247,7 +196,7 @@ w_int32_t flush_img_to_ram(w_part_s *img)
     }
     return 0;
 }
-
+#endif
 
 //先备份原来的程序，再烧录新程序到sys_program1和运行区
 w_int32_t flush_img_to_rom(w_part_s *img)
@@ -272,7 +221,7 @@ w_int32_t flush_img_to_rom(w_part_s *img)
     
     head = (img_head_s*)img->base;
     src = boot_part_get(PART_IMG1);
-    dest = boot_part_get(PART_ROMRUN);
+    dest = boot_part_get(PART_SYSRUN);
     run_in_program1 = boot_part_equal(src,dest);
     
     //烧录到sys_program1，如果同时也是运行空间，则先解密，在烧录
@@ -286,7 +235,7 @@ w_int32_t flush_img_to_rom(w_part_s *img)
             wind_warn("flush new program failed.");
             return -1;
         }
-        dest = boot_part_get(PART_ROMRUN);
+        dest = boot_part_get(PART_SYSRUN);
         dest->status = MEM_NORMAL;
         dest->crc = bin.crc;
         dest->datalen= bin.datalen;
@@ -303,7 +252,7 @@ w_int32_t flush_img_to_rom(w_part_s *img)
             return -1;
         }
         decrypt_img_data(img,&bin);
-        dest = boot_part_get(PART_ROMRUN);
+        dest = boot_part_get(PART_SYSRUN);
         ret = boot_part_copy_data(&bin,dest);
         if(0 != ret)
         {
@@ -322,7 +271,7 @@ w_int32_t flush_img_file(w_int16_t type,w_part_s *img)
     switch(type)
     {
         case MEDIA_TYPE_RAM:
-            ret = flush_img_to_ram(img);
+            //ret = flush_img_to_ram(img);
             break;
         case MEDIA_TYPE_ROM:
             ret = flush_img_to_rom(img);
@@ -391,12 +340,14 @@ w_int32_t clean_program(void)
     wind_printf("clearing program ...\r\n");
     code[idx++] = boot_part_get(PART_IMG1);
     code[idx++] = boot_part_get(PART_IMG2);
-    code[idx++] = boot_part_get(PART_ROMRUN);
+    code[idx++] = boot_part_get(PART_SYSRUN);
     code[idx++] = boot_part_get(PART_PARAM1);
     code[idx++] = boot_part_get(PART_PARAM2);
     
     for(i = 0;i < 5;i ++)
     {
+        if(!code[i])
+            continue;
         wind_notice("erase base 0x%x,lenth %d.",code[i]->base,code[i]->datalen);
         boot_part_erase(code[i]);
     }

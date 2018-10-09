@@ -137,7 +137,6 @@ static void wait_file_send_compete(void)
         //ret = wait_for_key_input(3,&ch,0);
     	feed_watchdog();
     	boot_delay(100);
-    	//ret = wind_std_input(&ch);
     	if(0 < wind_std_input(&ch))
         {
         	g_recvstat.stat = boot_get_sys_ms();
