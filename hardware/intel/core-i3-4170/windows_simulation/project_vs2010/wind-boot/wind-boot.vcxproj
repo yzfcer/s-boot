@@ -11,41 +11,38 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\..\src\boot\boot_check.h" />
+    <ClInclude Include="..\..\..\..\..\..\src\boot\boot_framework.h" />
+    <ClInclude Include="..\..\..\..\..\..\src\boot\boot_hw_if.h" />
+    <ClInclude Include="..\..\..\..\..\..\src\boot\boot_media.h" />
+    <ClInclude Include="..\..\..\..\..\..\src\boot\boot_param.h" />
+    <ClInclude Include="..\..\..\..\..\..\src\boot\boot_part.h" />
+    <ClInclude Include="..\..\..\..\..\..\src\boot\boot_test.h" />
+    <ClInclude Include="..\..\..\..\..\..\src\boot\menu_list.h" />
+    <ClInclude Include="..\..\..\..\..\..\src\boot\program_mgr.h" />
+    <ClInclude Include="..\..\..\..\..\..\src\boot\share_param.h" />
     <ClInclude Include="..\..\..\..\..\..\src\common\wind_crc32.h" />
     <ClInclude Include="..\..\..\..\..\..\src\common\wind_debug.h" />
+    <ClInclude Include="..\..\..\..\..\..\src\common\wind_encrypt.h" />
     <ClInclude Include="..\..\..\..\..\..\src\common\wind_string.h" />
-    <ClInclude Include="..\..\..\..\..\..\src\core\boot_check.h" />
-    <ClInclude Include="..\..\..\..\..\..\src\core\boot_framework.h" />
-    <ClInclude Include="..\..\..\..\..\..\src\core\boot_hw_if.h" />
-    <ClInclude Include="..\..\..\..\..\..\src\core\boot_media.h" />
-    <ClInclude Include="..\..\..\..\..\..\src\core\boot_param.h" />
-    <ClInclude Include="..\..\..\..\..\..\src\core\boot_part.h" />
-    <ClInclude Include="..\..\..\..\..\..\src\core\boot_test.h" />
-    <ClInclude Include="..\..\..\..\..\..\src\core\mem_map.h" />
-    <ClInclude Include="..\..\..\..\..\..\src\core\menu_list.h" />
-    <ClInclude Include="..\..\..\..\..\..\src\core\phy_mem.h" />
-    <ClInclude Include="..\..\..\..\..\..\src\core\program_mgr.h" />
-    <ClInclude Include="..\..\..\..\..\..\src\core\share_param.h" />
-    <ClInclude Include="..\..\..\..\..\..\src\encrypt\encrypt.h" />
     <ClInclude Include="..\..\port\boot_port.h" />
     <ClInclude Include="..\..\port\wind_type.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\..\src\boot\boot_check.c" />
+    <ClCompile Include="..\..\..\..\..\..\src\boot\boot_framework.c" />
+    <ClCompile Include="..\..\..\..\..\..\src\boot\boot_hw_if.c" />
+    <ClCompile Include="..\..\..\..\..\..\src\boot\boot_media.c" />
+    <ClCompile Include="..\..\..\..\..\..\src\boot\boot_param.c" />
+    <ClCompile Include="..\..\..\..\..\..\src\boot\boot_part.c" />
+    <ClCompile Include="..\..\..\..\..\..\src\boot\boot_test.c" />
+    <ClCompile Include="..\..\..\..\..\..\src\boot\menu_list.c" />
+    <ClCompile Include="..\..\..\..\..\..\src\boot\program_mgr.c" />
+    <ClCompile Include="..\..\..\..\..\..\src\boot\share_param.c" />
     <ClCompile Include="..\..\..\..\..\..\src\common\wind_crc32.c" />
     <ClCompile Include="..\..\..\..\..\..\src\common\wind_debug.c" />
+    <ClCompile Include="..\..\..\..\..\..\src\common\wind_encrypt.c" />
     <ClCompile Include="..\..\..\..\..\..\src\common\wind_string.c" />
-    <ClCompile Include="..\..\..\..\..\..\src\core\boot_check.c" />
-    <ClCompile Include="..\..\..\..\..\..\src\core\boot_framework.c" />
-    <ClCompile Include="..\..\..\..\..\..\src\core\boot_hw_if.c" />
-    <ClCompile Include="..\..\..\..\..\..\src\core\boot_media.c" />
-    <ClCompile Include="..\..\..\..\..\..\src\core\boot_param.c" />
-    <ClCompile Include="..\..\..\..\..\..\src\core\boot_part.c" />
-    <ClCompile Include="..\..\..\..\..\..\src\core\boot_test.c" />
-    <ClCompile Include="..\..\..\..\..\..\src\core\menu_list.c" />
-    <ClCompile Include="..\..\..\..\..\..\src\core\program_mgr.c" />
-    <ClCompile Include="..\..\..\..\..\..\src\core\share_param.c" />
-    <ClCompile Include="..\..\..\..\..\..\src\encrypt\encrypt.c" />
-    <ClCompile Include="..\..\..\..\..\..\src\encrypt\rc4.c" />
     <ClCompile Include="..\..\port\boot_port.c" />
     <ClCompile Include="..\..\port\media_ram1.c" />
     <ClCompile Include="..\..\port\media_ram2.c" />
@@ -79,7 +76,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)..\..\..\..\..\..\src\core;$(ProjectDir)..\..\..\..\..\..\hardware\intel\core-i3-4170\windows_simulation\port;$(ProjectDir)..\..\..\..\..\..\src\encrypt;$(ProjectDir)..\..\..\..\..\..\src\common;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)..\..\..\..\..\..\src\boot;$(ProjectDir)..\..\..\..\..\..\hardware\intel\core-i3-4170\windows_simulation\port;$(ProjectDir)..\..\..\..\..\..\src\encrypt;$(ProjectDir)..\..\..\..\..\..\src\common;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

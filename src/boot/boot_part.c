@@ -56,10 +56,11 @@ w_bool_t  boot_part_create(const char *name,w_media_s *md,w_uint32_t size)
     wind_strcpy(part->media_name,md->name);
     part->mtype = md->mtype;
     part->used = 1;
+    part->status = MEM_NULL;
+    part->time_mark = 0;
     part->base = md->offset;
     part->size = size;
     part->blksize = md->blksize;
-    part->status = MEM_NULL;
     part->datalen = 0;
     part->offset = 0;
     part->crc = 0;

@@ -47,6 +47,7 @@ typedef struct
 }sysparam_part_s;
 
 
+w_err_t sp_init_share_param(void);
 
 w_err_t sp_set_upgrade_param(upgrade_info_s *part);
 
@@ -56,7 +57,6 @@ w_err_t sp_set_sysparam_param(sysparam_part_s *sysparam);
 
 w_err_t sp_get_sysparam_param(sysparam_part_s *sysparam);
 
-w_err_t sp_init_share_param(void);
 
 #ifdef __cplusplus
 }

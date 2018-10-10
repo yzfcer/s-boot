@@ -33,9 +33,10 @@ typedef struct
     char name[PART_NAME_LEN];
     //w_media_s *media;
     char media_name[MEDIA_NAME_LEN];
-    w_uint8_t mtype;
-    w_uint8_t used;
-    w_uint16_t status;
+    w_uint8_t mtype:1;
+    w_uint8_t used:1;
+    w_uint8_t status:2;
+    w_uint16_t time_mark;
     w_uint32_t base;
     w_uint32_t size;
     w_uint32_t blksize;

@@ -71,16 +71,20 @@ w_int32_t get_menu_go_direction(void)
 
 
 
-static void download_img_to_rom(void)
+static void download_img(void)
 {
     download_img_file(MEDIA_TYPE_ROM);    
 }
 
-
-
-static void download_filesystem(void)
+static void download_file_system(void)
 {
-    wind_warn("s-boot can NOT support file system right now.");
+    wind_warn("wind-boot can NOT support file system right now.");
+}
+
+
+static void download_to_part(void)
+{
+    wind_warn("wind-boot can NOT support file system right now.");
 }
 
 static void set_debug_mode(void)
@@ -184,17 +188,18 @@ static void exit_and_save(void)
     if(ret != 0)
     {
         wind_printf("write param fialed.\r\n");
-    }    //这里是否还需要对参数做进一步的验证
+    }    
     exit_menu();
 }
 
 
 static w_menu_tb_s g_menu_handleTB[] = 
 {
-    {'1',0,0,"download img file to ROM",download_img_to_rom},
-    {'2',0,0,"download file system",download_filesystem},
-    {'3',0,0,"show media map",show_media_map},
-    {'4',0,0,"show program status",show_program_status},
+    {'1',0,0,"download img file",download_img},
+    {'2',0,0,"download file system",download_to_part},
+    {'3',0,0,"download to part",download_to_part},
+    {'4',0,0,"show media map",show_media_map},
+    {'5',0,0,"show program status",show_program_status},
     {'b',2,2,"set debug mode",set_debug_mode},
     {'k',0,0,"lock MCU chip",lock_mcu},
     {'r',2,2,"clear boot params",clear_boot_param},

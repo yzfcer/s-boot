@@ -30,7 +30,7 @@ w_int32_t wind_std_input(w_uint8_t *buf,w_int32_t len);
 w_int32_t boot_receive_img(w_part_s *part);
 
 w_uint32_t boot_get_sys_ms(void);
-void boot_jump_to_app(void);
+void boot_jump_to_system(void);
 
 w_err_t boot_medias_register(void);
 w_err_t boot_parts_create(void);

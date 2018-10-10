@@ -58,7 +58,7 @@ static w_int32_t boot_init(void)
     return 0;
 }
 
-static w_int32_t boot_app_debug_check(void)
+static w_int32_t boot_debug_mode_check(void)
 {
     boot_param_s *bp = boot_param_get();
     if(bp->debug_mode)
@@ -119,7 +119,7 @@ static w_int32_t boot_chip_lock_check(void)
 
 
 
-static w_int32_t boot_self_check(void)
+static w_int32_t boot_img_valid_check(void)
 {
     w_int32_t ret;
     ret = check_rom_programs();
@@ -145,7 +145,7 @@ static w_int32_t  boot_upgrade_check(void)
     
     if((!g_upgrade_info.flag))
     {
-        wind_notice("upgrade flags is invalid,need NOT upgrade App.");
+        wind_notice("upgrade flags is invalid,need NOT update image.");
         go_to_next_step();
         return 0;
     }
@@ -210,7 +210,7 @@ static w_int32_t boot_wait_key_press(void)
         wind_printf("\r\n");
         return 0;
     }
-    set_boot_status(BOOT_LOAD_APP);
+    set_boot_status(BOOT_LOAD_IMG);
     wind_printf("\r\n");
     return 0;
 }
@@ -224,13 +224,13 @@ static w_int32_t boot_menu_list(void)
         set_boot_status(BOOT_INIT);
     return 0;
 }
-static w_int32_t boot_load_app(void)
+static w_int32_t boot_load_img(void)
 {
     w_mem_status_e mem_stat = MEM_ERROR;
     w_part_s *part = W_NULL,*tmp;
     boot_param_s *bp = W_NULL; 
 
-    wind_notice("begin to load App to running space...");
+    wind_notice("begin to load image to running space...");
     bp = (boot_param_s *)boot_param_get();
     part = boot_part_get(PART_SYSRUN);
     
@@ -241,7 +241,7 @@ static w_int32_t boot_load_app(void)
         return -1;
     }
     
-    // debug模式不需要检查，直接调入App
+    // debug模式不需要检查，直接调入image
     if(bp->debug_mode)
     {
         go_to_next_step();
@@ -279,7 +279,7 @@ static w_int32_t boot_load_app(void)
 
     if(MEDIA_TYPE_ROM == part->mtype)
     {
-        wind_notice("need not load App to a NORFlash ROM.");
+        wind_notice("need not load image to ROM.");
         set_boot_status(BOOT_SET_APP_PARAM);
         return 0;
     }
@@ -295,7 +295,7 @@ static w_int32_t boot_load_app(void)
 static w_int32_t boot_set_app_param(void)
 {
     w_part_s *tmp;
-    wind_notice("begin to set App params...");
+    wind_notice("begin to set image ...");
     sp_init_share_param();
     
     tmp = boot_part_get(PART_CACHE);
@@ -317,8 +317,8 @@ static w_int32_t boot_set_app_param(void)
     wind_printf("sysparam lenth:0x%x\r\n",g_sysparam_part.size);
     sp_set_sysparam_param(&g_sysparam_part);
     
-    wind_notice("set App params OK.");
-    set_boot_status(BOOT_JUMP_TO_APP);
+    wind_notice("set image params OK.");
+    set_boot_status(BOOT_RUN_SYSTEM);
     return 0;
 }
 
@@ -333,12 +333,13 @@ static w_int32_t boot_error_handle(void)
     }
     return 0;
 }
+
 static w_int32_t boot_run_system(void)
 {
-	wind_notice("begin to jump to App space...");
+	wind_notice("begin to jump to image space...");
 	wind_printf("\r\n\r\n\r\n");
     boot_exit_hook();
-	boot_jump_to_app();
+	boot_jump_to_system();
 	return 0;
 }
 
@@ -346,18 +347,18 @@ static w_int32_t boot_run_system(void)
 boot_handle_TB g_status_handTB[] = 
 {
     {BOOT_INIT,"boot init",boot_init},
-    {BOOT_FIRST_CHECK,"first_check",boot_first_check},   
-    {BOOT_APP_DEBUG_CHECK,"app_debug_check",boot_app_debug_check},
+    {BOOT_FIRST_CHECK,"first run chack",boot_first_check},   
+    {BOOT_DEBUG_MODE_CHECK,"debug mode check",boot_debug_mode_check},
 
-    {BOOT_CHIP_LOCK_CHECK,"chip_lock_check",boot_chip_lock_check},
-    {BOOT_SELF_CHECK,"self_check",boot_self_check},
-    {BOOT_UPGRADE_CHECK,"upgrade_check",boot_upgrade_check},
+    {BOOT_CHIP_LOCK_CHECK,"chip lock status check",boot_chip_lock_check},
+    {BOOT_IMG_VALID_CHECK,"image valid check",boot_img_valid_check},
+    {BOOT_UPGRADE_CHECK,"upgrade status check",boot_upgrade_check},
     
-    {BOOT_WAIT_KEY_PRESS,"wait_key_press",boot_wait_key_press},
-    {BOOT_MENU_LIST,"menu_list",boot_menu_list},
-    {BOOT_LOAD_APP,"load_app",boot_load_app},
-    {BOOT_SET_APP_PARAM,"set_app_param",boot_set_app_param},
-    {BOOT_JUMP_TO_APP,"run_system",boot_run_system},
+    {BOOT_WAIT_KEY_PRESS,"wait for any key press",boot_wait_key_press},
+    {BOOT_MENU_LIST,"enter menu list",boot_menu_list},
+    {BOOT_LOAD_IMG,"load image",boot_load_img},
+    {BOOT_SET_APP_PARAM,"set app param",boot_set_app_param},
+    {BOOT_RUN_SYSTEM,"run system",boot_run_system},
     {BOOT_ERROR,"error",boot_error_handle},
 };
 

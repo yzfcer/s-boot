@@ -23,7 +23,7 @@
 #include "program_mgr.h"
 #include "boot_part.h"
 #include "boot_hw_if.h"
-#include "encrypt.h"
+#include "wind_encrypt.h"
 #include "wind_string.h"
 #ifdef __cplusplus
 extern "C" {
@@ -115,7 +115,7 @@ w_int32_t decrypt_img_data(w_part_s *img,w_part_s *bin)
     bin->datalen = img->datalen - head->head_len;
     wind_notice("decrypt img file...");
     wind_debug("decrypt_data base:0x%x,lenth:%d",bin->base,bin->datalen);
-	len = decrypt_data(head->encry_type,(w_uint8_t *)bin->base,bin->datalen);
+	len = wind_decrypt((w_uint8_t *)bin->base,bin->datalen);
     if(len < 0)
     {
         wind_warn("decrypt img file failed.");

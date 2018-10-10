@@ -12,11 +12,12 @@
        Modification:
 **********************************************************************************/
 #include "wind_type.h"
-#include "encrypt.h"
-static w_uint8_t rc4_key[16] = ENCRYPT_KEY;
-static w_uint8_t rc4_sbox[256] = { 0 };
+#include "wind_debug.h"
+#include "wind_encrypt.h"
+//static w_uint8_t rc4_key[16] = ENCRYPT_KEY;
+static w_uint8_t rc4_sbox[256] = {0};
 
-static void rc4_init(w_uint8_t*sbox, w_uint8_t *key, w_int32_t Len)
+static void rc4_init(w_uint8_t*sbox, w_uint8_t *key, w_int32_t len)
 {
     w_int32_t i = 0, j = 0;
     w_uint8_t k[256] = { 0 };
@@ -24,7 +25,7 @@ static void rc4_init(w_uint8_t*sbox, w_uint8_t *key, w_int32_t Len)
     for (i = 0; i<256; i++)
     {
         sbox[i] = (w_uint8_t)i;
-        k[i] = key[i%Len];
+        k[i] = key[i%len];
     }
     for (i = 0; i<256; i++)
     {
@@ -34,14 +35,12 @@ static void rc4_init(w_uint8_t*sbox, w_uint8_t *key, w_int32_t Len)
         sbox[j] = tmp;
     }
 }
- 
-w_int32_t RC4_crypt(w_uint8_t *data, w_int32_t len)
+
+static w_int32_t rc4_crypt(w_uint8_t *data, w_int32_t len)
 {
     w_int32_t i = 0, j = 0, t = 0;
     w_int32_t k = 0;
     w_uint8_t tmp;
-    
-    rc4_init(rc4_sbox, (w_uint8_t*)rc4_key, 16);
     for (k = 0; k<len; k++)
     {
         i = (i + 1) % 256;
@@ -55,3 +54,19 @@ w_int32_t RC4_crypt(w_uint8_t *data, w_int32_t len)
     return len;
 }
  
+w_err_t wind_encrypt_init(w_uint8_t *passwd, w_int32_t len)
+{
+    WIND_ASSERT_RETURN(passwd != W_NULL,W_ERR_PTR_NULL);
+    WIND_ASSERT_RETURN(len > ENCRYPT_PASSWD_MIN_LEN,W_ERR_INVALID);
+    rc4_init(rc4_sbox,passwd,len);
+    return W_ERR_OK;
+
+}
+w_int32_t wind_encrypt(w_uint8_t *data, w_int32_t len)
+{
+    return rc4_crypt(data,len);
+}
+w_int32_t wind_decrypt(w_uint8_t *data, w_int32_t len)
+{
+    return rc4_crypt(data,len);
+}

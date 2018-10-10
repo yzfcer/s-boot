@@ -14,7 +14,7 @@
     <Filter Include="comman">
       <UniqueIdentifier>{a2b2f458-be6a-45f3-b571-7251fcf587c7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core">
+    <Filter Include="boot">
       <UniqueIdentifier>{e222ddd9-de70-4442-8394-11c3354a3e2a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -25,45 +25,6 @@
     <ClInclude Include="..\..\port\boot_port.h">
       <Filter>port</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\core\boot_check.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\core\boot_framework.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\core\boot_hw_if.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\core\boot_media.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\core\boot_param.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\core\boot_part.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\core\boot_test.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\core\mem_map.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\core\menu_list.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\core\phy_mem.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\core\program_mgr.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\core\share_param.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\encrypt\encrypt.h">
-      <Filter>encrypt</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\src\common\wind_crc32.h">
       <Filter>comman</Filter>
     </ClInclude>
@@ -71,6 +32,39 @@
       <Filter>comman</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\src\common\wind_string.h">
+      <Filter>comman</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\src\boot\boot_check.h">
+      <Filter>boot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\src\boot\boot_framework.h">
+      <Filter>boot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\src\boot\boot_hw_if.h">
+      <Filter>boot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\src\boot\boot_media.h">
+      <Filter>boot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\src\boot\boot_param.h">
+      <Filter>boot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\src\boot\boot_part.h">
+      <Filter>boot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\src\boot\boot_test.h">
+      <Filter>boot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\src\boot\menu_list.h">
+      <Filter>boot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\src\boot\program_mgr.h">
+      <Filter>boot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\src\boot\share_param.h">
+      <Filter>boot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\src\common\wind_encrypt.h">
       <Filter>comman</Filter>
     </ClInclude>
   </ItemGroup>
@@ -90,42 +84,6 @@
     <ClCompile Include="..\..\port\media_rom2.c">
       <Filter>port</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\src\core\boot_check.c">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\src\core\boot_framework.c">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\src\core\boot_hw_if.c">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\src\core\boot_media.c">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\src\core\boot_param.c">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\src\core\boot_part.c">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\src\core\boot_test.c">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\src\core\menu_list.c">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\src\core\program_mgr.c">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\src\core\share_param.c">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\src\encrypt\encrypt.c">
-      <Filter>encrypt</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\src\encrypt\rc4.c">
-      <Filter>encrypt</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\src\common\wind_crc32.c">
       <Filter>comman</Filter>
     </ClCompile>
@@ -133,6 +91,39 @@
       <Filter>comman</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\src\common\wind_string.c">
+      <Filter>comman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\src\boot\boot_check.c">
+      <Filter>boot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\src\boot\boot_framework.c">
+      <Filter>boot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\src\boot\boot_hw_if.c">
+      <Filter>boot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\src\boot\boot_media.c">
+      <Filter>boot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\src\boot\boot_param.c">
+      <Filter>boot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\src\boot\boot_part.c">
+      <Filter>boot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\src\boot\boot_test.c">
+      <Filter>boot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\src\boot\menu_list.c">
+      <Filter>boot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\src\boot\program_mgr.c">
+      <Filter>boot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\src\boot\share_param.c">
+      <Filter>boot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\src\common\wind_encrypt.c">
       <Filter>comman</Filter>
     </ClCompile>
   </ItemGroup>

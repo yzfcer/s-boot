@@ -150,7 +150,7 @@ w_int32_t check_rom_programs(void)
     wind_notice("begin to check programs...");
     for(i = 0;i < sizeof(code)/sizeof(w_part_s*);i ++)
     {
-        if(!code[idx++])
+        if(!code[i])
             continue;
         is_ok = boot_part_check(code[i]);
         if(!is_ok && (MEM_ERROR != code[i]->status))

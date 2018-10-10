@@ -124,7 +124,7 @@ w_err_t boot_parts_create(void)
 }
 
 
-void boot_jump_to_app(void)
+void boot_jump_to_system(void)
 {
     char ch;
     while(1)
