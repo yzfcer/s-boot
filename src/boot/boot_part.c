@@ -41,30 +41,31 @@ w_err_t boot_part_init(void)
     return W_ERR_OK;
 }
 
-w_bool_t  boot_part_create(const char *name,w_media_s *md,w_uint32_t size)
+w_bool_t  boot_part_create(const char *name,w_media_s *media,w_uint32_t size)
 {
     w_part_s *part;
     wind_notice("create part:%s",name);
     WIND_ASSERT_RETURN(name != W_NULL,B_FALSE);
     WIND_ASSERT_RETURN(wind_strlen(name) < PART_NAME_LEN,B_FALSE);
-    WIND_ASSERT_RETURN(md != W_NULL,B_FALSE);
-    WIND_ASSERT_RETURN(size < md->size,B_FALSE);
-    WIND_ASSERT_RETURN(size + md->offset <= md->size,B_FALSE);
+    WIND_ASSERT_RETURN(media != W_NULL,B_FALSE);
+    WIND_ASSERT_RETURN(size > media->blksize,B_FALSE);
+    WIND_ASSERT_RETURN(size < media->size,B_FALSE);
+    WIND_ASSERT_RETURN(size + media->offset <= media->size,B_FALSE);
     part = get_null_part();
     WIND_ASSERT_RETURN(part != W_NULL,B_FALSE);
     wind_strcpy(part->name,name);
-    wind_strcpy(part->media_name,md->name);
-    part->mtype = md->mtype;
+    wind_strcpy(part->media_name,media->name);
+    part->mtype = media->mtype;
     part->used = 1;
     part->status = MEM_NULL;
     part->time_mark = 0;
-    part->base = md->offset;
+    part->base = media->offset;
     part->size = size;
-    part->blksize = md->blksize;
+    part->blksize = media->blksize;
     part->datalen = 0;
     part->offset = 0;
     part->crc = 0;
-    md->offset += size;
+    media->offset += size;
     return B_TRUE;
 }
 
@@ -176,6 +177,20 @@ w_err_t boot_part_erase(w_part_s *part)
     WIND_ASSERT_RETURN(blkcnt > 0,W_ERR_FAIL);
     return W_ERR_OK;
 }
+
+void boot_part_reset_ram(void)
+{
+    w_int32_t i;
+    for(i = 0;i < PART_COUNT;i ++)
+    {
+        if(g_part[i].used && (g_part[i].mtype == MEDIA_TYPE_RAM))
+        {
+            g_part[i].datalen = 0;
+            g_part[i].crc = 0;
+        }
+    }
+}
+
 
 void boot_part_print(void)
 {
@@ -312,6 +327,8 @@ w_bool_t boot_part_equal(w_part_s *src,w_part_s *dest)
         return B_FALSE;
     return B_TRUE;
 }
+
+
 
 w_bool_t boot_part_check(w_part_s *part)
 {

@@ -176,27 +176,6 @@ w_int32_t check_img_valid(w_part_s *img)
 }
 
 
-#if 0
-w_int32_t flush_img_to_ram(w_part_s *img)
-{
-    w_int32_t ret;
-    w_part_s bin;
-    w_part_s *dest;
-    decrypt_img_data(img,&bin);
-    //这里需要修改，不能直接使用img，因为会修改程序缓存的起始地址，
-    //另外需要重新考虑程序运行在RAM中间时，程序因该怎样存储
-    
-    wind_notice("begin to copy code to memory...");
-    dest = boot_part_get(PART_RAMRUN);
-    ret = boot_part_copy_data(&bin,dest);
-    if(0 != ret)
-    {
-        wind_warn("copy img to running space failed.");
-        return -1;
-    }
-    return 0;
-}
-#endif
 
 //先备份原来的程序，再烧录新程序到sys_program1和运行区
 w_int32_t flush_img_to_rom(w_part_s *img)
@@ -265,37 +244,11 @@ w_int32_t flush_img_to_rom(w_part_s *img)
 }
 
 
-w_int32_t flush_img_file(w_int16_t type,w_part_s *img)
-{
-    w_int32_t ret;   
-    switch(type)
-    {
-        case MEDIA_TYPE_RAM:
-            //ret = flush_img_to_ram(img);
-            break;
-        case MEDIA_TYPE_ROM:
-            ret = flush_img_to_rom(img);
-            break;
-        default:
-            wind_error("unknown memory type:%d",type);
-            ret = -1;
-            break;
-    }
-    if(0 != ret)
-    {
-        wind_warn("flush img data failed.");
-        (void)boot_param_from_rom();
-        return ret;
-    }
-    if(MEDIA_TYPE_ROM == type)
-        (void)boot_param_flush();
-    return ret;
-}
 
-w_int32_t download_img_file(w_int16_t type)
+w_err_t download_img_file(w_part_s *part,w_int32_t count)
 {
-    w_int32_t ret,len;
-    w_part_s *img;
+    w_int32_t ret,len,i;
+    w_part_s *cache;
     boot_param_s *bp = (boot_param_s*)boot_param_get();
 
     if(bp->debug_mode)
@@ -303,30 +256,38 @@ w_int32_t download_img_file(w_int16_t type)
         wind_notice("device can NOT download in debug mode ,set it to normal mode first");
         return -1;
     }
-    img = boot_part_get(PART_CACHE);
+    cache = boot_part_get(PART_CACHE);
     wind_printf("begin to receive file data,please wait.\r\n");
-    len = boot_receive_img(img);
+    len = boot_receive_img(cache);
     if(len <= 0)
     {
-        wind_error("receive img data failed.");
+        wind_error("receive cache data failed.");
         return -1;
     }
 
-    img->datalen = (w_uint32_t)len;
-    wind_notice("img file lenth:%d",img->datalen);
-    ret = check_img_valid(img);
+    cache->datalen = (w_uint32_t)len;
+    boot_part_calc_crc(cache);
+    
+    wind_notice("cache file lenth:%d",cache->datalen);
+#if 0
+    ret = check_img_valid(cache);
     if(ret != 0)
     {
-        wind_error("check img file ERROR");
+        wind_error("check cache file ERROR");
         return -1; 
     }
-    ret = flush_img_file(type,img);
-    if(0 != ret)
+#endif
+    for(i = 0;i < count;i ++)
     {
-        wind_warn("flush data to %s failed.",img->name);
-        return -1;
+        ret = boot_part_copy_data(cache,&part[i]);
+        if(0 != ret)
+        {
+            wind_warn("flush data to %s failed.",cache->name);
+            return -1;
+        }
     }
-    wind_notice("img flush OK.");
+    boot_param_flush();
+    wind_notice("cache flush OK.");
     return 0;
 }
 

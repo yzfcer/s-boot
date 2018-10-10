@@ -16,7 +16,7 @@
 #include "wind_string.h"
 #include "wind_debug.h"
 //硬件RAM数量和基地址和空间大小定义
-#define ROM1_SIZE 0x400000
+#define ROM1_SIZE 0x80000
 #define ROM1_BLKSIZE 512
 static w_uint8_t g_rom1[ROM1_SIZE];
 

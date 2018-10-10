@@ -16,7 +16,7 @@
 #include "wind_debug.h"
 //硬件RAM数量和基地址和空间大小定义
 #define RAM1_BASE 0x20000000
-#define RAM1_SIZE 0x400000
+#define RAM1_SIZE 0x100000
 #define RAM1_BLKSIZE 512
 static w_uint8_t g_ram1[RAM1_SIZE];
 

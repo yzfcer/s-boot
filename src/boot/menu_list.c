@@ -28,6 +28,23 @@
 extern "C" {
 #endif
 
+static char get_key(w_int32_t index)
+{
+    WIND_ASSERT_RETURN(index > 0,0);
+    if(index < 10)
+        return (char)(index + 0x30);
+    else 
+        return (char)(index - 10 + 0x60);
+}
+
+static w_int32_t get_index(char key)
+{
+    if(key > 0x30 && key < 0x3a)
+        return (char)(key - 0x30);
+    else if(key > 0x60 && key < 0x7a)
+        return (char)(key - 0x60);
+    return -1;
+}
 
 static w_int32_t is_string_equal(char *str1,char *str2,w_int32_t len)
 {
@@ -69,22 +86,78 @@ w_int32_t get_menu_go_direction(void)
     return g_go_ahead;
 }
 
-
-
-static void download_img(void)
+static w_part_s * get_img_part(void)
 {
-    download_img_file(MEDIA_TYPE_ROM);    
+    w_part_s *part[2];
+    part[0] = boot_part_get(PART_IMG1);
+    part[1] = boot_part_get(PART_IMG2);
+    if(!part[0] && part[1])
+        return W_NULL;
+    if(!part[0])
+        return part[1];
+    if(!part[1])
+        return part[0];
+    if(part[0]->time_mark <= part[1]->time_mark)
+    {
+        part[0]->time_mark = part[1]->time_mark + 1;
+        return part[0];
+    }
+    else
+    {
+        part[1]->time_mark = part[0]->time_mark + 1;
+        return part[1];
+    }
+}
+static w_err_t download_to_img_part(void)
+{
+    w_part_s *part[2],*tmp;
+    part[0] = boot_part_get(PART_SYSRUN);
+    WIND_ASSERT_RETURN(part[0] != W_NULL,W_ERR_FAIL);
+    part[1] = boot_part_get(PART_SYSRUN);
+    if(part[1] != W_NULL)
+    {
+        tmp = part[0];
+        part[0] = part[1];
+        part[1] = tmp;
+    }
+    download_img_file(part[0],2);
 }
 
-static void download_file_system(void)
+static w_err_t download_to_fs_part(void)
 {
-    wind_warn("wind-boot can NOT support file system right now.");
+    w_part_s *part = boot_part_get(PART_FS);
+    WIND_ASSERT_RETURN(part != W_NULL,W_ERR_NOT_SUPPORT);
+    return download_img_file(part,1);
 }
 
 
-static void download_to_part(void)
+static w_err_t download_to_any_part(void)
 {
-    wind_warn("wind-boot can NOT support file system right now.");
+    char ch;
+    w_int32_t i,index = 1,ret;
+    w_part_s *part;
+    part = boot_part_get_list();
+    WIND_ASSERT_RETURN(part != W_NULL,W_ERR_FAIL);
+    
+    wind_printf("choose part to download:\r\n");
+    for(i = 0;i < PART_COUNT;i ++)
+    {
+        if(part[i].used)
+            wind_printf("[%c] %s\r\n",get_key(i+1),part[i].name);
+    }
+    ret = wait_for_key_input(10,&ch,0);
+    if(ret != 0)
+    {
+        wind_notice("wait for input timeout.\r\n");
+        return W_ERR_TIMEOUT;
+    }
+    
+    index = get_index(ch);
+    if(index <= 0)
+        return W_ERR_FAIL;
+    wind_printf("now download to part:%s\r\n",part[index-1].name);
+    part = boot_part_get(part[index-1].name);
+    return download_img_file(part,1);
 }
 
 static void set_debug_mode(void)
@@ -195,9 +268,9 @@ static void exit_and_save(void)
 
 static w_menu_tb_s g_menu_handleTB[] = 
 {
-    {'1',0,0,"download img file",download_img},
-    {'2',0,0,"download file system",download_to_part},
-    {'3',0,0,"download to part",download_to_part},
+    {'1',0,0,"download img file",download_to_img_part},
+    {'2',0,0,"download file system",download_to_fs_part},
+    {'3',0,0,"download to any part",download_to_any_part},
     {'4',0,0,"show media map",show_media_map},
     {'5',0,0,"show program status",show_program_status},
     {'b',2,2,"set debug mode",set_debug_mode},

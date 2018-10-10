@@ -15,7 +15,7 @@
 #include "wind_string.h"
 #include "wind_debug.h"
 
-#define RAM2_SIZE 0x100000
+#define RAM2_SIZE 0x40000
 #define RAM2_BLKSIZE 512
 static w_uint8_t g_ram2[RAM2_SIZE];
 

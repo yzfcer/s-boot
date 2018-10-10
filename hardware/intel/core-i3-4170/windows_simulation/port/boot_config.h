@@ -39,8 +39,7 @@ extern "C" {
 #define IMG1_SIZE 0x40000
 #define IMG2_SIZE 0x40000
 #define IMG_PARA_SIZE 0x2000
-#define FS_SIZE 0
-#define RUN_SIZE IMG1_SIZE
+#define FS_SIZE 0x50000
 
 /***************************************************************
  wind-boot需要定义如下的RAM数据存储空间:
@@ -51,7 +50,7 @@ extern "C" {
 
 #define SHARE_SIZE 0x1000
 #define CACHE_SIZE 0x40000
-#define RAMRUN_SIZE 0xC0000
+#define SYSRUN_SIZE 0x10000
 
 
 //使能debug信息打印功能

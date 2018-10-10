@@ -30,6 +30,7 @@ static w_int32_t param_lenth(void)
 {
     return sizeof(boot_param_s)+PART_COUNT*sizeof(w_part_s);
 }
+
 static void upate_bootparam_crc(w_uint8_t *buff)
 {
     w_uint32_t *crc;
@@ -142,6 +143,7 @@ w_int32_t boot_param_read(void)
             wind_memcpy(&g_bootparam,buff,sizeof(boot_param_s));
             pt = boot_part_get_list();
             wind_memcpy((void*)pt,&buff[sizeof(boot_param_s)],PART_COUNT*sizeof(w_part_s));
+            boot_part_reset_ram();
             break;
         }
         else
