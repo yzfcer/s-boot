@@ -245,7 +245,7 @@ w_int32_t flush_img_to_rom(w_part_s *img)
 
 
 
-w_err_t download_img_file(w_part_s *part,w_int32_t count)
+w_err_t download_img_file(w_part_s **part,w_int32_t count)
 {
     w_int32_t ret,len,i;
     w_part_s *cache;
@@ -279,7 +279,7 @@ w_err_t download_img_file(w_part_s *part,w_int32_t count)
 #endif
     for(i = 0;i < count;i ++)
     {
-        ret = boot_part_copy_data(cache,&part[i]);
+        ret = boot_part_copy_data(cache,part[i]);
         if(0 != ret)
         {
             wind_warn("flush data to %s failed.",cache->name);

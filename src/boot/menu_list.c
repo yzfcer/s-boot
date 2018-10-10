@@ -113,21 +113,21 @@ static w_err_t download_to_img_part(void)
     w_part_s *part[2],*tmp;
     part[0] = boot_part_get(PART_SYSRUN);
     WIND_ASSERT_RETURN(part[0] != W_NULL,W_ERR_FAIL);
-    part[1] = boot_part_get(PART_SYSRUN);
+    part[1] = get_img_part();
     if(part[1] != W_NULL)
     {
         tmp = part[0];
         part[0] = part[1];
         part[1] = tmp;
     }
-    download_img_file(part[0],2);
+    download_img_file(part,2);
 }
 
 static w_err_t download_to_fs_part(void)
 {
     w_part_s *part = boot_part_get(PART_FS);
     WIND_ASSERT_RETURN(part != W_NULL,W_ERR_NOT_SUPPORT);
-    return download_img_file(part,1);
+    return download_img_file(&part,1);
 }
 
 
@@ -145,7 +145,7 @@ static w_err_t download_to_any_part(void)
         if(part[i].used)
             wind_printf("[%c] %s\r\n",get_key(i+1),part[i].name);
     }
-    ret = wait_for_key_input(10,&ch,0);
+    ret = wait_for_key_input(20,&ch,0);
     if(ret != 0)
     {
         wind_notice("wait for input timeout.\r\n");
@@ -157,7 +157,7 @@ static w_err_t download_to_any_part(void)
         return W_ERR_FAIL;
     wind_printf("now download to part:%s\r\n",part[index-1].name);
     part = boot_part_get(part[index-1].name);
-    return download_img_file(part,1);
+    return download_img_file(&part,1);
 }
 
 static void set_debug_mode(void)
