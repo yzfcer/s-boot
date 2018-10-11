@@ -41,7 +41,7 @@ w_err_t boot_part_init(void)
     return W_ERR_OK;
 }
 
-w_bool_t  boot_part_create(const char *name,w_media_s *media,w_uint32_t size)
+w_bool_t  boot_part_create(const char *name,w_media_s *media,w_uint32_t size,w_uint8_t encrypt)
 {
     w_part_s *part;
     wind_notice("create part:%s",name);
@@ -57,6 +57,7 @@ w_bool_t  boot_part_create(const char *name,w_media_s *media,w_uint32_t size)
     wind_strcpy(part->media_name,media->name);
     part->mtype = media->mtype;
     part->used = 1;
+    part->encrypt = encrypt?1:0;
     part->status = MEM_NULL;
     part->time_mark = 0;
     part->base = media->offset;

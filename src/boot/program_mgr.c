@@ -269,14 +269,7 @@ w_err_t download_img_file(w_part_s **part,w_int32_t count)
     boot_part_calc_crc(cache);
     
     wind_notice("cache file lenth:%d",cache->datalen);
-#if 0
-    ret = check_img_valid(cache);
-    if(ret != 0)
-    {
-        wind_error("check cache file ERROR");
-        return -1; 
-    }
-#endif
+
     for(i = 0;i < count;i ++)
     {
         ret = boot_part_copy_data(cache,part[i]);
@@ -287,7 +280,7 @@ w_err_t download_img_file(w_part_s **part,w_int32_t count)
         }
     }
     boot_param_flush();
-    wind_notice("cache flush OK.");
+    wind_notice("param flush OK.");
     return 0;
 }
 

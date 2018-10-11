@@ -35,6 +35,7 @@ typedef struct
     char media_name[MEDIA_NAME_LEN];
     w_uint8_t mtype:1;
     w_uint8_t used:1;
+    w_uint8_t encrypt:1;
     w_uint8_t status:2;
     w_uint16_t time_mark;
     w_uint32_t base;
@@ -47,7 +48,7 @@ typedef struct
 w_uint8_t *get_common_buffer(void);          
 
 w_err_t boot_part_init(void);
-w_bool_t  boot_part_create(const char *name,w_media_s *media,w_uint32_t size);
+w_bool_t  boot_part_create(const char *name,w_media_s *media,w_uint32_t size,w_uint8_t encrypt);
 w_part_s *boot_part_get(const char *name);
 w_err_t boot_part_seek(w_part_s *part,w_int32_t offset);
 w_err_t boot_part_calc_crc(w_part_s *part);
