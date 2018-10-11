@@ -1,9 +1,9 @@
 /*********************************************************************************
-  *Copyright(C),2016-2018,yzfcer@163.com
+  *Copyright(C),2017-2020,yzfcer@163.com
   *FileName:  
   *Author:      Jason Zhou
   *Version:     1.0
-  *Date:        2016/10/08
+  *Date:        2017/04/08
   *Description:  
   *Others:  
   *History:  
@@ -11,8 +11,8 @@
        Author:
        Modification:
 **********************************************************************************/
-#ifndef PROGRAM_MGR_H__
-#define PROGRAM_MGR_H__
+#ifndef BOOT_IMG_H__
+#define BOOT_IMG_H__
 #include "wind_type.h"
 #include "boot_part.h"
 

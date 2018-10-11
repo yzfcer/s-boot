@@ -1,9 +1,9 @@
 /*********************************************************************************
-  *Copyright(C),2016-2018,yzfcer@163.com
+  *Copyright(C),2017-2020,yzfcer@163.com
   *FileName:  
   *Author:      Jason Zhou
   *Version:     1.0
-  *Date:        2016/10/08
+  *Date:        2017/04/08
   *Description:  
   *Others:  
   *History:  
@@ -11,7 +11,7 @@
        Author:
        Modification:
 **********************************************************************************/
-#include "share_param.h"
+#include "boot_share_param.h"
 #include "boot_config.h"
 #include "boot_part.h"
 #include "boot_port.h"
@@ -80,18 +80,7 @@ static w_err_t check_share_param(share_param_s *sp)
     return W_ERR_OK;
 }
 
-w_err_t sp_init_share_param(void)
-{
-    share_param_s *sp = (share_param_s *)get_common_buffer();
 
-    wind_memset((void *)sp,0,sizeof(share_param_s));
-    sp->magic = SHARE_PARAM_MAGIC;
-    sp->lenth = sizeof(share_param_s);
-    sp->share_version = SHARE_VERSION;
-    
-    sp->upgrade_part.flag = 0;
-    return flush_share_data(sp);
-}
 
 
 static share_param_s *get_share_data(void)
@@ -132,7 +121,18 @@ static w_err_t flush_share_data(share_param_s *sp)
     return W_ERR_OK;
 }
 
+w_err_t sp_init_share_param(void)
+{
+    share_param_s *sp = (share_param_s *)get_common_buffer();
 
+    wind_memset((void *)sp,0,sizeof(share_param_s));
+    sp->magic = SHARE_PARAM_MAGIC;
+    sp->lenth = sizeof(share_param_s);
+    sp->share_version = SHARE_VERSION;
+    
+    sp->upgrade_part.flag = 0;
+    return flush_share_data(sp);
+}
 
 w_err_t sp_set_upgrade_param(upgrade_info_s *part)
 {

@@ -1,5 +1,5 @@
 /*********************************************************************************
-  *Copyright(C),2016-2018,yzfcer@163.com
+  *Copyright(C),2017-2020,yzfcer@163.com
   *FileName:  
   *Author:      Jason Zhou
   *Version:     1.0
@@ -17,7 +17,7 @@
 #include "wind_debug.h"
 #include "wind_crc32.h"
 #include "wind_string.h"
-#include "program_mgr.h"
+#include "boot_img.h"
 #include "boot_hw_if.h"
 w_int32_t repair_rom_space(w_part_s *src,w_part_s *dest)
 {

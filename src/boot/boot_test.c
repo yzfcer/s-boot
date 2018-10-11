@@ -1,9 +1,9 @@
 /*********************************************************************************
-  *Copyright(C),2016-2018,yzfcer@163.com
+  *Copyright(C),2017-2020,yzfcer@163.com
   *FileName:  
   *Author:      Jason Zhou
   *Version:     1.0
-  *Date:        2016/10/08
+  *Date:        2017/04/08
   *Description:  
   *Others:  
   *History:  
@@ -17,9 +17,9 @@
 #include "wind_crc32.h"
 #include "boot_part.h"
 #include "boot_test.h"
-#include "share_param.h"
+#include "boot_share_param.h"
 #include "boot_hw_if.h"
-#include "program_mgr.h"
+#include "boot_img.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,9 +1,9 @@
 /*********************************************************************************
-  *Copyright(C),2016-2018,yzfcer@163.com
+  *Copyright(C),2017-2020,yzfcer@163.com
   *FileName:  
   *Author:      Jason Zhou
   *Version:     1.0
-  *Date:        2016/10/08
+  *Date:        2017/04/08
   *Description:  
   *Others:  
   *History:  
@@ -11,7 +11,7 @@
        Author:
        Modification:
 **********************************************************************************/
-#include "menu_list.h"
+#include "boot_menu.h"
 #include "boot_port.h"
 #include "wind_debug.h"
 #include "boot_param.h"
@@ -19,8 +19,8 @@
 #include "wind_debug.h"
 
 #include "wind_crc32.h"
-#include "share_param.h"
-#include "program_mgr.h"
+#include "boot_share_param.h"
+#include "boot_img.h"
 #include "boot_test.h"
 #include "boot_hw_if.h"
 #include "wind_string.h"
@@ -62,7 +62,7 @@ static w_uint8_t exit_menu_flag = 0;
 static w_int32_t super_prio_flag = 0;
 //退出菜单的的运行方向，如果不为0，则向下执行，否则重新初始化
 static w_int32_t g_go_ahead = 0;
-static void exit_menu(void);
+static w_err_t exit_menu(void);
 static w_int32_t make_sure_input(char *info)
 {
     char ch;
@@ -92,7 +92,7 @@ static w_part_s * get_img_part(void)
     part[0] = boot_part_get(PART_IMG1);
     part[1] = boot_part_get(PART_IMG2);
     if(!part[0] && part[1])
-        return W_NULL;
+        return (w_part_s *)W_NULL;
     if(!part[0])
         return part[1];
     if(!part[1])
@@ -121,6 +121,7 @@ static w_err_t download_to_img_part(void)
         part[1] = tmp;
     }
     download_img_file(part,2);
+    return W_ERR_OK;
 }
 
 static w_err_t download_to_fs_part(void)
@@ -160,7 +161,7 @@ static w_err_t download_to_any_part(void)
     return download_img_file(&part,1);
 }
 
-static void set_debug_mode(void)
+static w_err_t set_debug_mode(void)
 {
     w_int32_t i;
     char ch;
@@ -180,7 +181,7 @@ static void set_debug_mode(void)
         if(0 != read_char_blocking(&ch))
         {
             exit_menu();
-            return;
+            return W_ERR_FAIL;
         }
         if(ch >= '1' && ch <= '0' + sizeof(mode)/sizeof(char*))
         {
@@ -191,49 +192,54 @@ static void set_debug_mode(void)
             break;
         }
     }
-    
+    return W_ERR_OK;
 }
 
 
-static void show_media_map(void)
+static w_err_t show_media_map(void)
 {
     boot_media_print();
+    return W_ERR_OK;
 }
 
-static void lock_mcu(void)
+static w_err_t lock_mcu(void)
 {
     if(is_chip_lock())
     {
         wind_notice("MCU has been locked before.");
-        return;
+        return W_ERR_FAIL;
     }
     set_chip_lock(1);
     exit_menu();
+    return W_ERR_OK;
 }
 
-static void unlock_mcu(void)
+static w_err_t unlock_mcu(void)
 {
     if(!is_chip_lock())
     {
         wind_notice("MCU has NOT been locked before.");
-        return;
+        return W_ERR_FAIL;
     }
     set_chip_lock(0);
     exit_menu();
+    return W_ERR_OK;
 }
 
-static void show_program_status(void)
+static w_err_t show_program_status(void)
 {
     boot_part_print();
+    return W_ERR_OK;
 }
 
 #if BOOT_TEST_ENABLE
-void bootloader_test(void)
+w_err_t bootloader_test(void)
 {
     if(0 != test_entry())
     {
         exit_menu();
     }
+    return W_ERR_OK;
 }
 #endif
 
@@ -246,14 +252,15 @@ static void do_clear_flash_data(w_uint8_t unlock)
         set_chip_lock(0);
 }
 
-static void clear_boot_param(void)
+static w_err_t clear_boot_param(void)
 {
     if(make_sure_input("Are you sure to clear params"))
         do_clear_flash_data(0);
     wind_printf("clear boot param complete.\r\n");
+    return W_ERR_OK;
 }
 
-static void exit_and_save(void)
+static w_err_t exit_and_save(void)
 {
     w_int32_t ret;
     
@@ -263,10 +270,11 @@ static void exit_and_save(void)
         wind_printf("write param fialed.\r\n");
     }    
     exit_menu();
+    return W_ERR_OK;
 }
 
 
-static w_menu_tb_s g_menu_handleTB[] = 
+static w_menu_tb_s g_menu_list[] = 
 {
     {'1',0,0,"download img file",download_to_img_part},
     {'2',0,0,"download file system",download_to_fs_part},
@@ -285,28 +293,29 @@ static w_menu_tb_s g_menu_handleTB[] =
     {'q',0,0,"exit menu",exit_menu}
 };
 
-static void exit_menu(void)
+static w_err_t exit_menu(void)
 {
     w_int32_t i;
     exit_menu_flag = 1;
     if(super_prio_flag)
     {
-        for(i = 0;i < sizeof(g_menu_handleTB)/sizeof(w_menu_tb_s);i ++)
+        for(i = 0;i < sizeof(g_menu_list)/sizeof(w_menu_tb_s);i ++)
         {
-            g_menu_handleTB[i].prio = g_menu_handleTB[i].prio_bak;
+            g_menu_list[i].prio = g_menu_list[i].prio_bak;
         }
     }
+    return W_ERR_OK;
 }
 
 void print32_t_menu_list(void)
 {
     w_int32_t i;
     wind_printf("\r\n\r\nmenu list:\r\n");
-    for(i = 0;i < sizeof(g_menu_handleTB)/sizeof(w_menu_tb_s);i ++)
+    for(i = 0;i < sizeof(g_menu_list)/sizeof(w_menu_tb_s);i ++)
     {
-        if(!g_menu_handleTB[i].prio)
+        if(!g_menu_list[i].prio)
         {
-            wind_printf("[%c] %s\r\n",g_menu_handleTB[i].key,g_menu_handleTB[i].menu_item);
+            wind_printf("[%c] %s\r\n",g_menu_list[i].key,g_menu_list[i].menu_item);
         }
     }
 }
@@ -334,10 +343,10 @@ w_int32_t open_super_prio(void)
         return -1;
     }
     
-    for(i = 0;i < sizeof(g_menu_handleTB)/sizeof(w_menu_tb_s);i ++)
+    for(i = 0;i < sizeof(g_menu_list)/sizeof(w_menu_tb_s);i ++)
     {
-        if(g_menu_handleTB[i].prio <= prio)
-            g_menu_handleTB[i].prio = 0;
+        if(g_menu_list[i].prio <= prio)
+            g_menu_list[i].prio = 0;
     }
     super_prio_flag = 1;
     return 0;
@@ -358,15 +367,15 @@ void run_menu(void)
             exit_menu();
             return;
         }
-        for(i = 0;i < sizeof(g_menu_handleTB)/sizeof(w_menu_tb_s);i ++)
+        for(i = 0;i < sizeof(g_menu_list)/sizeof(w_menu_tb_s);i ++)
         {
-            if(ch == g_menu_handleTB[i].key && 0 == g_menu_handleTB[i].prio)
+            if(ch == g_menu_list[i].key && 0 == g_menu_list[i].prio)
             {
-                g_menu_handleTB[i].handle();
+                g_menu_list[i].handle();
                 break;
             }
         }
-        if(i >= sizeof(g_menu_handleTB)/sizeof(w_menu_tb_s))
+        if(i >= sizeof(g_menu_list)/sizeof(w_menu_tb_s))
         {
             if(ch == '0')
             {
