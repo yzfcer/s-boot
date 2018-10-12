@@ -112,6 +112,7 @@ w_err_t share_param_init(void)
 
     part = boot_part_get_list();
     wind_memcpy((void *)sp->part,part,sizeof(sp->part));
+    share_param_flush(sp);
     return W_ERR_OK;
 }
 
