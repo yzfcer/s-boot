@@ -36,7 +36,7 @@ struct __img_head_s
     w_uint8_t  board_name[32];
     w_uint8_t  arch_name[32];
     w_uint8_t  cpu_name[32];
-    w_uint8_t  reserve1[508-224];
+    //w_uint8_t  reserve1[508-224];
     w_uint32_t head_crc;
 };
 

@@ -25,7 +25,6 @@
 extern "C" {
 #endif
 #if BOOT_TEST_ENABLE
-extern upgrade_info_s g_upgrade_info;
 boot_stub_s boot_stub = {0,0,0};
 void clear_errors(void)
 {
@@ -75,6 +74,7 @@ void test_run_error(void)
 void test_upgrade(void)
 {
     w_part_s *img;
+    share_param_s *sp;
 
     img = boot_part_get(PART_CACHE);
     wind_printf("begin to receive file data,please wait.\r\n");
@@ -84,13 +84,9 @@ void test_upgrade(void)
         wind_error("receive img data failed.");
         return;
     }
-    
-    sp_init_share_param();
-    g_upgrade_info.flag = 1;
-    g_upgrade_info.addr = img->base;
-    g_upgrade_info.datalen = img->datalen;
-    g_upgrade_info.mem_type = img->mtype;
-    sp_set_upgrade_param(&g_upgrade_info);
+    sp = share_param_get();
+    share_param_init();
+    sp->upgrade_flag = 1;
     return;
 }
 

@@ -13,7 +13,9 @@
 **********************************************************************************/
 #ifndef BOOT_SHARE_PARAM_H__
 #define BOOT_SHARE_PARAM_H__
+#include "boot_config.h"
 #include "wind_type.h"
+#include "boot_part.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -21,41 +23,24 @@ extern "C" {
 #define SHARE_PARAM_MAGIC 0x52d360a5
 #define SHARE_BASE 0x2002F000
 #define SHARE_LENTH 0x1000
-typedef struct 
-{
-    w_uint32_t exist;
-    w_uint32_t isOK;
-}hw_status_s;
+#define SHARE_VERSION 0x0001
 
-//升级参数区
 typedef struct
 {
-    w_uint32_t flag;//升级标志
-    w_uint32_t mem_type;//升级程序的介质类型
-    w_uint32_t addr;//升级程序的地址
-    w_uint32_t size;//升级程序的空间大小
-    w_uint32_t datalen;//升级程序的数据长度
-}upgrade_info_s;
+    w_uint32_t magic;
+    w_uint32_t lenth;
+    w_uint32_t share_version;
+    w_uint32_t upgrade_flag;
 
-//保留空间参数区
-typedef struct
-{
-    w_uint32_t addr;//保留空间的地址
-    w_uint32_t size;//保留空间的长度
-    w_uint32_t mem_type;//保留空间的类型
-    w_uint32_t pad;
-}sysparam_part_s;
+    w_part_s part[PART_COUNT];        
+}share_param_s;
 
+w_err_t share_param_init(void);
 
-w_err_t sp_init_share_param(void);
+share_param_s *share_param_get(void);
 
-w_err_t sp_set_upgrade_param(upgrade_info_s *part);
+w_err_t share_param_flush(void);
 
-w_err_t sp_get_upgrade_param(upgrade_info_s *part);
-
-w_err_t sp_set_sysparam_param(sysparam_part_s *sysparam);
-
-w_err_t sp_get_sysparam_param(sysparam_part_s *sysparam);
 
 
 #ifdef __cplusplus
