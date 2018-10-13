@@ -34,9 +34,6 @@
     <ClInclude Include="..\..\..\..\..\..\src\common\wind_string.h">
       <Filter>comman</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\src\boot\boot_check.h">
-      <Filter>boot</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\src\boot\boot_framework.h">
       <Filter>boot</Filter>
     </ClInclude>
@@ -95,9 +92,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\src\common\wind_string.c">
       <Filter>comman</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\src\boot\boot_check.c">
-      <Filter>boot</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\src\boot\boot_framework.c">
       <Filter>boot</Filter>

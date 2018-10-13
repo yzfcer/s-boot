@@ -46,6 +46,7 @@ w_int32_t change_boot_app(w_int32_t index);
 w_int32_t check_img_valid(w_part_s *img);
 
 w_int32_t clean_program(void);
+w_int32_t boot_img_check(void);
 
 #ifdef __cplusplus
 }

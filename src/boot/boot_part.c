@@ -202,12 +202,12 @@ void boot_part_print(void)
     w_part_s *part = boot_part_get_list();
     wind_printf("system part infomation:\r\n");
     wind_print_space(9);
-    wind_printf("%-15s%-8s%-12s%-11s%-11s%-9s%-8s\r\n","part","media","addr","size","datalen","type","usage");
+    wind_printf("%-12s %-8s %-8s %-10s %-10s %-10s %-8s\r\n","part","media","type","addr","size","datalen","usage");
     wind_print_space(9);
     for(i = 0;i < count;i ++)
     {
-        wind_printf("%-15s%-8s0x%-10x0x%-9x0x%-9x%-9s%4d%%\r\n",part[i].name,part[i].media_name,part[i].base,part[i].size,\
-                part[i].datalen,get_mtype_name(part[i].mtype),part[i].size?(part[i].datalen*100)/part[i].size:0);
+        wind_printf("%-12s %-8s %-8s 0x%-8x 0x%-8x 0x%-8x %4d%%\r\n",part[i].name,part[i].media_name,get_mtype_name(part[i].mtype),part[i].base,part[i].size,\
+                part[i].datalen,part[i].size?(part[i].datalen*100)/part[i].size:0);
     }
     wind_print_space(9);
 }

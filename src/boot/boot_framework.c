@@ -22,7 +22,6 @@
 #include "wind_crc32.h"
 #include "boot_img.h"
 #include "boot_hw_if.h"
-#include "boot_check.h"
 #include "wind_string.h"
 #ifdef __cplusplus
 extern "C" {
@@ -53,7 +52,6 @@ static w_int32_t boot_init(void)
     boot_media_init();
     boot_part_init();
     go_to_next_step();
-    wind_notice("bootloader init OK.");
     return 0;
 }
 
@@ -79,7 +77,6 @@ static w_int32_t boot_first_check(void)
 {
     w_int32_t ret;
     boot_param_s *bp;
-    wind_notice("begin to check first running time...");
     bp = boot_param_from_rom();
     if(W_NULL != bp)
     {
@@ -121,7 +118,7 @@ static w_int32_t boot_chip_lock_check(void)
 static w_int32_t boot_img_valid_check(void)
 {
     w_int32_t ret;
-    ret = check_rom_programs();
+    ret = boot_img_check();
     go_to_next_step();
     return ret;
 }
@@ -267,7 +264,7 @@ static w_int32_t boot_load_img(void)
     if(MEDIA_TYPE_ROM == part->mtype)
     {
         wind_notice("need not load image to ROM.");
-        set_boot_status(BOOT_SET_APP_PARAM);
+        set_boot_status(BOOT_SET_SHARE_PARAM);
         return 0;
     }
     else
@@ -279,10 +276,10 @@ static w_int32_t boot_load_img(void)
     
 }
 
-static w_int32_t boot_set_app_param(void)
+static w_int32_t boot_set_system_param(void)
 {
     w_part_s *tmp;
-    wind_notice("begin to set image ...");
+    wind_notice("set share params for system");
     share_param_init();
     set_boot_status(BOOT_RUN_SYSTEM);
     return 0;
@@ -302,9 +299,8 @@ static w_int32_t boot_error_handle(void)
 
 static w_int32_t boot_run_system(void)
 {
-	wind_notice("begin to jump to image space...");
-	wind_printf("\r\n\r\n\r\n");
     boot_exit_hook();
+	wind_notice("jump to system running space\r\n\r\n\r\n");
 	boot_jump_to_system();
 	return 0;
 }
@@ -323,7 +319,7 @@ boot_handle_TB g_status_handTB[] =
     {BOOT_WAIT_KEY_PRESS,"wait for any key press",boot_wait_key_press},
     {BOOT_MENU_LIST,"enter menu list",boot_menu_list},
     {BOOT_LOAD_IMG,"load image",boot_load_img},
-    {BOOT_SET_APP_PARAM,"set app param",boot_set_app_param},
+    {BOOT_SET_SHARE_PARAM,"set share param",boot_set_system_param},
     {BOOT_RUN_SYSTEM,"run system",boot_run_system},
     {BOOT_ERROR,"error",boot_error_handle},
 };

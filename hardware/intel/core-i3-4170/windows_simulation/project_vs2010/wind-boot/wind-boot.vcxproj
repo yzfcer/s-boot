@@ -11,7 +11,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\src\boot\boot_check.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot\boot_framework.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot\boot_hw_if.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot\boot_img.h" />
@@ -30,7 +29,6 @@
     <ClInclude Include="..\..\port\wind_type.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\..\src\boot\boot_check.c" />
     <ClCompile Include="..\..\..\..\..\..\src\boot\boot_framework.c" />
     <ClCompile Include="..\..\..\..\..\..\src\boot\boot_hw_if.c" />
     <ClCompile Include="..\..\..\..\..\..\src\boot\boot_img.c" />
