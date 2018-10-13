@@ -44,12 +44,11 @@ void boot_status_go_next(void)
 
 void print_boot_info(void)
 {
-    wind_printf("\r\n");
-    wind_printf("+---------------------------------------------+\r\n");
+    wind_printf("\r\n+---------------------------------------------+\r\n");
     wind_printf("               wind-boot %d.%d.%d\r\n",(w_uint8_t)(BOOT_VERSION >> 16),
                 (w_uint8_t)(BOOT_VERSION >> 8),(w_uint8_t)(BOOT_VERSION));
-    wind_printf("      *** To Make Ease For Developing ***\r\n");
-    wind_printf("+---------------------------------------------+\r\n");
+    wind_printf("      *** To Make Ease For Developing ***");
+    wind_printf("\r\n+---------------------------------------------+\r\n");
     wind_printf("Build: %s %s\r\n",__DATE__,__TIME__);
     wind_printf("Borad: %s\r\n",BOARD_NAME);
     wind_printf("Arch : %s\r\n",ARCH_NAME);
@@ -164,7 +163,7 @@ static w_int32_t  boot_upgrade_check(void)
     tmp = boot_part_get(PART_IMG1);
     if(MEDIA_TYPE_ROM == tmp->mtype)
     {
-        ret = flush_img_to_rom(&img);
+        ret = flush_img_to_part(&img);
     }
     else
     {
@@ -209,22 +208,24 @@ static w_int32_t boot_wait_key_press(void)
     return 0;
 }
 
-static w_int32_t boot_menu_list(void)
+static w_int32_t boot_enter_menu(void)
 {
-    run_menu();
-    if(get_menu_go_direction())
+    w_err_t err;
+    err = run_menu();
+    if(err = W_ERR_OK)
         boot_status_go_next();
     else
         boot_status_set(BOOT_INIT);
     return 0;
 }
+
 static w_int32_t boot_load_img(void)
 {
     w_mem_status_e mem_stat = MEM_ERROR;
     w_part_s *part = W_NULL,*tmp;
     boot_param_s *bp = W_NULL; 
 
-    wind_notice("begin to load image to running space...");
+    wind_notice("load image to running space...");
     bp = (boot_param_s *)boot_param_get();
     part = boot_part_get(PART_SYSRUN);
     
@@ -327,7 +328,7 @@ boot_handle_TB g_status_handTB[] =
     {BOOT_UPGRADE_CHECK,"upgrade status check",boot_upgrade_check},
     
     {BOOT_WAIT_KEY_PRESS,"wait for any key press",boot_wait_key_press},
-    {BOOT_MENU_LIST,"enter menu list",boot_menu_list},
+    {BOOT_MENU_LIST,"enter menu list",boot_enter_menu},
     {BOOT_LOAD_IMG,"load image",boot_load_img},
     {BOOT_SET_SHARE_PARAM,"set share param",boot_set_system_param},
     {BOOT_RUN_SYSTEM,"run system",boot_run_system},

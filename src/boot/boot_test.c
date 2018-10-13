@@ -77,7 +77,7 @@ void test_upgrade(void)
     share_param_s *sp;
 
     img = boot_part_get(PART_CACHE);
-    wind_printf("begin to receive file data,please wait.\r\n");
+    wind_printf("receive file data,please wait.\r\n");
     img->datalen = boot_receive_img(img);
     if(img->datalen <= 0)
     {

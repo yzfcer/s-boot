@@ -31,11 +31,7 @@ typedef struct
     menu_handle_fn handle;//´¦ÀíµÄ¾ä±ú
 }w_menu_tb_s;
 
-extern w_menu_tb_s g_menu_list[];
-void run_menu(void);
-void print32_t_menu_list(void);
-w_int32_t get_menu_go_direction(void);
-w_int32_t flush_img_to_rom(w_part_s *code_part);
+w_err_t run_menu(void);
 
 #ifdef __cplusplus
 }

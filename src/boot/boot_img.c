@@ -178,14 +178,14 @@ w_int32_t check_img_valid(w_part_s *img)
 
 
 //先备份原来的程序，再烧录新程序到sys_program1和运行区
-w_int32_t flush_img_to_rom(w_part_s *img)
+w_int32_t flush_img_to_part(w_part_s *img)
 {
     w_int32_t ret;
     w_part_s *src,*dest;
     w_part_s bin;
     img_head_s *head;
     w_bool_t run_in_program1;
-    wind_notice("begin to flush code to rom space...");
+    wind_notice("flush code to part space");
     
     //先将原来的程序拷贝到备份空间    
     src = boot_part_get(PART_IMG1);
@@ -245,7 +245,7 @@ w_int32_t flush_img_to_rom(w_part_s *img)
 
 
 
-w_err_t download_img_file(w_part_s **part,w_int32_t count)
+w_err_t boot_img_update_from_remote(w_part_s **part,w_int32_t count)
 {
     w_int32_t ret,len,i;
     w_part_s *cache;
@@ -257,7 +257,7 @@ w_err_t download_img_file(w_part_s **part,w_int32_t count)
         return -1;
     }
     cache = boot_part_get(PART_CACHE);
-    wind_printf("begin to receive file data,please wait.\r\n");
+    wind_printf("receive file data,please wait.\r\n");
     len = boot_receive_img(cache);
     if(len <= 0)
     {
@@ -286,7 +286,7 @@ w_err_t download_img_file(w_part_s **part,w_int32_t count)
 
 
 
-w_int32_t clean_program(void)
+w_int32_t boot_img_clear_all(void)
 {
     w_int32_t idx = 0;
     w_uint32_t i;
@@ -311,7 +311,7 @@ w_int32_t clean_program(void)
 
 
 //-------------------------------------------------------------------------
-w_int32_t repair_rom_space(w_part_s *src,w_part_s *dest)
+w_int32_t repair_part_space(w_part_s *src,w_part_s *dest)
 {
     w_int32_t ret;
     
@@ -375,7 +375,7 @@ w_int32_t repair_running_space(void)
         {
             boot_part_copy_info(src,&bin);
         }
-        ret = repair_rom_space(&bin,dest);
+        ret = repair_part_space(&bin,dest);
     }
     return ret;
 }
@@ -402,7 +402,7 @@ static w_int32_t repair_program(void)
             (tmp2->base != tmp1->base))
         {
             tmp2 = boot_part_get(PART_IMG2);
-            if(0 != repair_rom_space(tmp2,tmp1))
+            if(0 != repair_part_space(tmp2,tmp1))
                 ret = -1;
         }
         else
@@ -420,7 +420,7 @@ static w_int32_t repair_program(void)
     {
         tmp1 = boot_part_get(PART_IMG1);
         tmp2 = boot_part_get(PART_SYSRUN);
-        if(0 != repair_rom_space(tmp1,tmp2))
+        if(0 != repair_part_space(tmp1,tmp2))
             ret = -1;
     }
     (void)boot_param_flush();
@@ -434,7 +434,7 @@ w_int32_t boot_img_check(void)
     w_int32_t idx = 0;
     w_int32_t ret = 0;
     w_part_s *code[3];
-    w_int32_t save_flag = 0,i;
+    w_int32_t error_flag = 0,i;
     w_bool_t is_ok;
     
     code[idx++] = boot_part_get(PART_IMG1);
@@ -447,13 +447,13 @@ w_int32_t boot_img_check(void)
         is_ok = boot_part_check(code[i]);
         if(!is_ok)
         {
-            save_flag = 1;
+            error_flag = 1;
             code[i]->status = MEM_ERROR;
         }
         wind_notice("part %s status:%s",code[i]->name,is_ok?"OK":"ERROR");
     }
 
-    if(save_flag)
+    if(error_flag)
     {
         wind_error("program space ERROR.");
         (void)boot_param_flush();

@@ -120,7 +120,7 @@ static w_err_t download_to_img_part(void)
         part[0] = part[1];
         part[1] = tmp;
     }
-    download_img_file(part,2);
+    boot_img_update_from_remote(part,2);
     return W_ERR_OK;
 }
 
@@ -128,7 +128,7 @@ static w_err_t download_to_fs_part(void)
 {
     w_part_s *part = boot_part_get(PART_FS);
     WIND_ASSERT_RETURN(part != W_NULL,W_ERR_NOT_SUPPORT);
-    return download_img_file(&part,1);
+    return boot_img_update_from_remote(&part,1);
 }
 
 
@@ -158,7 +158,7 @@ static w_err_t download_to_any_part(void)
         return W_ERR_FAIL;
     wind_printf("now download to part:%s\r\n",part[index-1].name);
     part = boot_part_get(part[index-1].name);
-    return download_img_file(&part,1);
+    return boot_img_update_from_remote(&part,1);
 }
 
 static w_err_t set_debug_mode(void)
@@ -245,7 +245,7 @@ w_err_t bootloader_test(void)
 
 static void do_clear_flash_data(w_uint8_t unlock)
 {
-    clean_program();
+    boot_img_clear_all();
     boot_param_reset();
     (void)boot_param_flush();
     if(unlock)
@@ -352,7 +352,7 @@ w_int32_t open_super_prio(void)
     return 0;
 }
 
-void run_menu(void)
+w_err_t run_menu(void)
 {
     char ch;
     w_int32_t i,ret;
@@ -365,7 +365,10 @@ void run_menu(void)
         if(0 != read_char_blocking(&ch))
         {
             exit_menu();
-            return;
+            if(get_menu_go_direction())
+                return W_ERR_OK;
+            else
+                return W_ERR_FAIL;
         }
         for(i = 0;i < sizeof(g_menu_list)/sizeof(w_menu_tb_s);i ++)
         {
