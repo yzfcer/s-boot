@@ -131,6 +131,7 @@ void boot_jump_to_system(void)
     while(1)
     {
         scanf("%c",&ch);
+        if((ch == '\n') || (ch == '\r'))
         wind_printf("boot can not operate in system mode.\r\n");
     }
 }

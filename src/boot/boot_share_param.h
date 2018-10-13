@@ -39,7 +39,7 @@ w_err_t share_param_init(void);
 
 share_param_s *share_param_get(void);
 
-w_err_t share_param_flush(void);
+w_err_t share_param_flush(share_param_s *sp);
 
 
 

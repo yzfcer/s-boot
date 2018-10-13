@@ -35,16 +35,14 @@ typedef enum
     BOOT_STEP_CNT
 }boot_status_e;
 
-typedef w_int32_t (*Boot_handle)(void);
+typedef w_int32_t (*boot_handle_fn)(void);
 typedef struct 
 {
     boot_status_e status;
     char *stepname;
-    Boot_handle handle;
+    boot_handle_fn handle;
 }boot_handle_TB;
 
-void boot_status_set(boot_status_e status);
-void boot_status_go_next(void);
 
 #ifdef __cplusplus
 }

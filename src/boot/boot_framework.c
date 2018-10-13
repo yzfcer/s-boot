@@ -19,7 +19,6 @@
 #include "boot_part.h"
 #include "boot_media.h"
 #include "wind_debug.h"
-#include "wind_crc32.h"
 #include "boot_img.h"
 #include "boot_hw_if.h"
 #include "wind_string.h"
@@ -288,9 +287,11 @@ static w_int32_t boot_set_system_param(void)
 static w_int32_t boot_error_handle(void)
 {
     char ch;
+    w_int32_t ret;
     while(1)
     {
-        if(0 == read_char_blocking(&ch))
+        ret = read_char_blocking(&ch);
+        if((ret == 0) && (ch == '\n'))
             wind_error("Some error occured in bootloader and system boot failed.");
     }
     return 0;
