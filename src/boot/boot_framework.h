@@ -43,8 +43,8 @@ typedef struct
     Boot_handle handle;
 }boot_handle_TB;
 
-void set_boot_status(boot_status_e status);
-void go_to_next_step(void);
+void boot_status_set(boot_status_e status);
+void boot_status_go_next(void);
 
 #ifdef __cplusplus
 }

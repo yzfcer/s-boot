@@ -42,16 +42,16 @@ static w_uint32_t endian_test(void)
 }
 
 
-static char *encty_type[] = 
-{
-    "no encrypt",
-    "AES",
-    "DES",
-    "RC4"
-};
 
 static void print_img_head(img_head_s *head)
 {
+    static char *encty_type[4] = 
+    {
+        "no encrypt",
+        "AES",
+        "DES",
+        "RC4"
+    };
     wind_printf("img head info:\r\n");
     wind_printf("board name     : %s\r\n",(char*)head->board_name);
     wind_printf("cpu arch       : %s\r\n",(char*)head->arch_name);
