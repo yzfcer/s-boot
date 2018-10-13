@@ -86,55 +86,32 @@ w_int32_t get_menu_go_direction(void)
     return g_go_ahead;
 }
 
-static w_part_s * get_img_part(void)
-{
-    w_part_s *part[2];
-    part[0] = boot_part_get(PART_IMG1);
-    part[1] = boot_part_get(PART_IMG2);
-    if(!part[0] && part[1])
-        return (w_part_s *)W_NULL;
-    if(!part[0])
-        return part[1];
-    if(!part[1])
-        return part[0];
-    if(part[0]->time_mark <= part[1]->time_mark)
-    {
-        part[0]->time_mark = part[1]->time_mark + 1;
-        return part[0];
-    }
-    else
-    {
-        part[1]->time_mark = part[0]->time_mark + 1;
-        return part[1];
-    }
-}
+
+
+
 static w_err_t download_to_img_part(void)
 {
-    w_part_s *part[2],*tmp;
-    part[0] = boot_part_get(PART_SYSRUN);
-    WIND_ASSERT_RETURN(part[0] != W_NULL,W_ERR_FAIL);
-    part[1] = get_img_part();
-    if(part[1] != W_NULL)
-    {
-        tmp = part[0];
-        part[0] = part[1];
-        part[1] = tmp;
-    }
-    boot_img_update_from_remote(part,2);
-    return W_ERR_OK;
+    w_err_t err;
+    err = boot_img_download();
+    WIND_ASSERT_RETURN(err == W_ERR_OK,W_ERR_FAIL);
+    return boot_img_flush();
 }
 
 static w_err_t download_to_fs_part(void)
 {
+    w_err_t err;
     w_part_s *part = boot_part_get(PART_FS);
     WIND_ASSERT_RETURN(part != W_NULL,W_ERR_NOT_SUPPORT);
-    return boot_img_update_from_remote(&part,1);
+    err = boot_img_download();
+    WIND_ASSERT_RETURN(err == W_ERR_OK,W_ERR_FAIL);
+    return boot_img_flush_cache_to_part(&part,1);
 }
 
 
 static w_err_t download_to_any_part(void)
 {
     char ch;
+    w_err_t err;
     w_int32_t i,index = 1,ret;
     w_part_s *part;
     part = boot_part_get_list();
@@ -158,7 +135,10 @@ static w_err_t download_to_any_part(void)
         return W_ERR_FAIL;
     wind_printf("now download to part:%s\r\n",part[index-1].name);
     part = boot_part_get(part[index-1].name);
-    return boot_img_update_from_remote(&part,1);
+    WIND_ASSERT_RETURN(part != W_NULL,W_ERR_NOT_SUPPORT);
+    err = boot_img_download();
+    WIND_ASSERT_RETURN(err == W_ERR_OK,W_ERR_FAIL);
+    return boot_img_flush_cache_to_part(&part,1);
 }
 
 static w_err_t set_debug_mode(void)
@@ -391,6 +371,10 @@ w_err_t run_menu(void)
             }
         }
     }
+    if(get_menu_go_direction())
+        return W_ERR_OK;
+    else
+        return W_ERR_FAIL;
 }    
 
 

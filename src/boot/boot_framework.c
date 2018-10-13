@@ -137,8 +137,8 @@ static w_int32_t boot_img_valid_check(void)
 static w_int32_t  boot_upgrade_check(void)
 {
     w_int32_t ret;
-    w_part_s img,*tmp;
-     share_param_s *sp = share_param_get();
+    w_part_s *part[2],*cache;
+    share_param_s *sp = share_param_get();
     
     if(!sp->upgrade_flag)
     {
@@ -149,28 +149,17 @@ static w_int32_t  boot_upgrade_check(void)
 
     sp->upgrade_flag = 0;
     share_param_flush(sp);
-    wind_notice("handling upgrade event,please wait...");
-    tmp = boot_part_get(PART_CACHE);
-    
-    wind_error("--------Upgrade error----------");
-    
-    ret = check_img_valid(&img);
+    wind_notice("handling upgrade event,please wait");
+    cache = boot_part_get(PART_CACHE);
+    ret = check_img_valid(cache);
     if(0 != ret)
     {
         wind_error("check img file ERROR");
         return -1;
     }
-    tmp = boot_part_get(PART_IMG1);
-    if(MEDIA_TYPE_ROM == tmp->mtype)
-    {
-        ret = flush_img_to_part(&img);
-    }
-    else
-    {
-        wind_error("memory type ERROR.");
-        boot_status_set(BOOT_ERROR);
-        return -1;
-    }
+    part[0] = boot_img_get_flush_part();
+    part[1] = boot_part_get(PART_SYSRUN);
+    ret = boot_img_flush_cache_to_part(part,2);
     if(0 != ret)
     {
         wind_warn("flush upgrade img failed.");
@@ -289,7 +278,6 @@ static w_int32_t boot_load_img(void)
 
 static w_int32_t boot_set_system_param(void)
 {
-    w_part_s *tmp;
     wind_notice("set share params for system");
     share_param_init();
     boot_status_set(BOOT_RUN_SYSTEM);

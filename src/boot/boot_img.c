@@ -175,113 +175,96 @@ w_int32_t check_img_valid(w_part_s *img)
     return 0;
 }
 
-
-
-//先备份原来的程序，再烧录新程序到sys_program1和运行区
-w_int32_t flush_img_to_part(w_part_s *img)
+w_part_s * boot_img_get_flush_part(void)
 {
-    w_int32_t ret;
-    w_part_s *src,*dest;
-    w_part_s bin;
-    img_head_s *head;
-    w_bool_t run_in_program1;
-    wind_notice("flush code to part space");
-    
-    //先将原来的程序拷贝到备份空间    
-    src = boot_part_get(PART_IMG1);
-    dest = boot_part_get(PART_IMG2);
-    
-    ret = boot_part_copy_data(src,dest);
-    if(0 != ret)
+    w_part_s *part[2];
+    part[0] = boot_part_get(PART_IMG1);
+    part[1] = boot_part_get(PART_IMG2);
+    if(!part[0] && part[1])
+        return (w_part_s *)W_NULL;
+    if(!part[0])
+        return part[1];
+    if(!part[1])
+        return part[0];
+    if(part[0]->time_mark <= part[1]->time_mark)
     {
-        wind_warn("backup old program failed.");
-        return -1;
-    }
-    
-    head = (img_head_s*)img->base;
-    src = boot_part_get(PART_IMG1);
-    dest = boot_part_get(PART_SYSRUN);
-    run_in_program1 = boot_part_equal(src,dest);
-    
-    //烧录到sys_program1，如果同时也是运行空间，则先解密，在烧录
-    if(run_in_program1)
-    {
-        decrypt_img_data(img,&bin);
-        dest = boot_part_get(PART_IMG1);
-        ret = boot_part_copy_data(&bin,dest);
-        if(0 != ret)
-        {
-            wind_warn("flush new program failed.");
-            return -1;
-        }
-        dest = boot_part_get(PART_SYSRUN);
-        dest->status = MEM_NORMAL;
-        dest->crc = bin.crc;
-        dest->datalen= bin.datalen;
-        boot_param_flush();
-        return 0;
+        part[0]->time_mark = part[1]->time_mark + 1;
+        return part[0];
     }
     else
     {
-        dest = boot_part_get(PART_IMG1);
-        ret = boot_part_copy_data(img,dest);
-        if(0 != ret)
-        {
-            wind_warn("flush new program failed.");
-            return -1;
-        }
-        decrypt_img_data(img,&bin);
-        dest = boot_part_get(PART_SYSRUN);
-        ret = boot_part_copy_data(&bin,dest);
-        if(0 != ret)
-        {
-            wind_error("write new program failed.");
-            return -1;
-        }
+        part[1]->time_mark = part[0]->time_mark + 1;
+        return part[1];
     }
-    boot_param_flush();
-    return 0;
 }
 
 
-
-w_err_t boot_img_update_from_remote(w_part_s **part,w_int32_t count)
+w_err_t boot_img_flush_cache_to_part(w_part_s **part,w_int32_t count)
 {
-    w_int32_t ret,len,i;
+    w_int32_t i,ret;
     w_part_s *cache;
-    boot_param_s *bp = (boot_param_s*)boot_param_get();
-
-    if(bp->debug_mode)
-    {
-        wind_notice("device can NOT download in debug mode ,set it to normal mode first");
-        return -1;
-    }
     cache = boot_part_get(PART_CACHE);
-    wind_printf("receive file data,please wait.\r\n");
-    len = boot_receive_img(cache);
-    if(len <= 0)
-    {
-        wind_error("receive cache data failed.");
-        return -1;
-    }
-
-    cache->datalen = (w_uint32_t)len;
-    boot_part_calc_crc(cache);
-    
-    wind_notice("cache file lenth:%d",cache->datalen);
-
     for(i = 0;i < count;i ++)
     {
         ret = boot_part_copy_data(cache,part[i]);
         if(0 != ret)
         {
             wind_warn("flush data to %s failed.",cache->name);
-            return -1;
+            return W_ERR_FAIL;
         }
     }
     boot_param_flush();
     wind_notice("param flush OK.");
-    return 0;
+    return W_ERR_OK;
+}
+
+w_err_t boot_img_download(void)
+{
+    w_int32_t len;
+    w_part_s *cache;
+    boot_param_s *bp = (boot_param_s*)boot_param_get();
+
+    if(bp->debug_mode)
+    {
+        wind_notice("device can NOT download in debug mode ,set it to normal mode first");
+        return W_ERR_FAIL;
+    }
+    cache = boot_part_get(PART_CACHE);
+    wind_notice("receive file data,please wait.\r\n");
+    len = boot_receive_img(cache);
+    if(len <= 0)
+    {
+        wind_error("receive cache data failed.");
+        return W_ERR_FAIL;
+    }
+    cache->datalen = (w_uint32_t)len;
+    boot_part_calc_crc(cache);
+    wind_notice("cache file lenth:%d",cache->datalen);
+    return W_ERR_OK;
+}
+
+w_err_t boot_img_flush(void)
+{
+    w_err_t err;
+    w_part_s *part[2],*tmp;
+    w_int32_t count;
+    part[0] = boot_part_get(PART_SYSRUN);
+    WIND_ASSERT_RETURN(part[0] != W_NULL,W_ERR_FAIL);
+    part[1] = boot_img_get_flush_part();
+    if(part[1] != W_NULL)
+    {
+        tmp = part[0];
+        part[0] = part[1];
+        part[1] = tmp;
+        count = 2;
+    }
+    else
+    {
+        count = 1;
+    }
+
+    err = boot_img_download();
+    return boot_img_flush_cache_to_part(part,count);
 }
 
 

@@ -41,10 +41,12 @@ struct __img_head_s
 };
 
 w_int32_t decrypt_img_data(w_part_s *img,w_part_s *bin);
-w_err_t boot_img_update_from_remote(w_part_s **part,w_int32_t count);
+w_err_t boot_img_flush(void);
 w_int32_t change_boot_app(w_int32_t index);
 w_int32_t check_img_valid(w_part_s *img);
-w_int32_t flush_img_to_part(w_part_s *code_part);
+w_part_s * boot_img_get_flush_part(void);
+w_err_t boot_img_download(void);
+w_err_t boot_img_flush_cache_to_part(w_part_s **part,w_int32_t count);
 
 w_int32_t boot_img_clear_all(void);
 w_int32_t boot_img_check(void);
