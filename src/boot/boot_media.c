@@ -87,20 +87,20 @@ void boot_media_print(void)
     w_int32_t i;
     w_media_s *media = g_media[0];
     wind_printf("media infomation:\r\n");
-    wind_print_space(8);
-    wind_printf("%-12s %-8s %-10s %-10s %-10s %-8s\r\n","name","type","base","size","used","blksize");
-    wind_print_space(8);
+    wind_print_space(9);
+    wind_printf("%-12s %-8s %-10s %-10s %-10s %-8s %-8s\r\n","name","type","base","size","alloced","blksize","usage");
+    wind_print_space(9);
     for(i = 0;i < MEDIA_COUNT;i ++)
     {
         media = g_media[i];
         if(media != W_NULL)
         {
-            wind_printf("%-12s %-8s 0x%-8x 0x%-8x 0x%-8x %-8d\r\n",
+            wind_printf("%-12s %-8s 0x%-8x 0x%-8x 0x%-8x %-8d %4d%%\r\n",
                 media->name,get_mtype_name(media->mtype),media->base,
-                media->size,media->offset,media->blksize);
+                media->size,media->offset,media->blksize,media->offset * 100 / media->size);
         }
     }
-    wind_print_space(8);
+    wind_print_space(9);
 }
 
 
