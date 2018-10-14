@@ -231,20 +231,7 @@ w_part_s *boot_part_get_list(void)
     return g_part;
 }
 
-void boot_part_copy_info(w_part_s *src,w_part_s *dest)
-{
-    wind_strcpy(dest->name,src->name);
-    wind_strcpy(dest->media_name,src->media_name);
-    dest->mtype = src->mtype;
-    dest->used = src->used;
-    dest->status = src->status;
-    dest->base = src->base;
-    dest->size = src->size;
-    dest->blksize = src->blksize;
-    dest->datalen = src->datalen;
-    dest->offset = src->offset;
-    dest->crc = src->crc;
-}
+
 
 static void print_copy_percents(w_int32_t numerator, w_int32_t denominator,w_int32_t del)
 {
@@ -254,17 +241,17 @@ static void print_copy_percents(w_int32_t numerator, w_int32_t denominator,w_int
     feed_watchdog();
 }
 
-w_int32_t boot_part_copy_data(w_part_s *src,w_part_s *dest)
+w_err_t boot_part_copy_data(w_part_s *src,w_part_s *dest)
 {
     w_int32_t i,len,blocks,times;
     w_uint8_t *buff = get_common_buffer();
 
     if(0 >= src->datalen)
-        return 0;
+        return W_ERR_OK;
     if(dest->size < src->datalen)
     {
         wind_warn("space is NOT enough.");
-        return -1;
+        return W_ERR_FAIL;
     }
     wind_notice("copy data from \"%s\" to \"%s\" lenth %d.",
                 src->name,dest->name,src->datalen);
@@ -289,7 +276,7 @@ w_int32_t boot_part_copy_data(w_part_s *src,w_part_s *dest)
         {
             wind_warn("read block offset 0x%x,lenth %d failed.",src->offset,COMMBUF_SIZE);
             dest->status = MEM_ERROR;
-            return -1;
+            return W_ERR_FAIL;
         }
 
         for(times = 0;times < 3;times ++)
@@ -302,7 +289,7 @@ w_int32_t boot_part_copy_data(w_part_s *src,w_part_s *dest)
         {
             wind_warn("read block offset 0x%x,lenth %d failed.",dest->offset,COMMBUF_SIZE);
             dest->status = MEM_ERROR;
-            return -1;
+            return W_ERR_FAIL;
         }
         print_copy_percents(i,blocks,1);
         feed_watchdog();
@@ -315,7 +302,7 @@ w_int32_t boot_part_copy_data(w_part_s *src,w_part_s *dest)
     dest->status = MEM_NORMAL;
 
     wind_debug("copy data OK."); 
-    return 0;    
+    return W_ERR_OK;    
 }
 
 w_bool_t boot_part_equal(w_part_s *src,w_part_s *dest)

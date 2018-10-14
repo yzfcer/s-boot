@@ -24,6 +24,7 @@
 #include "boot_hw_if.h"
 #include "wind_encrypt.h"
 #include "wind_string.h"
+#include "wind_conv.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -42,14 +43,14 @@ static w_uint32_t endian_test(void)
 
 
 
-static void print_img_head(img_head_s *head)
+static void boot_img_print_head(img_head_s *head)
 {
     static char *encty_type[4] = 
     {
         "no encrypt",
+        "RC4"
         "AES",
         "DES",
-        "RC4"
     };
     wind_printf("img head info:\r\n");
     wind_printf("board name     : %s\r\n",(char*)head->board_name);
@@ -58,120 +59,58 @@ static void print_img_head(img_head_s *head)
     wind_printf("img file name  : %s\r\n",(char*)head->img_name);
     wind_printf("img file lenth : %d\r\n",head->img_len);
     wind_printf("soft version   : %s\r\n",head->bin_ver);
-    if(head->encry_type < 4);
-        wind_printf("encrypt type   : %s\r\n",encty_type[head->encry_type]);
+    if(head->encrypt_type < 4);
+        wind_printf("encrypt type   : %s\r\n",encty_type[head->encrypt_type]);
     wind_printf("\r\n");
 }
 
-static w_int32_t head_endian_convert(img_head_s *head)
-{
-    if(head->endian_test = 0x12345678)
-        return 0;
-    else if(head->endian_test = 0x78563412)
-    {
-        LE_TO_BE32(head->img_len);
-        LE_TO_BE32(head->head_len);
-        LE_TO_BE32(head->head_ver);
-        LE_TO_BE32(head->bin_crc);
-        LE_TO_BE32(head->encry_type);
-        LE_TO_BE32(head->endian_test);
-        LE_TO_BE32(head->head_crc);
-        return 0;        
-    }
-    return -1;        
-}
-
-
-w_bool_t check_hardware_matched(img_head_s *head)
-{
-    if(0 != wind_memcmp(head->board_name,BOARD_NAME,wind_strlen(BOARD_NAME)))
-    {
-        wind_notice("dest board name:%s",BOARD_NAME);
-        return B_FALSE;
-    }
-    if(0 != wind_memcmp(head->arch_name,ARCH_NAME,wind_strlen(ARCH_NAME)))
-    {
-        wind_notice("dest arch name:%s",ARCH_NAME);
-        return B_FALSE;
-    }
-    if(0 != wind_memcmp(head->cpu_name,CPU_NAME,wind_strlen(CPU_NAME)))
-    {
-        wind_notice("dest cpu model:%s",CPU_NAME);
-        return B_FALSE;
-    }
-    return B_TRUE;    
-}
-
-w_int32_t boot_img_decrypt(w_part_s *img,w_part_s *bin)
+static w_err_t boot_img_get_head(w_part_s *part)
 {
     w_int32_t len;
-    img_head_s *head;
+    w_uint32_t crc;
+    w_int32_t index = 0;
+    img_head_s *head = &img_head;
+    w_uint8_t *buff = get_common_buffer();
+    len = boot_part_read(part,buff,COMMBUF_SIZE);
+    WIND_ASSERT_RETURN(len > 0,W_ERR_FAIL);
+    head->magic = 0;
+    wind_to_uint32(&buff[index],&head->magic);
+    WIND_ASSERT_RETURN(head->magic == IMG_MAGIC,W_ERR_FAIL);
+    index += 4;
+    wind_to_uint32(&buff[index],&head->img_len);
+    index += 4;
+    wind_to_uint32(&buff[index],&head->head_len);
+    index += 4;
+    wind_to_uint32(&buff[index],&head->head_ver);
+    index += 4;
+    wind_to_uint32(&buff[index],&head->bin_ver);
+    index += 4;
+    wind_to_uint32(&buff[index],&head->bin_crc);
+    index += 4;
+    wind_to_uint32(&buff[index],&head->encrypt_type);
+    index += 4;
+    wind_memset(head->img_name,0,sizeof(head->img_name));
+    wind_strcpy(head->img_name,(const char*)&buff[index]);
+    index += sizeof(head->img_name);
 
-    boot_part_copy_info(img,bin);
-	head = (img_head_s*)bin->base;
-    bin->base += head->head_len;
-    bin->size = img->size - head->head_len;
-    bin->datalen = img->datalen - head->head_len;
-    wind_notice("decrypt img file...");
-    wind_debug("decrypt_data base:0x%x,lenth:%d",bin->base,bin->datalen);
-	len = wind_decrypt((w_uint8_t *)bin->base,bin->datalen);
-    if(len < 0)
-    {
-        wind_warn("decrypt img file failed.");
-        return -1;
-    }
-    bin->datalen = len;
+    wind_memset(head->board_name,0,sizeof(head->board_name));
+    wind_strcpy(head->board_name,(const char*)&buff[index]);
+    index += sizeof(head->board_name);
     
-    bin->crc = wind_crc32((w_uint8_t *)bin->base,bin->datalen,0xffffffff);
-    feed_watchdog();
-    wind_notice("decrypt img file OK.");
-    return 0;
-}
+    wind_memset(head->arch_name,0,sizeof(head->arch_name));
+    wind_strcpy(head->arch_name,(const char*)&buff[index]);
+    index += sizeof(head->arch_name);
 
+    wind_memset(head->cpu_name,0,sizeof(head->cpu_name));
+    wind_strcpy(head->cpu_name,(const char*)&buff[index]);
+    index += sizeof(head->cpu_name);
 
-w_int32_t check_img_valid(w_part_s *img)
-{
-    w_uint32_t cal_crc,crc;
-    img_head_s *head;
+    wind_to_uint32(&buff[index],&head->head_crc);
+    crc = wind_crc32(buff,index,0xffffffff);
+    WIND_ASSERT_RETURN(crc == head->head_crc,W_ERR_INVALID);
+    boot_img_print_head(head);
+    return W_ERR_OK;
 
-    feed_watchdog();
-	head = (img_head_s*)img->base;
-    if(0 != head_endian_convert(head))
-    {
-        wind_warn("img file head endian convert ERROR.");
-        return -1;
-    }
-    
-    cal_crc = wind_crc32((w_uint8_t*)head,head->head_len - 4,0xffffffff);
-    crc = head->head_crc;
-    
-    wind_debug("img file head crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
-    if(cal_crc != crc)
-    {
-        wind_warn("img file head crc ERROR.");
-        return -1;
-    }
-    print_img_head(head);
-    if(!check_hardware_matched(head))
-    {
-        wind_warn("hardware is NOT matched.");
-        return -1;
-    }
-    
-    feed_watchdog();
-	crc = wind_crc32((w_uint8_t*)(img->base+head->head_len),head->img_len - head->head_len,0xffffffff);
-    cal_crc = head->bin_crc;
-    
-    wind_debug("bin file crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
-    if(cal_crc != crc)
-    {
-        wind_warn("bin file crc ERROR.");
-        return -1;
-    }
-    
-    feed_watchdog();
-    wind_notice("img file verify OK.");
-    return 0;
 }
 
 w_part_s * boot_img_get_old_part(void)
@@ -180,14 +119,14 @@ w_part_s * boot_img_get_old_part(void)
     part[0] = boot_part_get(PART_IMG1);
     part[1] = boot_part_get(PART_IMG2);
     if(!part[0] && !part[1])
-        return W_NULL;
+        return (w_part_s *)W_NULL;
     if(!(part[0] && part[1]))
     {
         if(part[0] && (part[0]->status == MEM_NORMAL))
             return part[0];
         if(part[1] && (part[1]->status == MEM_NORMAL))
             return part[1];
-        return W_NULL;
+        return (w_part_s *)W_NULL;
     }
     if((part[0]->status != MEM_NORMAL) && (part[1]->status == MEM_NORMAL))
     {
@@ -211,6 +150,7 @@ w_part_s * boot_img_get_old_part(void)
         return part[1];
     }
 }
+
 
 w_part_s *boot_img_get_new_normal_img(void)
 {
@@ -244,15 +184,88 @@ w_part_s *boot_img_get_new_normal_img(void)
    
 }
 
+w_bool_t check_hardware_matched(img_head_s *head)
+{
+    if(0 != wind_memcmp(head->board_name,BOARD_NAME,wind_strlen(BOARD_NAME)))
+    {
+        wind_notice("dest board name:%s",BOARD_NAME);
+        return B_FALSE;
+    }
+    if(0 != wind_memcmp(head->arch_name,ARCH_NAME,wind_strlen(ARCH_NAME)))
+    {
+        wind_notice("dest arch name:%s",ARCH_NAME);
+        return B_FALSE;
+    }
+    if(0 != wind_memcmp(head->cpu_name,CPU_NAME,wind_strlen(CPU_NAME)))
+    {
+        wind_notice("dest cpu model:%s",CPU_NAME);
+        return B_FALSE;
+    }
+    return B_TRUE;    
+}
+
+w_err_t boot_img_decrypt(w_part_s *img)
+{
+    w_int32_t offset;
+    w_int32_t len;
+    img_head_s *head = &img_head;
+    WIND_ASSERT_RETURN(head->magic == IMG_MAGIC,W_ERR_FAIL);
+    offset = head->img_len;
+    return 0;
+}
+
+
+w_err_t check_img_valid(w_part_s *img)
+{
+    w_uint32_t cal_crc,crc;
+    img_head_s *head;
+
+    feed_watchdog();
+
+    
+    cal_crc = wind_crc32((w_uint8_t*)head,head->head_len - 4,0xffffffff);
+    crc = head->head_crc;
+    
+    wind_debug("img file head crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
+    if(cal_crc != crc)
+    {
+        wind_warn("img file head crc ERROR.");
+        return W_ERR_FAIL ;
+    }
+    boot_img_print_head(head);
+    if(!check_hardware_matched(head))
+    {
+        wind_warn("hardware is NOT matched.");
+        return -1;
+    }
+    
+    feed_watchdog();
+	crc = wind_crc32((w_uint8_t*)(img->base+head->head_len),head->img_len - head->head_len,0xffffffff);
+    cal_crc = head->bin_crc;
+    
+    wind_debug("bin file crc:0x%x,calc_crc:0x%x.",crc,cal_crc);
+    if(cal_crc != crc)
+    {
+        wind_warn("bin file crc ERROR.");
+        return -1;
+    }
+    
+    feed_watchdog();
+    wind_notice("img file verify OK.");
+    return 0;
+}
+
+
 w_err_t boot_img_flush_cache_to_part(w_part_s **part,w_int32_t count)
 {
-    w_int32_t i,ret;
+    w_int32_t i;
+    w_err_t err;
     w_part_s *cache;
     cache = boot_part_get(PART_CACHE);
     for(i = 0;i < count;i ++)
     {
-        ret = boot_part_copy_data(cache,part[i]);
-        if(0 != ret)
+        err = boot_part_copy_data(cache,part[i]);
+        if(0 != err)
         {
             wind_warn("flush data to %s failed.",cache->name);
             return W_ERR_FAIL;
@@ -314,7 +327,7 @@ w_err_t boot_img_flush(void)
 
 
 
-w_int32_t boot_img_clear_all(void)
+w_err_t boot_img_clear_all(void)
 {
     w_int32_t idx = 0;
     w_uint32_t i;
@@ -334,36 +347,11 @@ w_int32_t boot_img_clear_all(void)
         boot_part_erase(code[i]);
     }
     wind_printf("clear program OK.\r\n");
-    return 0;
+    return W_ERR_OK;
 }
 
 
 //-------------------------------------------------------------------------
-w_int32_t repair_part_space(w_part_s *src,w_part_s *dest)
-{
-    w_int32_t ret;
-    
-    if(MEM_NORMAL != src->status)
-    {
-        wind_error("can NOT find available source to repir program1.");
-        src = W_NULL;
-        return -1;
-    }
-    
-    wind_notice("repair program from \"%s\" to \"%s\"",
-                src->name,dest->name);
-    ret = boot_part_copy_data(src,dest);
-    if(ret != 0)
-    {
-        wind_error("repir space %s base 0x%x,lenth %d failed.",
-                    dest->name,dest->base,dest->size);
-        return -1;
-    }
-    return 0;
-}
-
-
-
 static w_err_t repair_program(void)
 {
     w_err_t err;
@@ -373,6 +361,7 @@ static w_err_t repair_program(void)
         return W_ERR_OK;
     src = boot_img_get_new_normal_img();
     WIND_ASSERT_RETURN(src != W_NULL,W_ERR_FAIL);
+    wind_notice("repair part:%s from %s",dest->name,src->name);
     err = boot_part_copy_data(src,dest);
     WIND_ASSERT_RETURN(err == W_ERR_OK,W_ERR_FAIL);
     
@@ -380,12 +369,10 @@ static w_err_t repair_program(void)
     return err;
 }
 
-
-
-w_int32_t boot_img_check(void)
+w_err_t boot_img_check(void)
 {
     w_int32_t idx = 0;
-    w_int32_t ret = 0;
+    w_err_t err = 0;
     w_part_s *code[3];
     w_int32_t error_flag = 0,i;
     w_bool_t is_ok;
@@ -409,16 +396,16 @@ w_int32_t boot_img_check(void)
     if(error_flag)
     {
         (void)boot_param_flush();
-        ret = repair_program();
+        err = repair_program();
         
-        if(0 != ret)
+        if(0 != err)
         {
             wind_error("repairing program failed");
-            return -1;
+            return W_ERR_FAIL;
         }
-        return ret;
+        return err;
     }
-    return ret;
+    return err;
 }
 
 #ifdef __cplusplus

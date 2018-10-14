@@ -54,16 +54,16 @@ void print_boot_info(void)
     wind_printf("CPU  : %s\r\n\r\n",CPU_NAME);
 }
 
-static w_int32_t boot_init(void)
+static w_err_t boot_init(void)
 {
     boot_param_init();
     boot_media_init();
     boot_part_init();
     boot_status_go_next();
-    return 0;
+    return W_ERR_OK;
 }
 
-static w_int32_t boot_debug_mode_check(void)
+static w_err_t boot_debug_mode_check(void)
 {
     boot_param_s *bp = boot_param_get();
     if(bp->debug_mode)
@@ -77,37 +77,37 @@ static w_int32_t boot_debug_mode_check(void)
         wind_notice("bootloader mode:NORMAL");
         boot_status_go_next();
     }
-    return 0;
+    return W_ERR_OK;
 }
 
 
-static w_int32_t boot_first_check(void)
+static w_err_t boot_first_check(void)
 {
-    w_int32_t ret;
+    w_err_t err;
     boot_param_s *bp;
     bp = boot_param_from_rom();
     if(W_NULL != bp)
     {
         boot_status_go_next();
         wind_notice("find it is NOT the first running time.");
-        return 0;
+        return W_ERR_OK;
     }
     wind_notice("NO valid boot params found.");
     boot_param_reset();
-    ret = boot_param_flush();
-    if(0 != ret)
+    err = boot_param_flush();
+    if(0 != err)
     {
         wind_error("write boot params failed.");
         boot_status_set(BOOT_ERROR);
-        return -1;
+        return W_ERR_FAIL;
     }
     boot_status_go_next();
     wind_notice("check first running time OK.");
-    return 0;
+    return W_ERR_OK;
     
 }
 
-static w_int32_t boot_chip_lock_check(void)
+static w_err_t boot_chip_lock_check(void)
 {
     if(is_chip_lock())
     {
@@ -118,87 +118,77 @@ static w_int32_t boot_chip_lock_check(void)
         wind_warn("MCU chip is unlocked.");
     }
     boot_status_go_next();
-    return 0;
+    return W_ERR_OK;
 }
 
 
 
-static w_int32_t boot_img_valid_check(void)
+static w_err_t boot_img_valid_check(void)
 {
-    w_int32_t ret;
-    ret = boot_img_check();
+    w_err_t err;
+    err = boot_img_check();
     boot_status_go_next();
-    return ret;
+    return err;
 }
 
 
 
-static w_int32_t  boot_upgrade_check(void)
+static w_err_t  boot_upgrade_check(void)
 {
-    w_int32_t ret;
-    w_part_s *part[2],*cache;
+    w_err_t err;
+    w_part_s *cache;
     share_param_s *sp = share_param_get();
     
     if(!sp->upgrade_flag)
     {
         wind_notice("upgrade flags is invalid,need NOT update image.");
         boot_status_go_next();
-        return 0;
+        return W_ERR_OK;
     }
 
     sp->upgrade_flag = 0;
     share_param_flush(sp);
     wind_notice("handling upgrade event,please wait");
     
-    cache = boot_part_get(PART_CACHE);
-    ret = check_img_valid(cache);
-    if(0 != ret)
-    {
-        wind_error("check img file ERROR");
-        return -1;
-    }
-
-    part[0] = boot_img_get_old_part();
-    part[1] = boot_part_get(PART_SYSRUN);
-    ret = boot_img_flush_cache_to_part(part,2);
-    if(0 != ret)
+    err = boot_img_flush();
+    if(0 != err)
     {
         wind_warn("flush upgrade img failed.");
         boot_status_set(BOOT_ERROR);
-        return -1;
+        return W_ERR_FAIL;
     }
     
-    ret = boot_param_flush();
-    if(0 != ret)
+    err = boot_param_flush();
+    if(0 != err)
     {
         wind_error("update params failed.");
         boot_status_set(BOOT_ERROR);
-        return -1;
+        return W_ERR_FAIL-1;
     }
     boot_status_go_next();
-    return 0;
+    return W_ERR_OK;
     
 }
 
 
-static w_int32_t boot_wait_key_press(void)
+static w_err_t boot_wait_key_press(void)
 {
     char ch = 0;
 
     boot_param_s *bp = (boot_param_s *)boot_param_get();
     wind_printf("press any key to enter menu list:");
-    if(0 == wait_for_key_input(bp->wait_sec,&ch,1))
+    if(W_ERR_OK == wait_for_key_input(bp->wait_sec,&ch,1))
     {
         boot_status_go_next();
         wind_printf("\r\n");
-        return 0;
+        return W_ERR_OK;
     }
     boot_status_set(BOOT_LOAD_IMG);
     wind_printf("\r\n");
-    return 0;
+    return W_ERR_OK;
 }
 
-static w_int32_t boot_enter_menu(void)
+static w_err_t boot_enter_menu(void)
 {
     w_err_t err;
     err = run_menu();
@@ -206,10 +196,10 @@ static w_int32_t boot_enter_menu(void)
         boot_status_go_next();
     else
         boot_status_set(BOOT_INIT);
-    return 0;
+    return W_ERR_OK;
 }
 
-static w_int32_t boot_load_img(void)
+static w_err_t boot_load_img(void)
 {
     w_mem_status_e mem_stat = MEM_ERROR;
     w_part_s *part = W_NULL,*tmp;
@@ -223,21 +213,21 @@ static w_int32_t boot_load_img(void)
     {
         wind_error("get boot param failed.");
         boot_status_set(BOOT_ERROR);
-        return -1;
+        return W_ERR_FAIL;
     }
     
     // debug模式不需要检查，直接调入image
     if(bp->debug_mode)
     {
         boot_status_go_next();
-        return 0;
+        return W_ERR_OK;
     }
     tmp = boot_part_get(PART_IMG1);
     if(tmp->datalen <= 0)
     {
         wind_notice("program is NOT existing.");
         boot_status_set(BOOT_MENU_LIST);
-        return -1;
+        return W_ERR_FAIL;
     }
 	tmp = boot_part_get(PART_SYSRUN);
     if(MEDIA_TYPE_ROM == tmp->mtype)
@@ -259,47 +249,47 @@ static w_int32_t boot_load_img(void)
     {
         wind_warn("program has some ERRORs.");
         boot_status_set(BOOT_MENU_LIST);
-        return -1;
+        return W_ERR_FAIL;
     }
 
     if(MEDIA_TYPE_ROM == part->mtype)
     {
         wind_notice("need not load image to ROM.");
         boot_status_set(BOOT_SET_SHARE_PARAM);
-        return 0;
+        return W_ERR_OK;
     }
     else
     {
         wind_error("running memory type is not supported.");
         boot_status_set(BOOT_ERROR);
-        return -1;
+        return W_ERR_OK;
     }
     
 }
 
-static w_int32_t boot_set_system_param(void)
+static w_err_t boot_set_system_param(void)
 {
     wind_notice("set share params for system");
     share_param_init();
     boot_status_set(BOOT_RUN_SYSTEM);
-    return 0;
+    return W_ERR_OK;
 }
 
 
-static w_int32_t boot_error_handle(void)
+static w_err_t boot_error_handle(void)
 {
     char ch;
-    w_int32_t ret;
+    w_err_t err;
     while(1)
     {
-        ret = read_char_blocking(&ch);
-        if((ret == 0) && (ch == '\n'))
+        err = read_char_blocking(&ch);
+        if((err == 0) && (ch == '\n'))
             wind_error("Some error occured in bootloader and system boot failed.");
     }
     return 0;
 }
 
-static w_int32_t boot_run_system(void)
+static w_err_t boot_run_system(void)
 {
     boot_exit_hook();
 	wind_notice("jump to system running space\r\n\r\n\r\n");
@@ -308,7 +298,7 @@ static w_int32_t boot_run_system(void)
 }
 
 
-boot_handle_TB g_status_handTB[] = 
+boot_step_s g_status_handTB[] = 
 {
     {BOOT_INIT,"boot init",boot_init},
     {BOOT_FIRST_CHECK,"first run chack",boot_first_check},   
@@ -330,23 +320,24 @@ boot_handle_TB g_status_handTB[] =
 
 void boot_loop(void)
 {
-    w_int32_t i,ret;
+    w_int32_t i;
+    w_err_t err;
     boot_enter_main_hook();
     print_boot_info();
     while(1)
     {
-        for(i = 0;i < sizeof(g_status_handTB)/sizeof(boot_handle_TB);i ++)
+        for(i = 0;i < sizeof(g_status_handTB)/sizeof(boot_step_s);i ++)
         {
             if(g_boot_status == g_status_handTB[i].status)
             {
                 wind_printf("[step%-2d] %-48s\r\n",g_status_handTB[i].status+1,
                             g_status_handTB[i].stepname);
-                ret = g_status_handTB[i].handle();
-                wind_notice("%-48s [%s]\r\n",g_status_handTB[i].stepname,ret?"ERROR":"OK");
+                err = g_status_handTB[i].handle();
+                wind_notice("%-48s [%s]\r\n",g_status_handTB[i].stepname,err == W_ERR_OK?"OK":"ERROR");
                 break;
             }
         }
-        if(i >= sizeof(g_status_handTB)/sizeof(boot_handle_TB))
+        if(i >= sizeof(g_status_handTB)/sizeof(boot_step_s))
         {
             wind_error("unkown status %d.",g_boot_status);
             boot_status_set(BOOT_ERROR);

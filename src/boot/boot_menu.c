@@ -67,7 +67,7 @@ static w_int32_t make_sure_input(char *info)
     while(1)
     {
         wind_printf("%s?[y/n]\r\n",info);
-        if(0 != read_char_blocking(&ch))
+        if(W_ERR_OK != read_char_blocking(&ch))
         {
             exit_menu();
             return 0;
@@ -126,8 +126,8 @@ static w_err_t download_to_sysrun(void)
 static w_err_t download_to_any_part(void)
 {
     char ch;
+    w_int32_t i,index = 1;
     w_err_t err;
-    w_int32_t i,index = 1,ret;
     w_part_s *part;
     part = boot_part_get_list();
     WIND_ASSERT_RETURN(part != W_NULL,W_ERR_FAIL);
@@ -138,8 +138,8 @@ static w_err_t download_to_any_part(void)
         if(part[i].used)
             wind_printf("[%c] %s\r\n",get_key(i+1),part[i].name);
     }
-    ret = wait_for_key_input(20,&ch,0);
-    if(ret != 0)
+    err = wait_for_key_input(20,&ch,0);
+    if(err != 0)
     {
         wind_notice("wait for input timeout.\r\n");
         return W_ERR_TIMEOUT;
@@ -173,7 +173,7 @@ static w_err_t set_debug_mode(void)
         {
             wind_printf("[%d] %s\r\n",i+1,mode[i]);
         }
-        if(0 != read_char_blocking(&ch))
+        if(W_ERR_OK != read_char_blocking(&ch))
         {
             exit_menu();
             return W_ERR_FAIL;
@@ -242,7 +242,7 @@ static void do_clear_flash_data(w_uint8_t unlock)
 {
     boot_img_clear_all();
     boot_param_reset();
-    (void)boot_param_flush();
+    boot_param_flush();
     if(unlock)
         set_chip_lock(0);
 }
@@ -257,10 +257,10 @@ static w_err_t clear_boot_param(void)
 
 static w_err_t exit_and_save(void)
 {
-    w_int32_t ret;
+    w_int32_t err;
     
-    ret = boot_param_flush();
-    if(ret != 0)
+    err = boot_param_flush();
+    if(err != 0)
     {
         wind_printf("write param fialed.\r\n");
     }    
@@ -317,7 +317,7 @@ void print32_t_menu_list(void)
 }
 
 //开启超级权限，可以删除程序，修改重要参数等
-w_int32_t open_super_prio(void)
+w_err_t open_super_prio(void)
 {
     w_int32_t i;
     w_int32_t len;
@@ -336,7 +336,7 @@ w_int32_t open_super_prio(void)
     }
     else
     {
-        return -1;
+        return W_ERR_FAIL;
     }
     
     for(i = 0;i < sizeof(g_menu_list)/sizeof(w_menu_tb_s);i ++)
@@ -345,20 +345,20 @@ w_int32_t open_super_prio(void)
             g_menu_list[i].prio = 0;
     }
     super_prio_flag = 1;
-    return 0;
+    return W_ERR_OK;
 }
 
 w_err_t run_menu(void)
 {
     char ch;
-    w_int32_t i,ret;
+    w_int32_t i,err;
     
     exit_menu_flag = 0;
     g_go_ahead = 1;
     while(0 == exit_menu_flag)
     {
         print32_t_menu_list();
-        if(0 != read_char_blocking(&ch))
+        if(W_ERR_OK != read_char_blocking(&ch))
         {
             exit_menu();
             if(get_menu_go_direction())
@@ -380,8 +380,8 @@ w_err_t run_menu(void)
             if(ch == '0')
             {
                 wind_printf("\r\n");
-                ret = open_super_prio();
-                if(0 == ret)
+                err = open_super_prio();
+                if(0 == err)
                 {
                     wind_notice("You have opened advanced function.");
                 }

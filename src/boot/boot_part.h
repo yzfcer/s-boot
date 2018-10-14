@@ -60,8 +60,7 @@ void boot_part_reset_ram(void);
 void boot_part_print(void);
 w_int32_t boot_part_get_count(void);
 w_part_s *boot_part_get_list(void);
-void boot_part_copy_info(w_part_s *src,w_part_s *dest);
-w_int32_t boot_part_copy_data(w_part_s *src,w_part_s *dest);
+w_err_t boot_part_copy_data(w_part_s *src,w_part_s *dest);
 w_bool_t boot_part_equal(w_part_s *src,w_part_s *dest);
 w_bool_t boot_part_check(w_part_s *part);
 

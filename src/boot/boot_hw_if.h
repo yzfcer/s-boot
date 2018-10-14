@@ -19,9 +19,9 @@ extern "C" {
 #endif
 void boot_delay(w_uint32_t ms);
 
-w_int32_t read_char_blocking(char *ch);
+w_err_t read_char_blocking(char *ch);
 w_int32_t read_line_blockig(char *buff,w_int32_t len);
-w_int32_t wait_for_key_input(w_int32_t to_sec,char *ch,w_int32_t print32_t_flag);
+w_err_t wait_for_key_input(w_int32_t to_sec,char *ch,w_int32_t print32_t_flag);
 
 #ifdef __cplusplus
 }

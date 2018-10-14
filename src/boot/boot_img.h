@@ -19,36 +19,35 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+#define IMG_MAGIC 0x4528AB6D
 typedef struct __img_head_s img_head_s;
 struct __img_head_s
 {
-    w_uint8_t  magic[8];
+    w_uint32_t magic;
     w_uint32_t img_len;
     w_uint32_t head_len;
     w_uint32_t head_ver;
-    w_uint8_t  bin_ver[16];
+    w_uint32_t bin_ver;
     w_uint32_t bin_crc;
-    w_int32_t encry_type;
-    w_uint32_t endian_test;
-    w_uint8_t  img_name[64];
-    w_uint8_t  board_name[32];
-    w_uint8_t  arch_name[32];
-    w_uint8_t  cpu_name[32];
+    w_uint32_t encrypt_type;
+    char       img_name[64];
+    char       board_name[32];
+    char       arch_name[32];
+    char       cpu_name[32];
     w_uint32_t head_crc;
 };
 
 w_part_s *boot_img_get_old_part(void);
 w_part_s *boot_img_get_new_normal_img(void);
 
-w_int32_t boot_img_decrypt(w_part_s *img,w_part_s *bin);
+w_err_t boot_img_decrypt(w_part_s *img);
 w_err_t   boot_img_flush(void);
-w_int32_t check_img_valid(w_part_s *img);
+w_err_t check_img_valid(w_part_s *img);
 w_err_t   boot_img_download(void);
 w_err_t   boot_img_flush_cache_to_part(w_part_s **part,w_int32_t count);
 
-w_int32_t boot_img_clear_all(void);
-w_int32_t boot_img_check(void);
+w_err_t boot_img_clear_all(void);
+w_err_t boot_img_check(void);
 
 #ifdef __cplusplus
 }

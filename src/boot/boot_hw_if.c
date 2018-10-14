@@ -30,13 +30,13 @@ void boot_delay(w_uint32_t ms)
     while(boot_get_sys_ms() - tick < ms);
 }
 
-w_int32_t wait_for_key_input(w_int32_t to_sec,char *ch,w_int32_t print_flag)
+w_err_t wait_for_key_input(w_int32_t to_sec,char *ch,w_int32_t print_flag)
 {
     w_int32_t second;
     w_uint32_t tick;
-    w_int32_t ret = -1;
+    w_err_t err = W_ERR_FAIL;
     if(to_sec <= 0)
-        return -1;
+        return W_ERR_OK;
     second = to_sec > 99?99:to_sec;
     tick = boot_get_sys_ms();
     if(print_flag)
@@ -46,7 +46,7 @@ w_int32_t wait_for_key_input(w_int32_t to_sec,char *ch,w_int32_t print_flag)
         feed_watchdog();
         if(wind_std_input(ch,1) > 0)
         {
-            ret = 0;
+            err = W_ERR_OK;
             break;
         }
         if(boot_get_sys_ms() - tick >= 1000)
@@ -65,21 +65,21 @@ w_int32_t wait_for_key_input(w_int32_t to_sec,char *ch,w_int32_t print_flag)
         }
     }
     wind_printf("\r\n");
-    return ret;
+    return err;
 }
 
 
 
 
 
-w_int32_t read_char_blocking(char *ch)
+w_err_t read_char_blocking(char *ch)
 {
     if(0 == wait_for_key_input(60,ch,0))
-        return 0;
+        return W_ERR_OK;
     wind_printf("you have NOT input any key in a 60 seconds,boot exit the menu list.\r\n");
     if(0 == wait_for_key_input(30,ch,1))
-        return 0;
-    return -1;
+        return W_ERR_OK;
+    return W_ERR_FAIL;
 }
 
 w_int32_t read_line_blockig(char *buff,w_int32_t len)
@@ -129,12 +129,12 @@ void init_recv_stat(recv_stat_s *stat)
 }
 static void wait_file_send_compete(void)
 {
-	w_int32_t ret;
+	w_err_t err;
 	char ch;
 	g_recvstat.stat = boot_get_sys_ms();
 	while(1)
     {
-        //ret = wait_for_key_input(3,&ch,0);
+        //err = wait_for_key_input(3,&ch,0);
     	feed_watchdog();
     	boot_delay(100);
     	if(0 < wind_std_input(&ch))
@@ -148,7 +148,7 @@ static void wait_file_send_compete(void)
 
 w_int32_t boot_receive_img(w_uint32_t addr,w_uint32_t maxlen)
 {
-    w_int32_t ret;
+    w_err_t err;
     w_int32_t i,end;
     char *buf = (char*)addr;
     init_recv_stat(&g_recvstat);
@@ -157,8 +157,8 @@ w_int32_t boot_receive_img(w_uint32_t addr,w_uint32_t maxlen)
         switch(g_recvstat.stat)
         {
             case RECV_START:
-                ret = wait_for_key_input(30,&buf[0],1);
-                if(0 == ret)
+                err = wait_for_key_input(30,&buf[0],1);
+                if(0 == err)
                 {
                     
                     g_recvstat.stat = RECV_HANDLE;
@@ -172,8 +172,8 @@ w_int32_t boot_receive_img(w_uint32_t addr,w_uint32_t maxlen)
                 }
                 break;
             case RECV_HANDLE:
-                ret = wind_std_input(&buf[g_recvstat.idx]);
-                if(0 < ret)
+                err = wind_std_input(&buf[g_recvstat.idx]);
+                if(0 < err)
                 {
                     g_recvstat.idx ++;
                     if(g_recvstat.idx >= maxlen)

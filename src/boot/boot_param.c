@@ -54,9 +54,9 @@ boot_param_s *boot_param_get(void)
 
 boot_param_s *boot_param_from_rom(void)
 {
-    w_int32_t ret;
-    ret = boot_param_read();
-    if(0 != ret)
+    w_int32_t err;
+    err = boot_param_read();
+    if(0 != err)
     {
         wind_warn("get boot params failed.");
         return (boot_param_s *)NULL;
@@ -90,6 +90,7 @@ w_err_t boot_param_reset(void)
     boot_media_init();
     boot_part_init();
     bp->part = boot_part_get_list();
+    return W_ERR_OK;
 }
 
 
@@ -126,10 +127,10 @@ w_err_t boot_param_check_valid(w_uint8_t *buff)
 
 
 
-w_int32_t boot_param_read(void)
+w_err_t boot_param_read(void)
 {
-    w_uint32_t err = 0;
-    w_int32_t i,j,len,ret;
+    w_err_t err = 0;
+    w_int32_t i,j,len,err_cnt = 0;
     w_part_s *part[2],*pt;
     w_uint8_t *buff;
     part[0] = boot_part_get(PART_PARAM1);
@@ -144,8 +145,8 @@ w_int32_t boot_param_read(void)
             if(len >= sizeof(boot_param_s))
                 break;
         }
-        ret = boot_param_check_valid(buff);
-        if(0 == ret)
+        err = boot_param_check_valid(buff);
+        if(0 == err)
         {
             wind_memcpy(&g_bootparam,buff,sizeof(boot_param_s));
             pt = boot_part_get_list();
@@ -156,10 +157,10 @@ w_int32_t boot_param_read(void)
         else
         {
             wind_warn("read param %d fail.",i + 1);
-            err ++;
+            err_cnt ++;
         }
     }
-    if(err >= 2)
+    if(err_cnt >= 2)
     {
         wind_warn("read both params failed.");
         return -1;
@@ -168,7 +169,7 @@ w_int32_t boot_param_read(void)
     
 }
 
-w_int32_t boot_param_flush(void)
+w_err_t boot_param_flush(void)
 {
     w_int32_t i,j,len,err = 0;
     w_part_s *part[2],*pt;
