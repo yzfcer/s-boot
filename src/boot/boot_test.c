@@ -84,7 +84,7 @@ void test_upgrade(void)
         return;
     }
     sp = share_param_get();
-    share_param_init();
+    share_param_reset();
     sp->upgrade_flag = 1;
     return;
 }

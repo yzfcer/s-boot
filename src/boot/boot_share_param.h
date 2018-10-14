@@ -36,6 +36,7 @@ typedef struct
 }share_param_s;
 
 w_err_t share_param_init(void);
+w_err_t share_param_reset(void);
 
 share_param_s *share_param_get(void);
 

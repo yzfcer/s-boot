@@ -234,7 +234,7 @@ static w_err_t check_img_file(w_part_s *cache)
 
 w_err_t boot_img_check_cache_valid(w_part_s *cache)
 {
-    w_uint32_t cal_crc,crc;
+    w_uint32_t crc;
     img_head_s *head;
     w_err_t err;
     feed_watchdog();
@@ -254,7 +254,14 @@ w_err_t boot_img_check_cache_valid(w_part_s *cache)
     }
     
     feed_watchdog();
-    
+    crc = cache->crc;
+    err = boot_part_calc_crc(cache,head->head_len,head->img_len - head->head_len,W_TRUE);
+    if((err != W_ERR_OK) || (cache->crc != head->bin_ver))
+    {
+        cache->crc = crc;
+        return W_ERR_FAIL;
+    }
+    cache->crc = crc;
     feed_watchdog();
     wind_notice("img file verify OK.");
     return W_ERR_OK;
@@ -266,7 +273,6 @@ w_err_t boot_img_flush_cache_to_part(w_part_s **part,w_int32_t count)
     w_int32_t i;
     w_err_t err;
     w_part_s *cache;
-
 
     cache = boot_part_get(PART_CACHE);
     err = boot_img_check_cache_valid(cache);
@@ -305,7 +311,7 @@ w_err_t boot_img_download(void)
         return W_ERR_FAIL;
     }
     cache->datalen = (w_uint32_t)len;
-    boot_part_calc_crc(cache,W_TRUE);
+    boot_part_calc_crc(cache,0,0,W_TRUE);
     wind_notice("cache file lenth:%d",cache->datalen);
     return W_ERR_OK;
 }

@@ -44,7 +44,7 @@ w_err_t boot_part_init(void)
 w_bool_t  boot_part_create(const char *name,w_media_s *media,w_uint32_t size,w_uint8_t encrypt)
 {
     w_part_s *part;
-    wind_notice("create part:%s",name);
+    wind_notice("create part: %s",name);
     WIND_ASSERT_RETURN(name != W_NULL,W_FALSE);
     WIND_ASSERT_RETURN(wind_strlen(name) < PART_NAME_LEN,W_FALSE);
     WIND_ASSERT_RETURN(media != W_NULL,W_FALSE);
@@ -91,26 +91,29 @@ w_err_t boot_part_seek(w_part_s *part,w_int32_t offset)
     return W_ERR_OK;
 }
 
-w_err_t boot_part_calc_crc(w_part_s *part,w_bool_t set)
+w_err_t boot_part_calc_crc(w_part_s *part,w_int32_t offset,w_int32_t len,w_bool_t set)
 {
     w_int32_t blkcnt;
     w_int32_t size;    
     w_uint8_t *buff;
-    w_uint32_t offset;
     w_uint32_t crc = 0xffffffff;
     WIND_ASSERT_RETURN(part != W_NULL,W_ERR_PTR_NULL);
+    WIND_ASSERT_RETURN(offset >= 0,W_ERR_INVALID);
+    WIND_ASSERT_RETURN((offset & (part->blksize-1)) == 0,W_ERR_INVALID);
+    WIND_ASSERT_RETURN(len >= 0,W_ERR_INVALID);
+    if(len == 0)
+        len = part->datalen;
+    
     buff = get_common_buffer();
     blkcnt = COMMBUF_SIZE / part->blksize;
     WIND_ASSERT_RETURN(blkcnt > 0,W_ERR_FAIL);
     size = blkcnt * part->blksize;
-    offset = 0;
-    boot_part_seek(part,0);
+    boot_part_seek(part,offset);
     while(part->offset < part->datalen)
     {
         size = boot_part_read(part,buff,COMMBUF_SIZE);
         WIND_ASSERT_RETURN(size > 0,W_ERR_FAIL);
         crc = wind_crc32(buff,size,crc);
-        offset += size;
     }
     if(set)
     {
@@ -327,7 +330,7 @@ w_bool_t boot_part_check(w_part_s *part)
         return W_TRUE;
     if(part->status == MEM_ERROR)
         return W_FALSE;
-    err = boot_part_calc_crc(part,W_FALSE);
+    err = boot_part_calc_crc(part,0,0,W_FALSE);
     if(W_ERR_OK != err)
         return W_FALSE;
     return W_TRUE;

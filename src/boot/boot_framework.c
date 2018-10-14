@@ -59,6 +59,7 @@ static w_err_t boot_init(void)
     boot_param_init();
     boot_media_init();
     boot_part_init();
+    share_param_init();
     boot_status_go_next();
     return W_ERR_OK;
 }
@@ -269,7 +270,7 @@ static w_err_t boot_load_img(void)
 static w_err_t boot_set_system_param(void)
 {
     wind_notice("set share params for system");
-    share_param_init();
+    share_param_reset();
     boot_status_set(BOOT_RUN_SYSTEM);
     return W_ERR_OK;
 }
