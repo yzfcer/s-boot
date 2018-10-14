@@ -21,14 +21,14 @@
 #include <conio.h>
 #include "wind_debug.h"
 
-w_int32_t boot_enter_main_hook(void)
+w_err_t boot_enter_main_hook(void)
 {
-	return 0;
+	return W_ERR_OK;
 }
 
-w_int32_t boot_exit_hook(void)
+w_err_t boot_exit_hook(void)
 {
-	return 0;
+	return W_ERR_OK;
 }
 void      wind_std_port_init(void)
 {

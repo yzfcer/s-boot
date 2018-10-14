@@ -44,7 +44,7 @@ typedef struct
 }boot_test_s;
 void set_error(w_uint8_t err_type,w_uint8_t err);
 w_uint8_t get_error(w_uint8_t err_type);
-w_int32_t test_entry(void);
+w_err_t test_entry(void);
 #else
 #define get_error(t) 0
 #endif

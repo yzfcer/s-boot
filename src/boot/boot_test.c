@@ -108,7 +108,7 @@ void print32_t_boottest(void)
     }
 }
 
-w_int32_t test_entry(void)
+w_err_t test_entry(void)
 {
     char ch;
     w_int32_t i;
@@ -116,16 +116,16 @@ w_int32_t test_entry(void)
     {
         print32_t_boottest();
         if(W_ERR_OK != read_char_blocking(&ch))
-            return -1;
+            return W_ERR_FAIL;
         for(i = 0;i < sizeof(g_boottest)/sizeof(boot_test_s);i ++)
         {
             if(ch == g_boottest[i].key)
             {
                 g_boottest[i].test();
-                return 0;
+                return W_ERR_OK;
             }
         }
-        return 0;
+        return W_ERR_OK;
     }
 }
 
