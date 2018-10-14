@@ -105,6 +105,23 @@ static w_err_t download_to_fs_part(void)
     return boot_img_flush_cache_to_part(&part,1);
 }
 
+static w_err_t download_to_sysrun(void)
+{
+    w_err_t err;
+    w_part_s *part = boot_part_get(PART_SYSRUN);
+    WIND_ASSERT_RETURN(part != W_NULL,W_ERR_NOT_SUPPORT);
+    err = boot_img_download();
+    WIND_ASSERT_RETURN(err == W_ERR_OK,W_ERR_FAIL);
+    err = boot_img_flush_cache_to_part(&part,1);
+    if(err == W_ERR_OK)
+    {
+        g_go_ahead = 1;
+        exit_menu_flag = 1;
+    }
+        
+    return err;
+}
+
 
 static w_err_t download_to_any_part(void)
 {
@@ -204,7 +221,7 @@ static w_err_t unlock_mcu(void)
     return W_ERR_OK;
 }
 
-static w_err_t show_program_status(void)
+static w_err_t show_part_status(void)
 {
     boot_part_print();
     return W_ERR_OK;
@@ -256,10 +273,11 @@ static w_menu_tb_s g_menu_list[] =
 {
     {'1',0,0,"download img file",download_to_img_part},
     {'2',0,0,"download file system",download_to_fs_part},
-    {'3',0,0,"download to any part",download_to_any_part},
-    {'4',0,0,"show media map",show_media_map},
-    {'5',0,0,"show program status",show_program_status},
-    {'b',2,2,"set debug mode",set_debug_mode},
+    {'3',0,0,"download to sysrun",download_to_sysrun},
+    {'4',0,0,"download to any part",download_to_any_part},
+    {'5',0,0,"show media map",show_media_map},
+    {'6',0,0,"show part status",show_part_status},
+    {'7',2,2,"set debug mode",set_debug_mode},
     {'k',0,0,"lock MCU chip",lock_mcu},
     {'r',2,2,"clear boot params",clear_boot_param},
 #if BOOT_TEST_ENABLE
@@ -336,7 +354,7 @@ w_err_t run_menu(void)
     w_int32_t i,ret;
     
     exit_menu_flag = 0;
-    g_go_ahead = 0;
+    g_go_ahead = 1;
     while(0 == exit_menu_flag)
     {
         print32_t_menu_list();
@@ -352,6 +370,7 @@ w_err_t run_menu(void)
         {
             if(ch == g_menu_list[i].key && 0 == g_menu_list[i].prio)
             {
+                g_go_ahead = 0;
                 g_menu_list[i].handle();
                 break;
             }

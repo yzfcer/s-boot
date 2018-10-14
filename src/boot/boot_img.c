@@ -27,7 +27,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+img_head_s img_head;
 
 static w_uint32_t LE_TO_BE32(w_uint32_t x) 
 {
@@ -102,7 +102,7 @@ w_bool_t check_hardware_matched(img_head_s *head)
     return B_TRUE;    
 }
 
-w_int32_t decrypt_img_data(w_part_s *img,w_part_s *bin)
+w_int32_t boot_img_decrypt(w_part_s *img,w_part_s *bin)
 {
     w_int32_t len;
     img_head_s *head;
@@ -174,17 +174,32 @@ w_int32_t check_img_valid(w_part_s *img)
     return 0;
 }
 
-w_part_s * boot_img_get_flush_part(void)
+w_part_s * boot_img_get_old_part(void)
 {
     w_part_s *part[2];
     part[0] = boot_part_get(PART_IMG1);
     part[1] = boot_part_get(PART_IMG2);
-    if(!part[0] && part[1])
-        return (w_part_s *)W_NULL;
-    if(!part[0])
-        return part[1];
-    if(!part[1])
+    if(!part[0] && !part[1])
+        return W_NULL;
+    if(!(part[0] && part[1]))
+    {
+        if(part[0] && (part[0]->status == MEM_NORMAL))
+            return part[0];
+        if(part[1] && (part[1]->status == MEM_NORMAL))
+            return part[1];
+        return W_NULL;
+    }
+    if((part[0]->status != MEM_NORMAL) && (part[1]->status == MEM_NORMAL))
+    {
+        part[0] = part[1] + 1;
         return part[0];
+        
+    }
+    if((part[1]->status != MEM_NORMAL) && (part[0]->status == MEM_NORMAL))
+    {
+        part[1] = part[0] + 1;
+        return part[1];
+    }
     if(part[0]->time_mark <= part[1]->time_mark)
     {
         part[0]->time_mark = part[1]->time_mark + 1;
@@ -197,6 +212,37 @@ w_part_s * boot_img_get_flush_part(void)
     }
 }
 
+w_part_s *boot_img_get_new_normal_img(void)
+{
+    w_part_s *part[2];
+    part[0] = boot_part_get(PART_IMG1);
+    part[1] = boot_part_get(PART_IMG2);
+    if(!part[0] && !part[1])
+        return W_NULL;
+    if(!(part[0] && part[1]))
+    {
+        if(part[0] && (part[0]->status == MEM_NORMAL))
+            return part[0];
+        if(part[1] && (part[1]->status == MEM_NORMAL))
+            return part[1];
+        return W_NULL;
+    }
+    if((part[0]->status != MEM_NORMAL) && (part[1]->status == MEM_NORMAL))
+        return part[1];
+    if((part[1]->status != MEM_NORMAL) && (part[0]->status == MEM_NORMAL))
+        return part[0];
+    if(part[0]->time_mark <= part[1]->time_mark)
+    {
+        part[0]->time_mark = part[1]->time_mark + 1;
+        return part[0];
+    }
+    else
+    {
+        part[1]->time_mark = part[0]->time_mark + 1;
+        return part[1];
+    }
+   
+}
 
 w_err_t boot_img_flush_cache_to_part(w_part_s **part,w_int32_t count)
 {
@@ -249,7 +295,7 @@ w_err_t boot_img_flush(void)
     w_int32_t count;
     part[0] = boot_part_get(PART_SYSRUN);
     WIND_ASSERT_RETURN(part[0] != W_NULL,W_ERR_FAIL);
-    part[1] = boot_img_get_flush_part();
+    part[1] = boot_img_get_old_part();
     if(part[1] != W_NULL)
     {
         tmp = part[0];
@@ -316,97 +362,22 @@ w_int32_t repair_part_space(w_part_s *src,w_part_s *dest)
     return 0;
 }
 
-w_int32_t repair_running_space(void)
+
+
+static w_err_t repair_program(void)
 {
-    w_int32_t ret;
-    w_part_s *src,*dest,*tmp,*tmp1;
-    w_part_s bin;
+    w_err_t err;
+    w_part_s *src,*dest;
     dest = boot_part_get(PART_SYSRUN);
-    do
-    {
-        src = boot_part_get(PART_IMG1);
-        if(MEM_NORMAL == src->status)
-            break;
-        src = boot_part_get(PART_IMG2);
-        if(MEM_NORMAL == src->status)
-            break;
-        src = W_NULL;  
-    }while(0);
+    if(MEM_ERROR != dest->status)
+        return W_ERR_OK;
+    src = boot_img_get_new_normal_img();
+    WIND_ASSERT_RETURN(src != W_NULL,W_ERR_FAIL);
+    err = boot_part_copy_data(src,dest);
+    WIND_ASSERT_RETURN(err == W_ERR_OK,W_ERR_FAIL);
     
-    if(W_NULL == src)
-    {
-        wind_warn("can not find an available source for repairing.");
-        ret = -1;
-    }
-    else
-    {
-        //如果不是同一块sys_program1与运行区不是同一块，则数据需要先解密
-        wind_notice("repair program from \"%s\" to \"%s\"",src->name,dest->name);
-        tmp = boot_part_get(PART_CACHE);
-        boot_part_copy_data(src,tmp);
-        src = boot_part_get(PART_CACHE);
-        tmp = boot_part_get(PART_IMG1);
-        tmp1 = boot_part_get(PART_SYSRUN);
-        if((tmp->mtype != tmp1->mtype) ||
-            wind_strcmp(tmp->media_name,tmp1->media_name) ||
-            (tmp->base != tmp1->base))
-        {
-            decrypt_img_data(src,&bin);
-        }
-        else
-        {
-            boot_part_copy_info(src,&bin);
-        }
-        ret = repair_part_space(&bin,dest);
-    }
-    return ret;
-}
-
-
-
-static w_int32_t repair_program(void)
-{
-    w_int32_t ret = 0;
-    w_part_s *tmp1,*tmp2;
-    wind_notice("programs has errors,try to repair ...");
-    tmp2 = boot_part_get(PART_SYSRUN);
-    if(MEM_ERROR == tmp2->status)
-    {
-        if(0 != repair_running_space())
-            ret = -1;
-    }
-    tmp1 = boot_part_get(PART_IMG1);
-    if(MEM_ERROR == tmp1->status)
-    {
-        
-        if((tmp2->mtype != tmp1->mtype) ||
-            wind_strcmp(tmp2->media_name,tmp1->media_name) ||
-            (tmp2->base != tmp1->base))
-        {
-            tmp2 = boot_part_get(PART_IMG2);
-            if(0 != repair_part_space(tmp2,tmp1))
-                ret = -1;
-        }
-        else
-        {
-            tmp1 = boot_part_get(PART_IMG1);
-            tmp2 = boot_part_get(PART_SYSRUN);
-            tmp1->base = tmp2->base;
-            tmp1->datalen = tmp2->datalen;
-            tmp1->crc = tmp2->crc;
-            tmp1->status = MEM_NORMAL;
-        }
-    }
-    tmp1 = boot_part_get(PART_IMG2);
-    if(MEM_ERROR == tmp1->status)
-    {
-        tmp1 = boot_part_get(PART_IMG1);
-        tmp2 = boot_part_get(PART_SYSRUN);
-        if(0 != repair_part_space(tmp1,tmp2))
-            ret = -1;
-    }
     (void)boot_param_flush();
-    return ret;
+    return err;
 }
 
 
@@ -437,9 +408,9 @@ w_int32_t boot_img_check(void)
 
     if(error_flag)
     {
-        wind_error("program space ERROR.");
         (void)boot_param_flush();
         ret = repair_program();
+        
         if(0 != ret)
         {
             wind_error("repairing program failed");

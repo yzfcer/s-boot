@@ -65,10 +65,13 @@ boot_param_s *boot_param_from_rom(void)
 }
 
 
-void boot_param_reset(void)
+w_err_t boot_param_reset(void)
 {   
     boot_param_s *bp = (boot_param_s*)&g_bootparam;
     wind_notice("reset boot param.");
+    WIND_ASSERT_RETURN(wind_strlen(ARCH_NAME) < ARCH_NAME_LEN,W_ERR_INVALID);
+    WIND_ASSERT_RETURN(wind_strlen(CPU_NAME) < CPU_NAME_LEN,W_ERR_INVALID);
+    WIND_ASSERT_RETURN(wind_strlen(BOARD_NAME) < BOARD_NAME_LEN,W_ERR_INVALID);
     wind_memset(&g_bootparam,0,BT_BUF_SIZE);
     bp->magic = BOOT_PARAM_MAGIC;
     bp->lenth = param_lenth();
@@ -80,6 +83,10 @@ void boot_param_reset(void)
     bp->encrypt_type = ENCRYPT_TYPE;
     bp->lock_en = MCU_LOCK_ENABLE;
     bp->part_cnt = PART_COUNT;
+    wind_strcpy(bp->arch_name,ARCH_NAME);
+    wind_strcpy(bp->cpu_name,CPU_NAME);
+    wind_strcpy(bp->board_name,BOARD_NAME);
+    wind_strcpy(bp->run_part,PART_SYSRUN);
     boot_media_init();
     boot_part_init();
     bp->part = boot_part_get_list();

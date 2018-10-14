@@ -31,22 +31,21 @@ struct __img_head_s
     w_uint32_t bin_crc;
     w_int32_t encry_type;
     w_uint32_t endian_test;
-    w_uint8_t  reserve[16];
     w_uint8_t  img_name[64];
     w_uint8_t  board_name[32];
     w_uint8_t  arch_name[32];
     w_uint8_t  cpu_name[32];
-    //w_uint8_t  reserve1[508-224];
     w_uint32_t head_crc;
 };
 
-w_int32_t decrypt_img_data(w_part_s *img,w_part_s *bin);
-w_err_t boot_img_flush(void);
-w_int32_t change_boot_app(w_int32_t index);
+w_part_s *boot_img_get_old_part(void);
+w_part_s *boot_img_get_new_normal_img(void);
+
+w_int32_t boot_img_decrypt(w_part_s *img,w_part_s *bin);
+w_err_t   boot_img_flush(void);
 w_int32_t check_img_valid(w_part_s *img);
-w_part_s * boot_img_get_flush_part(void);
-w_err_t boot_img_download(void);
-w_err_t boot_img_flush_cache_to_part(w_part_s **part,w_int32_t count);
+w_err_t   boot_img_download(void);
+w_err_t   boot_img_flush_cache_to_part(w_part_s **part,w_int32_t count);
 
 w_int32_t boot_img_clear_all(void);
 w_int32_t boot_img_check(void);

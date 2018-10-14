@@ -149,6 +149,7 @@ static w_int32_t  boot_upgrade_check(void)
     sp->upgrade_flag = 0;
     share_param_flush(sp);
     wind_notice("handling upgrade event,please wait");
+    
     cache = boot_part_get(PART_CACHE);
     ret = check_img_valid(cache);
     if(0 != ret)
@@ -156,7 +157,8 @@ static w_int32_t  boot_upgrade_check(void)
         wind_error("check img file ERROR");
         return -1;
     }
-    part[0] = boot_img_get_flush_part();
+
+    part[0] = boot_img_get_old_part();
     part[1] = boot_part_get(PART_SYSRUN);
     ret = boot_img_flush_cache_to_part(part,2);
     if(0 != ret)
@@ -200,7 +202,7 @@ static w_int32_t boot_enter_menu(void)
 {
     w_err_t err;
     err = run_menu();
-    if(err = W_ERR_OK)
+    if(err == W_ERR_OK)
         boot_status_go_next();
     else
         boot_status_set(BOOT_INIT);
