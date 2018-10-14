@@ -158,14 +158,14 @@ w_part_s *boot_img_get_new_normal_img(void)
     part[0] = boot_part_get(PART_IMG1);
     part[1] = boot_part_get(PART_IMG2);
     if(!part[0] && !part[1])
-        return W_NULL;
+        return (w_part_s *)W_NULL;
     if(!(part[0] && part[1]))
     {
         if(part[0] && (part[0]->status == MEM_NORMAL))
             return part[0];
         if(part[1] && (part[1]->status == MEM_NORMAL))
             return part[1];
-        return W_NULL;
+        return (w_part_s *)W_NULL;
     }
     if((part[0]->status != MEM_NORMAL) && (part[1]->status == MEM_NORMAL))
         return part[1];
