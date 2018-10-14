@@ -128,23 +128,17 @@ w_int32_t boot_part_read(w_part_s *part,w_uint8_t *data,w_uint32_t datalen)
     w_uint32_t size;
     w_media_s *media;
     WIND_ASSERT_RETURN(part != W_NULL,W_ERR_PTR_NULL);
-    WIND_ASSERT_RETURN(part->datalen > 0,W_ERR_PTR_NULL);
+    WIND_ASSERT_RETURN(part->offset < part->size,W_ERR_INVALID);
     WIND_ASSERT_RETURN(data != W_NULL,W_ERR_PTR_NULL);
-    
-    WIND_ASSERT_RETURN(datalen > 0,0);
-    WIND_ASSERT_RETURN(datalen < part->size,W_ERR_INVALID);
-    WIND_ASSERT_RETURN(part->offset < part->datalen,W_ERR_INVALID);
-    WIND_ASSERT_RETURN(0 == ((part->blksize-1)&part->offset),W_ERR_INVALID);
-    if(datalen + part->offset > part->datalen)
-        datalen = part->datalen - part->offset;
+    WIND_ASSERT_RETURN(datalen > 0,W_ERR_INVALID);
+    WIND_ASSERT_RETURN(0 == (part->offset&(part->blksize-1)),W_ERR_INVALID);
     size = datalen;
-    if(size < part->blksize)
-        size = part->blksize;
+    if(size + part->offset > part->size)
+        size = part->datalen - part->offset;
     media = boot_media_get(part->media_name);
     blkcnt = (size + part->blksize - 1)/ part->blksize;
     blkcnt = media->ops->read_blk(media,part->base + part->offset,data,blkcnt);
     WIND_ASSERT_RETURN(blkcnt > 0,W_ERR_FAIL);
-    size = blkcnt * part->blksize;
     part->offset += size;
     return size;
 }
@@ -155,23 +149,21 @@ w_int32_t boot_part_write(w_part_s *part,w_uint8_t *data,w_uint32_t datalen)
     w_uint32_t size;
     w_media_s *media;
     WIND_ASSERT_RETURN(part != W_NULL,W_ERR_PTR_NULL);
-    WIND_ASSERT_RETURN(data != W_NULL,W_ERR_PTR_NULL);
-    WIND_ASSERT_RETURN(datalen > 0,0);
-    WIND_ASSERT_RETURN(datalen < part->size,W_ERR_INVALID);
-    WIND_ASSERT_RETURN(datalen < part->size - part->offset,W_ERR_INVALID);
     WIND_ASSERT_RETURN(part->offset < part->size,W_ERR_INVALID);
+    WIND_ASSERT_RETURN(data != W_NULL,W_ERR_PTR_NULL);
+    WIND_ASSERT_RETURN(datalen > 0,W_ERR_INVALID);
+    WIND_ASSERT_RETURN(datalen < part->size,W_ERR_INVALID);
+    WIND_ASSERT_RETURN(datalen + part->offset < part->size,W_ERR_INVALID);
     WIND_ASSERT_RETURN(0 == (part->offset&(part->blksize-1)),W_ERR_INVALID);
     size = datalen;
-    if(size < part->blksize)
-        size = part->blksize;
     media = boot_media_get(part->media_name);
     blkcnt = (size + part->blksize - 1)/ part->blksize;
     blkcnt = media->ops->write_blk(media,part->base + part->offset,data,blkcnt);
     WIND_ASSERT_RETURN(blkcnt > 0,W_ERR_FAIL);
-    //size = blkcnt * part->blksize;
-    part->offset += datalen;
+    
+    part->offset += size;
     part->datalen = part->offset;
-    return datalen;
+    return size;
 }
 
 w_err_t boot_part_erase(w_part_s *part)

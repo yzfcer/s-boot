@@ -73,7 +73,6 @@ static w_err_t boot_debug_mode_check(void)
     }
     else
     {
-        
         wind_notice("bootloader mode:NORMAL");
         boot_status_go_next();
     }

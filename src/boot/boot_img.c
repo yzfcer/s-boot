@@ -64,7 +64,10 @@ static w_err_t get_img_head(w_part_s *part)
     WIND_ASSERT_RETURN(len > 0,W_ERR_FAIL);
     head->magic = 0;
     wind_to_uint32(&buff[index],&head->magic);
-    WIND_ASSERT_RETURN(head->magic == IMG_MAGIC,W_ERR_OK);
+
+    //这种情况应该是bin文件没有包含头部结构
+    if(head->magic != IMG_MAGIC)
+        return W_ERR_OK;
     index += 4;
     wind_to_uint32(&buff[index],&head->img_len);
     index += 4;
