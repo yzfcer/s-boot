@@ -61,7 +61,7 @@ static w_int32_t super_prio_flag = 0;
 //退出菜单的的运行方向，如果不为0，则向下执行，否则重新初始化
 static w_int32_t g_go_ahead = 0;
 static w_err_t exit_menu(void);
-static w_int32_t make_sure_input(char *info)
+static w_bool_t make_sure_input(char *info)
 {
     char ch;
     while(1)
@@ -70,12 +70,12 @@ static w_int32_t make_sure_input(char *info)
         if(W_ERR_OK != read_char_blocking(&ch))
         {
             exit_menu();
-            return 0;
+            return B_FALSE;
         }
         if('y' == ch)
-            return 1;
+            return B_TRUE;
         else if('n' == ch)
-            return 0;
+            return B_FALSE;
     }
 }
 
@@ -92,7 +92,7 @@ static w_err_t download_to_img_part(void)
     w_err_t err;
     err = boot_img_download();
     WIND_ASSERT_RETURN(err == W_ERR_OK,W_ERR_FAIL);
-    return boot_img_flush();
+    return boot_img_flush_cache();
 }
 
 static w_err_t download_to_fs_part(void)
@@ -257,7 +257,7 @@ static w_err_t clear_boot_param(void)
 
 static w_err_t exit_and_save(void)
 {
-    w_int32_t err;
+    w_err_t err;
     
     err = boot_param_flush();
     if(err != 0)
@@ -326,11 +326,11 @@ w_err_t open_super_prio(void)
     char *prio2 = "sudo";
     w_uint8_t *buff = get_common_buffer();
     len = read_line_blockig((char*)buff,COMMBUF_SIZE);
-    if(is_string_equal((char*)buff,prio1,wind_strlen(prio1)))
+    if(wind_strcmp((char*)buff,prio1) == 0)
     {
         prio = 1;
     }
-    else if(is_string_equal((char*)buff,prio2,wind_strlen(prio2)))
+    else if(wind_strcmp((char*)buff,prio2) == 0)
     {
         prio = 2;
     }
@@ -351,7 +351,8 @@ w_err_t open_super_prio(void)
 w_err_t run_menu(void)
 {
     char ch;
-    w_int32_t i,err;
+    w_int32_t i;
+    w_err_t err;
     
     exit_menu_flag = 0;
     g_go_ahead = 1;

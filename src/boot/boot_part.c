@@ -91,7 +91,7 @@ w_err_t boot_part_seek(w_part_s *part,w_int32_t offset)
     return W_ERR_OK;
 }
 
-w_err_t boot_part_calc_crc(w_part_s *part)
+w_err_t boot_part_calc_crc(w_part_s *part,w_bool_t set)
 {
     w_int32_t blkcnt;
     w_int32_t size;    
@@ -112,8 +112,12 @@ w_err_t boot_part_calc_crc(w_part_s *part)
         crc = wind_crc32(buff,size,crc);
         offset += size;
     }
-    part->crc = crc;
-    return W_ERR_OK;
+    if(set)
+    {
+        part->crc = crc;
+        return W_ERR_OK;
+    }
+    return part->crc == crc?W_ERR_OK:W_ERR_FAIL;
 }
 
 
@@ -322,14 +326,14 @@ w_bool_t boot_part_equal(w_part_s *src,w_part_s *dest)
 
 w_bool_t boot_part_check(w_part_s *part)
 {
-    w_uint32_t crc;
+    w_err_t err;
     WIND_ASSERT_RETURN(part != W_NULL,B_FALSE);
     if(part->status == MEM_NULL)
         return B_TRUE;
     if(part->status == MEM_ERROR)
         return B_FALSE;
-    crc = boot_part_calc_crc(part);
-    if(part->crc != crc)
+    err = boot_part_calc_crc(part,B_FALSE);
+    if(W_ERR_OK != err)
         return B_FALSE;
     return B_TRUE;
 }

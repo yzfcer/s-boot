@@ -198,7 +198,7 @@ w_err_t boot_img_decrypt(w_part_s *img)
     img_head_s *head = &img_head;
     WIND_ASSERT_RETURN(head->magic == IMG_MAGIC,W_ERR_FAIL);
     offset = head->img_len;
-    return 0;
+    return W_ERR_OK;
 }
 
 
@@ -208,6 +208,7 @@ w_err_t boot_img_check_valid(w_part_s *img)
     img_head_s *head;
 
     feed_watchdog();
+    head = &img_head;
 
     cal_crc = wind_crc32((w_uint8_t*)head,head->head_len - 4,0xffffffff);
     crc = head->head_crc;
@@ -222,7 +223,7 @@ w_err_t boot_img_check_valid(w_part_s *img)
     if(W_ERR_OK != boot_img_check_hwinfo(head))
     {
         wind_warn("hardware is NOT matched.");
-        return -1;
+        return W_ERR_FAIL;
     }
     
     feed_watchdog();
@@ -233,12 +234,12 @@ w_err_t boot_img_check_valid(w_part_s *img)
     if(cal_crc != crc)
     {
         wind_warn("bin file crc ERROR.");
-        return -1;
+        return W_ERR_FAIL;
     }
     
     feed_watchdog();
     wind_notice("img file verify OK.");
-    return 0;
+    return W_ERR_OK;
 }
 
 
@@ -282,12 +283,12 @@ w_err_t boot_img_download(void)
         return W_ERR_FAIL;
     }
     cache->datalen = (w_uint32_t)len;
-    boot_part_calc_crc(cache);
+    boot_part_calc_crc(cache,B_TRUE);
     wind_notice("cache file lenth:%d",cache->datalen);
     return W_ERR_OK;
 }
 
-w_err_t boot_img_flush(void)
+w_err_t boot_img_flush_cache(void)
 {
     w_err_t err;
     w_part_s *part[2],*tmp;

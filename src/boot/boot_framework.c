@@ -150,7 +150,7 @@ static w_err_t  boot_upgrade_check(void)
     share_param_flush(sp);
     wind_notice("handling upgrade event,please wait");
     
-    err = boot_img_flush();
+    err = boot_img_flush_cache();
     if(0 != err)
     {
         wind_warn("flush upgrade img failed.");
@@ -283,10 +283,10 @@ static w_err_t boot_error_handle(void)
     while(1)
     {
         err = read_char_blocking(&ch);
-        if((err == 0) && (ch == '\n'))
+        if((err == W_ERR_OK) && (ch == '\n'))
             wind_error("Some error occured in bootloader and system boot failed.");
     }
-    return 0;
+    return W_ERR_OK;
 }
 
 static w_err_t boot_run_system(void)
@@ -294,7 +294,7 @@ static w_err_t boot_run_system(void)
     boot_exit_hook();
 	wind_notice("jump to system running space\r\n\r\n\r\n");
 	boot_jump_to_system();
-	return 0;
+	return W_ERR_OK;
 }
 
 

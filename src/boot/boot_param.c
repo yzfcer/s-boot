@@ -54,7 +54,7 @@ boot_param_s *boot_param_get(void)
 
 boot_param_s *boot_param_from_rom(void)
 {
-    w_int32_t err;
+    w_err_t err;
     err = boot_param_read();
     if(0 != err)
     {
@@ -163,9 +163,9 @@ w_err_t boot_param_read(void)
     if(err_cnt >= 2)
     {
         wind_warn("read both params failed.");
-        return -1;
+        return W_ERR_FAIL;
     }
-    return 0;
+    return W_ERR_OK;
     
 }
 
@@ -208,10 +208,10 @@ w_err_t boot_param_flush(void)
         wind_warn("write both params failed.");
         part[0]->datalen = 0;
         part[1]->datalen = 0;
-        return -1;
+        return W_ERR_FAIL;
     }
     wind_notice("write boot param complete.");
-    return 0;
+    return W_ERR_OK;
 }
 
 

@@ -88,7 +88,7 @@ typedef enum __w_bool_t
 
 
 #ifndef w_err_t
-typedef w_int8_t w_err_t;
+typedef w_int64_t w_err_t;
 #endif
 
 
