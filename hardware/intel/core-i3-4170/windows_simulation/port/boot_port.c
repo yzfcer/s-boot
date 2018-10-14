@@ -143,7 +143,7 @@ void feed_watchdog(void)
 
 w_bool_t is_chip_lock()
 {
-	return B_TRUE;
+	return W_TRUE;
 }
 
 void set_chip_lock(w_uint8_t lock_enable)

@@ -139,7 +139,7 @@ static w_err_t  boot_upgrade_check(void)
     w_part_s *cache;
     share_param_s *sp = share_param_get();
     
-    if(!sp->upgrade_flag)
+    if(!sp || !sp->upgrade_flag)
     {
         wind_notice("upgrade flags is invalid,need NOT update image.");
         boot_status_go_next();

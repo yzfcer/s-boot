@@ -20,6 +20,7 @@
     <ClInclude Include="..\..\..\..\..\..\src\boot\boot_part.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot\boot_share_param.h" />
     <ClInclude Include="..\..\..\..\..\..\src\boot\boot_test.h" />
+    <ClInclude Include="..\..\..\..\..\..\src\common\wind_conv.h" />
     <ClInclude Include="..\..\..\..\..\..\src\common\wind_crc32.h" />
     <ClInclude Include="..\..\..\..\..\..\src\common\wind_debug.h" />
     <ClInclude Include="..\..\..\..\..\..\src\common\wind_encrypt.h" />
@@ -38,6 +39,7 @@
     <ClCompile Include="..\..\..\..\..\..\src\boot\boot_part.c" />
     <ClCompile Include="..\..\..\..\..\..\src\boot\boot_share_param.c" />
     <ClCompile Include="..\..\..\..\..\..\src\boot\boot_test.c" />
+    <ClCompile Include="..\..\..\..\..\..\src\common\wind_conv.c" />
     <ClCompile Include="..\..\..\..\..\..\src\common\wind_crc32.c" />
     <ClCompile Include="..\..\..\..\..\..\src\common\wind_debug.c" />
     <ClCompile Include="..\..\..\..\..\..\src\common\wind_encrypt.c" />

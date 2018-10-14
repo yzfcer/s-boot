@@ -70,12 +70,12 @@ static w_bool_t make_sure_input(char *info)
         if(W_ERR_OK != read_char_blocking(&ch))
         {
             exit_menu();
-            return B_FALSE;
+            return W_FALSE;
         }
         if('y' == ch)
-            return B_TRUE;
+            return W_TRUE;
         else if('n' == ch)
-            return B_FALSE;
+            return W_FALSE;
     }
 }
 

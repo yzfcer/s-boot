@@ -67,6 +67,9 @@
     <ClInclude Include="..\..\port\boot_config.h">
       <Filter>port</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\src\common\wind_conv.h">
+      <Filter>comman</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\port\boot_port.c">
@@ -122,6 +125,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\src\boot\boot_share_param.c">
       <Filter>boot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\src\common\wind_conv.c">
+      <Filter>comman</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
