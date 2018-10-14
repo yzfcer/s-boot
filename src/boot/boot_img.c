@@ -30,19 +30,6 @@ extern "C" {
 #endif
 img_head_s img_head;
 
-static w_uint32_t LE_TO_BE32(w_uint32_t x) 
-{
-    return (((x)&0xff)<<24) + (((x>>8)&0xff)<<16) + (((x>>16)&0xff)<<8) + (((x>>24)&0xff));
-}
-
-static w_uint32_t endian_test(void)
-{
-    w_uint8_t test[2] = {0x12,0x34};
-    w_uint16_t *data = (w_uint16_t*)test;
-}
-
-
-
 static void boot_img_print_head(img_head_s *head)
 {
     static char *encty_type[4] = 
@@ -184,24 +171,24 @@ w_part_s *boot_img_get_new_normal_img(void)
    
 }
 
-w_bool_t check_hardware_matched(img_head_s *head)
+w_err_t boot_img_check_hwinfo(img_head_s *head)
 {
     if(0 != wind_memcmp(head->board_name,BOARD_NAME,wind_strlen(BOARD_NAME)))
     {
         wind_notice("dest board name:%s",BOARD_NAME);
-        return B_FALSE;
+        return W_ERR_INVALID;
     }
     if(0 != wind_memcmp(head->arch_name,ARCH_NAME,wind_strlen(ARCH_NAME)))
     {
         wind_notice("dest arch name:%s",ARCH_NAME);
-        return B_FALSE;
+        return W_ERR_INVALID;
     }
     if(0 != wind_memcmp(head->cpu_name,CPU_NAME,wind_strlen(CPU_NAME)))
     {
         wind_notice("dest cpu model:%s",CPU_NAME);
-        return B_FALSE;
+        return W_ERR_INVALID;
     }
-    return B_TRUE;    
+    return W_ERR_OK;    
 }
 
 w_err_t boot_img_decrypt(w_part_s *img)
@@ -215,14 +202,13 @@ w_err_t boot_img_decrypt(w_part_s *img)
 }
 
 
-w_err_t check_img_valid(w_part_s *img)
+w_err_t boot_img_check_valid(w_part_s *img)
 {
     w_uint32_t cal_crc,crc;
     img_head_s *head;
 
     feed_watchdog();
 
-    
     cal_crc = wind_crc32((w_uint8_t*)head,head->head_len - 4,0xffffffff);
     crc = head->head_crc;
     
@@ -230,10 +216,10 @@ w_err_t check_img_valid(w_part_s *img)
     if(cal_crc != crc)
     {
         wind_warn("img file head crc ERROR.");
-        return W_ERR_FAIL ;
+        return W_ERR_FAIL;
     }
     boot_img_print_head(head);
-    if(!check_hardware_matched(head))
+    if(W_ERR_OK != boot_img_check_hwinfo(head))
     {
         wind_warn("hardware is NOT matched.");
         return -1;
