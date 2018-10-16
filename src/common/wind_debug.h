@@ -49,15 +49,10 @@ extern "C" {
 //---------------------------------------------------------------------
 #define WIND_DEBUG_SUPPORT 1
 #if WIND_DEBUG_SUPPORT
-#ifdef _USE_USER_PRINT
 extern w_int32_t wind_std_output(w_uint8_t *str,w_int32_t len);
 w_int32_t wind_printf(const char *fmt, ...);
 #else
-#include <stdio.h>
-#define wind_printf printf
-#endif
-#else
-#define wind_printf
+#define wind_printf(const char *fmt, ...)
 #endif
 
 void wind_print_space(w_int32_t space8_cnt);

@@ -119,7 +119,7 @@ w_int32_t wind_strlen(const char *s)
     return (w_int32_t)(sc - s);
 }
 
-w_uint32_t wind_strnlen(const char *s, w_uint32_t count)
+w_int32_t wind_strnlen(const char *s, w_uint32_t count)
 {
     const char *sc;
 

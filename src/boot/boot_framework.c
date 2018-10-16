@@ -324,6 +324,12 @@ void boot_loop(void)
     w_err_t err;
     boot_enter_main_hook();
     print_boot_info();
+    wind_error("--------------------------encrypt");
+    wind_error("--------------------------part erase");
+    wind_printf("sizeof(unsigned)=%d\r\n",sizeof(unsigned));
+    wind_printf("sizeof(long)=%d\r\n",sizeof(long));
+    wind_printf("test=%f\r\n",1.23f);
+    wind_printf("test=%b\r\n",0x12);
     while(1)
     {
         for(i = 0;i < sizeof(g_status_handTB)/sizeof(boot_step_s);i ++)
