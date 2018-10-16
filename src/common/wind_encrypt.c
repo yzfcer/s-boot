@@ -14,7 +14,6 @@
 #include "wind_type.h"
 #include "wind_debug.h"
 #include "wind_encrypt.h"
-//static w_uint8_t rc4_sbox[256] = {0};
 
 static void rc4_init(w_uint8_t *sbox, w_uint8_t *key, w_int32_t len)
 {
