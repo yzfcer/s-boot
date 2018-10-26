@@ -17,7 +17,7 @@
 #include "boot_part.h"
 #include <stdio.h>
 
-#define ARCH_NAME  "Intel i3"
+#define ARCH_NAME  "Intel x86_64"
 #define CPU_NAME   "Intel core i3-4170"
 #define BOARD_NAME "windows simulation"
 

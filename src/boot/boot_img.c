@@ -212,7 +212,6 @@ static w_err_t decrypt_img(w_part_s *img)
     w_uint32_t fsize;
     w_uint8_t *buff;
     img_head_s *head = &img_head;
-    //WIND_ASSERT_RETURN(head->magic == IMG_MAGIC,W_ERR_FAIL);
     if(head->magic != IMG_MAGIC)
         return W_ERR_FAIL;
     offset = head->img_len;
@@ -265,12 +264,10 @@ static w_err_t check_img_valid(w_part_s *cache)
     w_err_t err;
     feed_watchdog();
     head = &img_head;
-    //err = get_img_head(cache);
-    //if((err != W_ERR_OK) && (head->magic != IMG_MAGIC))
-    //    return W_ERR_OK;
+
     if(head->magic != IMG_MAGIC)
     {
-        wind_warn("image file has no head.");
+        wind_notice("image file has no head.");
         return W_ERR_OK;
     }
     if(W_ERR_OK != check_img_hwinfo(head))
@@ -309,7 +306,6 @@ static w_err_t flush_bin_file(w_part_s **part,w_int32_t count,w_uint8_t encrypt)
         }
     }
     boot_param_flush();
-    wind_notice("param flush OK.");
     return W_ERR_OK;    
 }
 

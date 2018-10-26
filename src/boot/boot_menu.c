@@ -260,12 +260,8 @@ static w_err_t exit_and_save(void)
     w_err_t err;
     
     err = boot_param_flush();
-    if(err != 0)
-    {
-        wind_printf("write param fialed.\r\n");
-    }    
     exit_menu();
-    return W_ERR_OK;
+    return err;
 }
 
 

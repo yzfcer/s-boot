@@ -197,7 +197,7 @@ w_int32_t wind_vsprintf(char *buf, const char *fmt, wind_va_list args)
     w_int32_t i, base;
     char *str;
     w_fp64_t vargdouble;
-    w_uint32_t vargint;
+    //w_uint32_t vargint;
     const char *s;
     w_int32_t flags;      /* flags to wind_number() */
     w_int32_t field_width;    /* width of output field */
@@ -332,8 +332,8 @@ w_int32_t wind_vsprintf(char *buf, const char *fmt, wind_va_list args)
 
         case 'b':
         case 'B':
-            vargint = wind_va_arg(args, w_uint32_t);
-            str = wind_binary(str,vargint);
+            //vargint = wind_va_arg(args, w_uint32_t);
+            //str = wind_binary(str,vargint);
             break;
 
 

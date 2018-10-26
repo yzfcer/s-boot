@@ -204,19 +204,19 @@ w_err_t boot_param_flush(void)
         if(j >= 3)
         {
             
-            wind_warn("write param %d fail.",i + 1);
+            wind_warn("flush param %d fail.",i + 1);
             err ++;
         }
-        wind_debug("write param %d OK.",i + 1);
+        wind_debug("flush param %d OK.",i + 1);
     }
     if(err >= 2)
     {
-        wind_warn("write both params failed.");
+        wind_warn("flush both params failed.");
         part[0]->datalen = 0;
         part[1]->datalen = 0;
         return W_ERR_FAIL;
     }
-    wind_notice("write boot param complete.");
+    wind_notice("flush boot param OK.");
     return W_ERR_OK;
 }
 

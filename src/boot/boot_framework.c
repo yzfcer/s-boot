@@ -49,9 +49,9 @@ void print_boot_info(void)
     wind_printf("      *** To Make Ease For Developing ***");
     wind_printf("\r\n+---------------------------------------------+\r\n");
     wind_printf("Build: %s %s\r\n",__DATE__,__TIME__);
-    wind_printf("Borad: %s\r\n",BOARD_NAME);
     wind_printf("Arch : %s\r\n",ARCH_NAME);
-    wind_printf("CPU  : %s\r\n\r\n",CPU_NAME);
+    wind_printf("CPU  : %s\r\n",CPU_NAME);
+    wind_printf("Borad: %s\r\n\r\n",BOARD_NAME);
 }
 
 static w_err_t boot_init(void)
@@ -69,7 +69,7 @@ static w_err_t boot_debug_mode_check(void)
     boot_param_s *bp = boot_param_get();
     if(bp->debug_mode)
     {
-        wind_warn("bootloader mode:DEBUG");
+        wind_notice("bootloader mode:DEBUG");
         boot_status_set(BOOT_WAIT_KEY_PRESS);
     }
     else
@@ -300,7 +300,7 @@ static w_err_t boot_run_system(void)
 boot_step_s g_status_handTB[] = 
 {
     {BOOT_INIT,"boot init",boot_init},
-    {BOOT_FIRST_CHECK,"first run chack",boot_first_check},   
+    {BOOT_FIRST_CHECK,"first run check",boot_first_check},   
     {BOOT_DEBUG_MODE_CHECK,"debug mode check",boot_debug_mode_check},
 
     {BOOT_CHIP_LOCK_CHECK,"chip lock status check",boot_chip_lock_check},
@@ -323,13 +323,7 @@ void boot_loop(void)
     w_err_t err;
     boot_enter_main_hook();
     print_boot_info();
-    wind_error("--------------------------encrypt");
     wind_error("--------------------------part erase");
-    wind_printf("sizeof(unsigned)=%d\r\n",sizeof(unsigned));
-    wind_printf("sizeof(long)=%d\r\n",sizeof(long));
-    wind_printf("test=%f\r\n",1.23f);
-    wind_printf("test=%b\r\n",0x12);
-    wind_printf("test=%p\r\n",&err);
     while(1)
     {
         for(i = 0;i < sizeof(g_status_handTB)/sizeof(boot_step_s);i ++)
