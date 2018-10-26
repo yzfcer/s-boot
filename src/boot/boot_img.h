@@ -38,7 +38,7 @@ struct __img_head_s
     w_uint32_t head_crc;
 };
 
-w_part_s *boot_img_get_old_part(void);
+w_part_s *get_old_part(void);
 w_part_s *boot_img_get_new_normal_img(void);
 
 w_err_t boot_img_download(void);

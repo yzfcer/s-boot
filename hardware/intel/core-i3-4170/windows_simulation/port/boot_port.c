@@ -23,12 +23,12 @@
 
 w_err_t boot_enter_main_hook(void)
 {
-	return W_ERR_OK;
+    return W_ERR_OK;
 }
 
 w_err_t boot_exit_hook(void)
 {
-	return W_ERR_OK;
+    return W_ERR_OK;
 }
 void      wind_std_port_init(void)
 {
@@ -59,7 +59,7 @@ w_int32_t wind_std_input(w_uint8_t *buff,w_int32_t len)
         else
             return i;
     }
-	return len;
+    return len;
 }
 
 w_int32_t boot_receive_img(w_part_s *part)
@@ -80,12 +80,12 @@ w_int32_t boot_receive_img(w_part_s *part)
             break;
     }
     fclose(file);
-	return part->datalen;
+    return part->datalen;
 }
 
 w_uint32_t boot_get_sys_ms(void)
 {
-	return GetTickCount();
+    return GetTickCount();
 }
 
 
@@ -143,7 +143,7 @@ void feed_watchdog(void)
 
 w_bool_t is_chip_lock()
 {
-	return W_TRUE;
+    return W_TRUE;
 }
 
 void set_chip_lock(w_uint8_t lock_enable)

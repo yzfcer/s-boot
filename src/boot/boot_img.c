@@ -114,7 +114,7 @@ static w_err_t get_img_head(w_part_s *part)
 
 }
 
-static w_part_s * boot_img_get_old_part(void)
+static w_part_s * get_old_part(void)
 {
     w_part_s *part[2];
     part[0] = boot_part_get(PART_IMG1);
@@ -185,7 +185,7 @@ w_part_s *boot_img_get_new_normal_img(void)
    
 }
 
-w_err_t check_img_hwinfo(img_head_s *head)
+static w_err_t check_img_hwinfo(img_head_s *head)
 {
     if(0 != wind_memcmp(head->board_name,BOARD_NAME,wind_strlen(BOARD_NAME)))
     {
@@ -205,12 +205,12 @@ w_err_t check_img_hwinfo(img_head_s *head)
     return W_ERR_OK;    
 }
 
-static w_err_t boot_img_decrypt(w_part_s *img)
+static w_err_t decrypt_img(w_part_s *img)
 {
     w_int32_t offset;
     w_int32_t len;
     w_uint32_t fsize;
-    w_uint8_t buff;
+    w_uint8_t *buff;
     img_head_s *head = &img_head;
     //WIND_ASSERT_RETURN(head->magic == IMG_MAGIC,W_ERR_FAIL);
     if(head->magic != IMG_MAGIC)
@@ -259,9 +259,8 @@ static w_err_t check_img_file_crc(w_part_s *cache)
     return cache->crc == crc?W_ERR_OK:W_ERR_FAIL;
 }
 
-static w_err_t boot_img_check_cache_valid(w_part_s *cache)
+static w_err_t check_img_valid(w_part_s *cache)
 {
-    w_uint32_t crc;
     img_head_s *head;
     w_err_t err;
     feed_watchdog();
@@ -309,17 +308,14 @@ static w_err_t flush_bin_file(w_part_s **part,w_int32_t count,w_uint8_t encrypt)
             }
         }
     }
+    boot_param_flush();
     wind_notice("param flush OK.");
     return W_ERR_OK;    
 }
 
-void flush_encrypt_file(w_part_s **part,w_int32_t count)
-{
-    
-}
+
 w_err_t boot_img_flush_cache_to_part(w_part_s **part,w_int32_t count)
 {
-    w_int32_t i;
     w_err_t err;
     w_part_s *cache;
     img_head_s *head = &img_head;
@@ -338,20 +334,17 @@ w_err_t boot_img_flush_cache_to_part(w_part_s **part,w_int32_t count)
     }
     else
     {
-        err = boot_img_check_cache_valid(cache);
+        err = check_img_valid(cache);
         WIND_ASSERT_RETURN(err == W_ERR_OK,W_ERR_INVALID);
         if(head->magic == IMG_MAGIC)
         {
-            err = boot_img_decrypt(cache);
+            err = decrypt_img(cache);
             WIND_ASSERT_RETURN(err == W_ERR_OK,W_ERR_FAIL);
         }
         
         return flush_bin_file(part,count,0);
     }
 
-    boot_param_flush();
-    wind_notice("param flush OK.");
-    return W_ERR_OK;
 }
 
 w_err_t boot_img_download(void)
@@ -386,7 +379,7 @@ w_err_t boot_img_flush_cache(void)
     w_int32_t count;
     part[0] = boot_part_get(PART_SYSRUN);
     WIND_ASSERT_RETURN(part[0] != W_NULL,W_ERR_FAIL);
-    part[1] = boot_img_get_old_part();
+    part[1] = get_old_part();
     if(part[1] != W_NULL)
     {
         tmp = part[0];

@@ -136,7 +136,6 @@ static w_err_t boot_img_valid_check(void)
 static w_err_t  boot_upgrade_check(void)
 {
     w_err_t err;
-    w_part_s *cache;
     share_param_s *sp = share_param_get();
     
     if(!sp || !sp->upgrade_flag)
@@ -229,7 +228,7 @@ static w_err_t boot_load_img(void)
         boot_status_set(BOOT_MENU_LIST);
         return W_ERR_FAIL;
     }
-	tmp = boot_part_get(PART_SYSRUN);
+    tmp = boot_part_get(PART_SYSRUN);
     if(MEDIA_TYPE_ROM == tmp->mtype)
     {
         if(MEM_NORMAL == tmp->status)
@@ -292,9 +291,9 @@ static w_err_t boot_error_handle(void)
 static w_err_t boot_run_system(void)
 {
     boot_exit_hook();
-	wind_notice("jump to system running space\r\n\r\n\r\n");
-	boot_jump_to_system();
-	return W_ERR_OK;
+    wind_notice("jump to system running space\r\n\r\n\r\n");
+    boot_jump_to_system();
+    return W_ERR_OK;
 }
 
 
