@@ -86,7 +86,7 @@ w_int32_t read_line_blockig(char *buff,w_int32_t len)
 {
     w_int32_t idx = 0;
     char ch;
-	while(1)
+    while(1)
     {
         if(0 < wind_std_input(&ch,1))
         {
@@ -129,20 +129,20 @@ void init_recv_stat(recv_stat_s *stat)
 }
 static void wait_file_send_compete(void)
 {
-	w_err_t err;
-	char ch;
-	g_recvstat.stat = boot_get_sys_ms();
-	while(1)
+    w_err_t err;
+    char ch;
+    g_recvstat.stat = boot_get_sys_ms();
+    while(1)
     {
         //err = wait_for_key_input(3,&ch,0);
-    	feed_watchdog();
-    	boot_delay(100);
-    	if(0 < wind_std_input(&ch))
+        feed_watchdog();
+        boot_delay(100);
+        if(0 < wind_std_input(&ch))
         {
-        	g_recvstat.stat = boot_get_sys_ms();
+            g_recvstat.stat = boot_get_sys_ms();
         }
-    	if(boot_get_sys_ms() - g_recvstat.stat >= 2000)
-    	return;
+        if(boot_get_sys_ms() - g_recvstat.stat >= 2000)
+        return;
     }
 }
 

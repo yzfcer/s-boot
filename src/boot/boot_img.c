@@ -212,7 +212,9 @@ w_err_t boot_img_decrypt(w_part_s *img)
     w_uint32_t fsize;
     w_uint8_t buff;
     img_head_s *head = &img_head;
-    WIND_ASSERT_RETURN(head->magic == IMG_MAGIC,W_ERR_FAIL);
+    //WIND_ASSERT_RETURN(head->magic == IMG_MAGIC,W_ERR_FAIL);
+    if(head->magic != IMG_MAGIC)
+        return W_ERR_FAIL;
     offset = head->img_len;
     fsize = head->img_len;
     boot_part_seek(img,offset);
@@ -264,9 +266,9 @@ w_err_t boot_img_check_cache_valid(w_part_s *cache)
     w_err_t err;
     feed_watchdog();
     head = &img_head;
-    err = get_img_head(cache);
-    if((err != W_ERR_OK) && (head->magic != IMG_MAGIC))
-        return W_ERR_OK;
+    //err = get_img_head(cache);
+    //if((err != W_ERR_OK) && (head->magic != IMG_MAGIC))
+    //    return W_ERR_OK;
     if(head->magic != IMG_MAGIC)
     {
         wind_warn("image file has no head.");
@@ -326,7 +328,7 @@ w_err_t boot_img_flush_cache_to_part(w_part_s **part,w_int32_t count)
     WIND_ASSERT_RETURN(err == W_ERR_OK,W_ERR_FAIL);
     
     cache = boot_part_get(PART_CACHE);
-    err = get_img_head(part);
+    err = get_img_head(cache);
     if(err != W_ERR_OK)
     {
         if(head->magic != IMG_MAGIC)
@@ -338,8 +340,12 @@ w_err_t boot_img_flush_cache_to_part(w_part_s **part,w_int32_t count)
     {
         err = boot_img_check_cache_valid(cache);
         WIND_ASSERT_RETURN(err == W_ERR_OK,W_ERR_INVALID);
-        err = boot_img_decrypt(cache);
-        WIND_ASSERT_RETURN(err == W_ERR_OK,W_ERR_FAIL);
+        if(head->magic == IMG_MAGIC)
+        {
+            err = boot_img_decrypt(cache);
+            WIND_ASSERT_RETURN(err == W_ERR_OK,W_ERR_FAIL);
+        }
+        
         return flush_bin_file(part,count,0);
     }
 
