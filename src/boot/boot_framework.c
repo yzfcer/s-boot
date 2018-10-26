@@ -330,6 +330,7 @@ void boot_loop(void)
     wind_printf("sizeof(long)=%d\r\n",sizeof(long));
     wind_printf("test=%f\r\n",1.23f);
     wind_printf("test=%b\r\n",0x12);
+    wind_printf("test=%p\r\n",&err);
     while(1)
     {
         for(i = 0;i < sizeof(g_status_handTB)/sizeof(boot_step_s);i ++)

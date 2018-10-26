@@ -29,6 +29,8 @@
 extern "C" {
 #endif
 img_head_s img_head;
+static w_encypt_ctx_s ctx;
+static w_uint8_t keys[] = ENCRYPT_KEY;
 
 static void print_img_head(img_head_s *head)
 {
@@ -101,7 +103,12 @@ static w_err_t get_img_head(w_part_s *part)
 
     wind_to_uint32(&buff[head->head_len-4],&head->head_crc);
     crc = wind_crc32(buff,head->head_len - 4,0xffffffff);
-    WIND_ASSERT_RETURN(crc == head->head_crc,W_ERR_INVALID);
+    if(crc != head->head_crc)
+    {
+        head->magic = 0;
+        wind_error("img head crc error.");
+        return W_ERR_INVALID;
+    }
     print_img_head(head);
     return W_ERR_OK;
 
@@ -202,13 +209,31 @@ w_err_t boot_img_decrypt(w_part_s *img)
 {
     w_int32_t offset;
     w_int32_t len;
+    w_uint32_t fsize;
+    w_uint8_t buff;
     img_head_s *head = &img_head;
     WIND_ASSERT_RETURN(head->magic == IMG_MAGIC,W_ERR_FAIL);
     offset = head->img_len;
+    fsize = head->img_len;
+    boot_part_seek(img,offset);
+    buff = get_common_buffer();
+    offset = 0;
+    wind_encrypt_init(&ctx,keys,sizeof(keys));
+    while(1)
+    {
+        len = boot_part_read(img,buff,COMMBUF_SIZE);
+        WIND_ASSERT_RETURN(len > 0,W_ERR_FAIL);
+        len = (fsize - offset) > len?len:fsize - offset;
+        wind_decrypt(&ctx,buff,len);
+        boot_part_write(img,buff,COMMBUF_SIZE);
+        offset += len;
+        if(offset >= fsize)
+            break;
+    }
     return W_ERR_OK;
 }
 
-static w_err_t check_img_file(w_part_s *cache)
+static w_err_t check_img_file_crc(w_part_s *cache)
 {
     w_int32_t blkcnt;
     w_int32_t size;    
@@ -254,38 +279,70 @@ w_err_t boot_img_check_cache_valid(w_part_s *cache)
     }
     
     feed_watchdog();
-    crc = cache->crc;
-    err = boot_part_calc_crc(cache,head->head_len,head->img_len - head->head_len,W_TRUE);
-    if((err != W_ERR_OK) || (cache->crc != head->bin_ver))
-    {
-        cache->crc = crc;
-        return W_ERR_FAIL;
-    }
-    cache->crc = crc;
+    err = check_img_file_crc(cache);
+
     feed_watchdog();
+    WIND_ASSERT_RETURN(err == W_ERR_OK,W_ERR_FAIL);
     wind_notice("img file verify OK.");
     return W_ERR_OK;
 }
 
-
-w_err_t boot_img_flush_cache_to_part(w_part_s **part,w_int32_t count)
+static w_err_t flush_bin_file(w_part_s **part,w_int32_t count,w_uint8_t encrypt)
 {
     w_int32_t i;
     w_err_t err;
     w_part_s *cache;
 
     cache = boot_part_get(PART_CACHE);
-    err = boot_img_check_cache_valid(cache);
-    WIND_ASSERT_RETURN(err == W_ERR_OK,W_ERR_INVALID);
     for(i = 0;i < count;i ++)
     {
-        err = boot_part_copy_data(cache,part[i]);
-        if(0 != err)
+        if((part[i]->encrypt && encrypt) ||
+            !(part[i]->encrypt || encrypt))
         {
-            wind_warn("flush data to %s failed.",cache->name);
-            return W_ERR_FAIL;
+            err = boot_part_copy_data(cache,part[i]);
+            if(0 != err)
+            {
+                wind_warn("flush data to %s failed.",cache->name);
+                return W_ERR_FAIL;
+            }
         }
     }
+    wind_notice("param flush OK.");
+    return W_ERR_OK;    
+}
+
+void flush_encrypt_file(w_part_s **part,w_int32_t count)
+{
+    
+}
+w_err_t boot_img_flush_cache_to_part(w_part_s **part,w_int32_t count)
+{
+    w_int32_t i;
+    w_err_t err;
+    w_part_s *cache;
+    img_head_s *head = &img_head;
+
+    err = flush_bin_file(part,count,1);
+    WIND_ASSERT_RETURN(err == W_ERR_OK,W_ERR_FAIL);
+    
+    cache = boot_part_get(PART_CACHE);
+    err = get_img_head(part);
+    if(err != W_ERR_OK)
+    {
+        if(head->magic != IMG_MAGIC)
+            return flush_bin_file(part,count,0);
+        else
+            return err;
+    }
+    else
+    {
+        err = boot_img_check_cache_valid(cache);
+        WIND_ASSERT_RETURN(err == W_ERR_OK,W_ERR_INVALID);
+        err = boot_img_decrypt(cache);
+        WIND_ASSERT_RETURN(err == W_ERR_OK,W_ERR_FAIL);
+        return flush_bin_file(part,count,0);
+    }
+
     boot_param_flush();
     wind_notice("param flush OK.");
     return W_ERR_OK;
@@ -337,6 +394,7 @@ w_err_t boot_img_flush_cache(void)
     }
 
     err = boot_img_download();
+    WIND_ASSERT_RETURN(err == W_ERR_OK,err);
     return boot_img_flush_cache_to_part(part,count);
 }
 

@@ -24,7 +24,7 @@
 *******************************************************************************************************/
 #include "wind_type.h"
 w_uint32_t crc32_table[256];
-void wind_create_crc32tb(void)
+void wind_crc32_init(void)
 {
     w_uint32_t c;
     w_uint16_t i = 0;
