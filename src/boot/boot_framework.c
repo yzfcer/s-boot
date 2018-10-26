@@ -67,6 +67,7 @@ static w_err_t boot_init(void)
 static w_err_t boot_debug_mode_check(void)
 {
     boot_param_s *bp = boot_param_get();
+    
     if(bp->debug_mode)
     {
         wind_notice("bootloader mode:DEBUG");
