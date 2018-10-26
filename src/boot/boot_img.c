@@ -114,7 +114,7 @@ static w_err_t get_img_head(w_part_s *part)
 
 }
 
-w_part_s * boot_img_get_old_part(void)
+static w_part_s * boot_img_get_old_part(void)
 {
     w_part_s *part[2];
     part[0] = boot_part_get(PART_IMG1);
@@ -205,7 +205,7 @@ w_err_t check_img_hwinfo(img_head_s *head)
     return W_ERR_OK;    
 }
 
-w_err_t boot_img_decrypt(w_part_s *img)
+static w_err_t boot_img_decrypt(w_part_s *img)
 {
     w_int32_t offset;
     w_int32_t len;
@@ -259,7 +259,7 @@ static w_err_t check_img_file_crc(w_part_s *cache)
     return cache->crc == crc?W_ERR_OK:W_ERR_FAIL;
 }
 
-w_err_t boot_img_check_cache_valid(w_part_s *cache)
+static w_err_t boot_img_check_cache_valid(w_part_s *cache)
 {
     w_uint32_t crc;
     img_head_s *head;
