@@ -13,7 +13,7 @@
 **********************************************************************************/
 #ifndef BOOT_SHARE_PARAM_H__
 #define BOOT_SHARE_PARAM_H__
-#include "boot_config.h"
+#include "wind_config.h"
 #include "wind_type.h"
 #include "boot_part.h"
 #ifdef __cplusplus

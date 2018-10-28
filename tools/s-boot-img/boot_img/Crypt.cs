@@ -9,6 +9,7 @@ namespace boot_img
     {
         public virtual void set_key(byte[] key, int lenth)
         {
+
  
         }
 

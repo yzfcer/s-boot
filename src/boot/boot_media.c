@@ -11,7 +11,7 @@
        Author:
        Modification:
 **********************************************************************************/
-#include "boot_config.h" 
+#include "wind_config.h" 
 #include "boot_media.h"
 #include "boot_port.h"
 #include "wind_debug.h"

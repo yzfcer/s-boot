@@ -12,7 +12,7 @@
        Modification:
 **********************************************************************************/
 #include "boot_share_param.h"
-#include "boot_config.h"
+#include "wind_config.h"
 #include "boot_part.h"
 #include "boot_port.h"
 #include "wind_debug.h"

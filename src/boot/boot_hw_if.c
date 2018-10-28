@@ -16,7 +16,7 @@
 #include "boot_hw_if.h"
 #include "boot_param.h"
 #include <stdarg.h>
-#include "boot_config.h"
+#include "wind_config.h"
 
 #ifdef __cplusplus
 extern "C" {

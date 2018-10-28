@@ -1,5 +1,5 @@
 
-#include "boot_config.h"
+#include "wind_config.h"
 #include "boot_hw_if.h"
 #include "boot_part.h"
 #include "boot_port.h"
