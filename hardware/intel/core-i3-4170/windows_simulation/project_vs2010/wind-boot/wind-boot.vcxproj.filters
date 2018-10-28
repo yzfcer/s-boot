@@ -70,6 +70,9 @@
     <ClInclude Include="..\..\..\..\..\..\src\common\wind_conv.h">
       <Filter>comman</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\port\wind_std.h">
+      <Filter>port</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\port\boot_port.c">
@@ -128,6 +131,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\src\common\wind_conv.c">
       <Filter>comman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\port\wind_std.c">
+      <Filter>port</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

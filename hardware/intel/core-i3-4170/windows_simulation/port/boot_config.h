@@ -36,10 +36,10 @@ extern "C" {
 #define BOOT_SIZE 0xE000
 #define BT_PARA1_SIZE 0x1000
 #define BT_PARA2_SIZE 0x1000
-#define IMG1_SIZE 0x40000
-#define IMG2_SIZE 0x40000
-#define IMG_PARA_SIZE 0x2000
-#define FS_SIZE 0x50000
+#define IMG1_SIZE 0x10000
+#define IMG2_SIZE 0x10000
+#define IMG_PARA_SIZE 0x1000
+#define FS_SIZE 0x20000
 
 /***************************************************************
  wind-boot需要定义如下的RAM数据存储空间:
